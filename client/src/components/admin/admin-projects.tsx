@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { RemixIcon } from "@/components/ui/remixicon";
 import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function AdminProjects() {
   const { toast } = useToast();
@@ -27,11 +29,14 @@ export function AdminProjects() {
   const [formData, setFormData] = useState<InsertProject>({
     title: "",
     description: "",
+    category: "Web",
+    technologies: [],
     image: "",
-    tags: []
+    featured: false,
+    order: 0
   });
   
-  const [tagInput, setTagInput] = useState("");
+  const [technologyInput, setTechnologyInput] = useState("");
 
   const { data: projects, isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
@@ -121,20 +126,20 @@ export function AdminProjects() {
     }
   };
 
-  const handleTagAdd = () => {
-    if (tagInput.trim()) {
+  const handleTechnologyAdd = () => {
+    if (technologyInput.trim()) {
       setFormData(prev => ({
         ...prev,
-        tags: [...prev.tags, tagInput.trim()]
+        technologies: [...prev.technologies, technologyInput.trim()]
       }));
-      setTagInput("");
+      setTechnologyInput("");
     }
   };
 
-  const handleTagRemove = (tagToRemove: string) => {
+  const handleTechnologyRemove = (techToRemove: string) => {
     setFormData(prev => ({
       ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
+      technologies: prev.technologies.filter(tech => tech !== techToRemove)
     }));
   };
 
