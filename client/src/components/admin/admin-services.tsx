@@ -26,7 +26,8 @@ export function AdminServices() {
   const [formData, setFormData] = useState<InsertService>({
     title: "",
     description: "",
-    icon: ""
+    icon: "",
+    price: ""
   });
 
   const { data: services, isLoading } = useQuery<Service[]>({
