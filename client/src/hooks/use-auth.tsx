@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useState, useEffect } from "react";
 import {
   useQuery,
   useMutation,
@@ -33,15 +33,26 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const [initialized, setInitialized] = useState(false);
   
   const {
     data: user,
     error,
     isLoading,
+    isSuccess,
   } = useQuery<SelectUser | null, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
+    retry: false,
+    refetchOnWindowFocus: false,
   });
+
+  // Marcar como inicializado após a primeira consulta ser concluída
+  useEffect(() => {
+    if (isSuccess) {
+      setInitialized(true);
+    }
+  }, [isSuccess]);
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
@@ -58,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         title: "Falha no login",
-        description: error.message,
+        description: error.message || "Verifique suas credenciais e tente novamente",
         variant: "destructive",
       });
     },
@@ -79,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         title: "Falha no cadastro",
-        description: error.message,
+        description: error.message || "Não foi possível criar sua conta",
         variant: "destructive",
       });
     },
@@ -98,11 +109,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         title: "Falha no logout",
-        description: error.message,
+        description: error.message || "Não foi possível sair da sua conta",
         variant: "destructive",
       });
     },
   });
+
+  // Não renderizar filhos até que a autenticação esteja inicializada
+  if (!initialized && isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider
