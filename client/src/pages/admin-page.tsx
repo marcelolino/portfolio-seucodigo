@@ -34,7 +34,7 @@ export default function AdminPage() {
     }
   };
 
-  if (!user || user.role !== "admin") {
+  if (!user) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
