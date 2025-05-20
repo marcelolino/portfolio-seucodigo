@@ -13,8 +13,10 @@ interface WebSocketMessage {
   isAdmin?: boolean;
 }
 
+import { setupAuth } from "./auth";
+
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Set up authentication
+  // Configurar autenticação
   setupAuth(app);
 
   // API routes

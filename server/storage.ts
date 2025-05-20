@@ -6,8 +6,10 @@ import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 import { hashPassword } from "./auth";
+import createMemoryStore from "memorystore";
 
 const PostgresSessionStore = connectPg(session);
+const MemoryStore = createMemoryStore(session);
 
 export interface IStorage {
   // Users
@@ -364,4 +366,6 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Usar o DatabaseStorage para banco de dados PostgreSQL
+import { DatabaseStorage } from "./dbStorage";
+export const storage = new DatabaseStorage();
