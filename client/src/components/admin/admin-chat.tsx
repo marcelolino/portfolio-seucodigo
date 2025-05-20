@@ -1,0 +1,314 @@
+import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { User, Message } from "@shared/schema";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { RemixIcon } from "@/components/ui/remixicon";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+interface ChatMessage extends Message {
+  animateIn?: boolean;
+}
+
+export function AdminChat() {
+  const { toast } = useToast();
+  const [activeUser, setActiveUser] = useState<User | null>(null);
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [message, setMessage] = useState("");
+  const [userMessages, setUserMessages] = useState<{ [userId: number]: ChatMessage[] }>({});
+  const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
+  const [chatConnected, setChatConnected] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const { data: users, isLoading: isLoadingUsers } = useQuery<User[]>({
+    queryKey: ["/api/users"],
+  });
+
+  const { data: messages, isLoading: isLoadingMessages } = useQuery<Message[]>({
+    queryKey: ["/api/messages"],
+    onSuccess: (data) => {
+      // Group messages by user ID
+      const messagesByUser: { [userId: number]: ChatMessage[] } = {};
+      
+      data.forEach(msg => {
+        if (msg.userId) {
+          if (!messagesByUser[msg.userId]) {
+            messagesByUser[msg.userId] = [];
+          }
+          messagesByUser[msg.userId].push({ ...msg, animateIn: false });
+        }
+      });
+      
+      setUserMessages(messagesByUser);
+      setAllMessages(data as ChatMessage[]);
+    }
+  });
+
+  useEffect(() => {
+    // Setup WebSocket connection
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    const ws = new WebSocket(wsUrl);
+    
+    ws.onopen = () => {
+      // Authenticate with the WebSocket server as admin
+      ws.send(JSON.stringify({
+        type: "authenticate",
+        userId: undefined,
+        isAdmin: true
+      }));
+      
+      setChatConnected(true);
+      toast({
+        title: "Chat conectado",
+        description: "Você está pronto para responder mensagens.",
+      });
+    };
+    
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      
+      if (data.type === "message" && data.message) {
+        const newMessage = { ...data.message, animateIn: true };
+        
+        // Add to all messages
+        setAllMessages(prev => [...prev, newMessage]);
+        
+        // Add to user messages if it has a userId
+        if (newMessage.userId) {
+          setUserMessages(prev => {
+            const userMsgs = prev[newMessage.userId] || [];
+            return {
+              ...prev,
+              [newMessage.userId]: [...userMsgs, newMessage]
+            };
+          });
+        }
+      }
+    };
+    
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+      setChatConnected(false);
+      toast({
+        title: "Erro de conexão",
+        description: "Não foi possível conectar ao servidor de chat.",
+        variant: "destructive",
+      });
+    };
+    
+    ws.onclose = () => {
+      setChatConnected(false);
+    };
+    
+    setSocket(ws);
+    
+    return () => {
+      ws.close();
+    };
+  }, [toast]);
+
+  useEffect(() => {
+    // Scroll to bottom when messages change
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [userMessages, activeUser]);
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (message.trim() && socket && socket.readyState === WebSocket.OPEN && activeUser) {
+      socket.send(JSON.stringify({
+        type: "message",
+        userId: activeUser.id,
+        content: message,
+        isAdmin: true
+      }));
+      
+      setMessage("");
+    }
+  };
+
+  const getUserLastMessage = (userId: number) => {
+    const userMsgs = userMessages[userId] || [];
+    return userMsgs.length > 0 ? userMsgs[userMsgs.length - 1] : null;
+  };
+
+  const formatTime = (date: Date) => {
+    return format(new Date(date), "HH:mm", { locale: ptBR });
+  };
+
+  const formatDate = (date: Date) => {
+    return format(new Date(date), "dd MMM yyyy, HH:mm", { locale: ptBR });
+  };
+
+  const getDisplayMessages = () => {
+    if (!activeUser) return [];
+    return userMessages[activeUser.id] || [];
+  };
+
+  const getUnreadCount = (userId: number) => {
+    const userMsgs = userMessages[userId] || [];
+    // Count messages that are not from admin and are newer than last viewed
+    return userMsgs.filter(msg => !msg.isAdmin).length;
+  };
+
+  return (
+    <div>
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold">Chat com Clientes</h1>
+        <p className="text-gray-600">Gerencie as conversas com os usuários.</p>
+      </header>
+
+      <div className="flex h-[calc(100vh-10rem)] bg-white rounded-lg shadow-sm overflow-hidden">
+        {/* User list sidebar */}
+        <div className="w-80 border-r flex flex-col">
+          <div className="p-4 border-b">
+            <h2 className="font-semibold">Conversas</h2>
+            <div className="flex items-center mt-2">
+              <div className={`w-2 h-2 rounded-full mr-2 ${chatConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <span className="text-sm text-gray-600">
+                {chatConnected ? 'Conectado' : 'Desconectado'}
+              </span>
+            </div>
+          </div>
+          
+          <ScrollArea className="flex-1">
+            {isLoadingUsers || isLoadingMessages ? (
+              <div className="flex justify-center items-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : users && users.length > 0 ? (
+              <div className="space-y-1 p-2">
+                {users.filter(user => user.role !== "admin").map((user) => {
+                  const lastMsg = getUserLastMessage(user.id);
+                  const unreadCount = getUnreadCount(user.id);
+                  
+                  return (
+                    <button
+                      key={user.id}
+                      className={`w-full flex items-center p-3 rounded-md transition-colors ${
+                        activeUser?.id === user.id
+                          ? 'bg-primary/10 text-primary'
+                          : 'hover:bg-gray-100'
+                      }`}
+                      onClick={() => setActiveUser(user)}
+                    >
+                      <Avatar className="h-10 w-10 mr-3">
+                        <AvatarImage src={`https://ui-avatars.com/api/?name=${user.name}&background=2563eb&color=fff`} />
+                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 text-left">
+                        <div className="flex justify-between">
+                          <p className="font-medium truncate">{user.name}</p>
+                          {unreadCount > 0 && (
+                            <Badge variant="destructive" className="ml-2">
+                              {unreadCount}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-500 truncate">
+                          {lastMsg ? lastMsg.content : "Nenhuma mensagem"}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full p-4">
+                <RemixIcon name="ri-chat-3-line text-4xl text-gray-400 mb-2" />
+                <p className="text-gray-500 text-center">
+                  Nenhum usuário encontrado.
+                </p>
+              </div>
+            )}
+          </ScrollArea>
+        </div>
+
+        {/* Chat area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {activeUser ? (
+            <>
+              <div className="p-4 border-b flex items-center">
+                <Avatar className="h-10 w-10 mr-3">
+                  <AvatarImage src={`https://ui-avatars.com/api/?name=${activeUser.name}&background=2563eb&color=fff`} />
+                  <AvatarFallback>{activeUser.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="font-semibold">{activeUser.name}</h3>
+                  <p className="text-sm text-gray-500">{activeUser.email}</p>
+                </div>
+              </div>
+
+              <ScrollArea className="flex-1 p-4">
+                <div className="space-y-4">
+                  {getDisplayMessages().length > 0 ? (
+                    getDisplayMessages().map((msg, index) => (
+                      <div
+                        key={index}
+                        className={`flex ${msg.isAdmin ? 'justify-end' : 'justify-start'} ${
+                          msg.animateIn ? 'animate-fadeIn' : ''
+                        }`}
+                      >
+                        <div
+                          className={`max-w-[80%] px-4 py-2 rounded-lg ${
+                            msg.isAdmin
+                              ? 'bg-primary text-white'
+                              : 'bg-gray-100'
+                          }`}
+                        >
+                          <p className="mb-1">{msg.content}</p>
+                          <p className="text-xs opacity-70">
+                            {formatDate(new Date(msg.createdAt))}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-10">
+                      <p className="text-gray-500">
+                        Nenhuma mensagem. Comece a conversa agora!
+                      </p>
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+              </ScrollArea>
+
+              <form onSubmit={handleSendMessage} className="p-4 border-t flex">
+                <Input
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Digite sua mensagem..."
+                  className="flex-1 mr-2"
+                  disabled={!chatConnected}
+                />
+                <Button
+                  type="submit"
+                  disabled={!message.trim() || !chatConnected}
+                >
+                  <RemixIcon name="ri-send-plane-fill" />
+                </Button>
+              </form>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full p-4">
+              <RemixIcon name="ri-chat-smile-3-line text-6xl text-gray-300 mb-4" />
+              <h3 className="text-xl font-medium text-gray-700 mb-2">Nenhuma conversa selecionada</h3>
+              <p className="text-gray-500 text-center max-w-md">
+                Selecione um usuário à esquerda para iniciar uma conversa ou visualizar mensagens anteriores.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
