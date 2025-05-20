@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, numeric, doublePrecision } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -16,8 +16,11 @@ export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description").notNull(),
+  category: text("category").notNull(),
+  technologies: text("technologies").array().notNull(),
   image: text("image").notNull(),
-  tags: text("tags").array().notNull(),
+  featured: boolean("featured").default(false),
+  order: integer("order").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -26,6 +29,8 @@ export const services = pgTable("services", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   icon: text("icon").notNull(),
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  order: integer("order").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -33,9 +38,11 @@ export const testimonials = pgTable("testimonials", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   company: text("company").notNull(),
+  position: text("position"),
   avatar: text("avatar").notNull(),
   content: text("content").notNull(),
   rating: integer("rating").notNull(),
+  order: integer("order").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -44,6 +51,7 @@ export const messages = pgTable("messages", {
   userId: integer("user_id").references(() => users.id),
   content: text("content").notNull(),
   isAdmin: boolean("is_admin").notNull().default(false),
+  isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -53,7 +61,24 @@ export const contacts = pgTable("contacts", {
   email: text("email").notNull(),
   subject: text("subject").notNull(),
   message: text("message").notNull(),
+  isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const siteSettings = pgTable("site_settings", {
+  id: serial("id").primaryKey(),
+  siteName: text("site_name").notNull(),
+  siteTitle: text("site_title").notNull(),
+  contactEmail: text("contact_email").notNull(),
+  contactPhone: text("contact_phone"),
+  address: text("address"),
+  logo: text("logo"),
+  github: text("github"),
+  linkedin: text("linkedin"),
+  twitter: text("twitter"),
+  instagram: text("instagram"),
+  whatsapp: text("whatsapp"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Insert schemas
@@ -87,6 +112,11 @@ export const insertContactSchema = createInsertSchema(contacts).omit({
   createdAt: true,
 });
 
+export const insertSiteSettingsSchema = createInsertSchema(siteSettings).omit({
+  id: true,
+  updatedAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -105,6 +135,9 @@ export type Message = typeof messages.$inferSelect;
 
 export type InsertContact = z.infer<typeof insertContactSchema>;
 export type Contact = typeof contacts.$inferSelect;
+
+export type InsertSiteSettings = z.infer<typeof insertSiteSettingsSchema>;
+export type SiteSettings = typeof siteSettings.$inferSelect;
 
 // Extended schemas for validation
 export const loginSchema = z.object({

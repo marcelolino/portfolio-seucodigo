@@ -1,9 +1,13 @@
-import { users, projects, services, testimonials, messages, contacts } from "@shared/schema";
-import type { User, InsertUser, Project, InsertProject, Service, InsertService, Testimonial, InsertTestimonial, Message, InsertMessage, Contact, InsertContact } from "@shared/schema";
+import { users, projects, services, testimonials, messages, contacts, siteSettings } from "@shared/schema";
+import type { User, InsertUser, Project, InsertProject, Service, InsertService, Testimonial, InsertTestimonial, Message, InsertMessage, Contact, InsertContact, SiteSettings, InsertSiteSettings } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
 import session from "express-session";
-import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
+import { hashPassword } from "./auth";
 
-const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
   // Users
