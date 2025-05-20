@@ -47,8 +47,12 @@ export function AdminProjects() {
       const res = await apiRequest("POST", "/api/projects", data);
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      // Atualize o cache diretamente para evitar necessidade de refresh
+      queryClient.setQueryData(["/api/projects"], (oldData: Project[] | undefined) => {
+        return oldData ? [...oldData, data] : [data];
+      });
       toast({
         title: "Projeto adicionado com sucesso",
         description: "O projeto foi adicionado ao portfólio.",
