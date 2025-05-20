@@ -74,8 +74,15 @@ export function AdminProjects() {
       const res = await apiRequest("PATCH", `/api/projects/${id}`, data);
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedProject) => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      // Atualiza o cache diretamente para evitar necessidade de refresh
+      queryClient.setQueryData(["/api/projects"], (oldData: Project[] | undefined) => {
+        if (!oldData) return [updatedProject];
+        return oldData.map(project => 
+          project.id === updatedProject.id ? updatedProject : project
+        );
+      });
       toast({
         title: "Projeto atualizado com sucesso",
         description: "As alterações foram salvas.",
@@ -96,7 +103,14 @@ export function AdminProjects() {
       await apiRequest("DELETE", `/api/projects/${id}`);
     },
     onSuccess: () => {
+      // Atualiza o cache diretamente para evitar necessidade de refresh
+      queryClient.setQueryData(["/api/projects"], (oldData: Project[] | undefined) => {
+        if (!oldData) return [];
+        return oldData.filter(project => project.id !== currentProject?.id);
+      });
+      
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      
       toast({
         title: "Projeto excluído com sucesso",
         description: "O projeto foi removido do portfólio.",

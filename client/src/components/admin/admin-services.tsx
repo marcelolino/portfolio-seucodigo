@@ -39,8 +39,14 @@ export function AdminServices() {
       const res = await apiRequest("POST", "/api/services", data);
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Atualiza o cache diretamente para evitar necessidade de refresh
+      queryClient.setQueryData(["/api/services"], (oldData: Service[] | undefined) => {
+        return oldData ? [...oldData, data] : [data];
+      });
+      
       queryClient.invalidateQueries({ queryKey: ["/api/services"] });
+      
       toast({
         title: "Serviço adicionado com sucesso",
         description: "O serviço foi adicionado à lista.",
@@ -62,8 +68,17 @@ export function AdminServices() {
       const res = await apiRequest("PUT", `/api/services/${id}`, data);
       return await res.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedService) => {
+      // Atualiza o cache diretamente para evitar necessidade de refresh
+      queryClient.setQueryData(["/api/services"], (oldData: Service[] | undefined) => {
+        if (!oldData) return [updatedService];
+        return oldData.map(service => 
+          service.id === updatedService.id ? updatedService : service
+        );
+      });
+      
       queryClient.invalidateQueries({ queryKey: ["/api/services"] });
+      
       toast({
         title: "Serviço atualizado com sucesso",
         description: "As alterações foram salvas.",
@@ -85,7 +100,14 @@ export function AdminServices() {
       await apiRequest("DELETE", `/api/services/${id}`);
     },
     onSuccess: () => {
+      // Atualiza o cache diretamente para evitar necessidade de refresh
+      queryClient.setQueryData(["/api/services"], (oldData: Service[] | undefined) => {
+        if (!oldData) return [];
+        return oldData.filter(service => service.id !== currentService?.id);
+      });
+      
       queryClient.invalidateQueries({ queryKey: ["/api/services"] });
+      
       toast({
         title: "Serviço excluído com sucesso",
         description: "O serviço foi removido da lista.",
