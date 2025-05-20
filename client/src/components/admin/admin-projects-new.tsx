@@ -65,9 +65,9 @@ export function AdminProjects() {
     },
   });
 
-  const editProjectMutation = useMutation({
+  const updateProjectMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<InsertProject> }) => {
-      const res = await apiRequest("PUT", `/api/projects/${id}`, data);
+      const res = await apiRequest("PATCH", `/api/projects/${id}`, data);
       return await res.json();
     },
     onSuccess: () => {
@@ -77,7 +77,6 @@ export function AdminProjects() {
         description: "As alterações foram salvas.",
       });
       setIsEditDialogOpen(false);
-      resetForm();
     },
     onError: (error: Error) => {
       toast({
@@ -99,7 +98,6 @@ export function AdminProjects() {
         description: "O projeto foi removido do portfólio.",
       });
       setIsDeleteDialogOpen(false);
-      setCurrentProject(null);
     },
     onError: (error: Error) => {
       toast({
@@ -110,7 +108,9 @@ export function AdminProjects() {
     },
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -124,6 +124,20 @@ export function AdminProjects() {
         [name]: ""
       }));
     }
+  };
+  
+  const handleSwitchChange = (checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      featured: checked
+    }));
+  };
+  
+  const handleCategoryChange = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      category: value
+    }));
   };
 
   const handleTechnologyAdd = () => {
@@ -186,179 +200,210 @@ export function AdminProjects() {
       insertProjectSchema.parse(formData);
       
       if (isEdit && currentProject) {
-        editProjectMutation.mutate({
-          id: currentProject.id,
-          data: formData
-        });
+        updateProjectMutation.mutate({ id: currentProject.id, data: formData });
       } else {
         addProjectMutation.mutate(formData);
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errors: { [key: string]: string } = {};
-        error.errors.forEach(err => {
+        error.errors.forEach((err) => {
           if (err.path) {
             errors[err.path[0]] = err.message;
           }
         });
         setFormErrors(errors);
+        
+        toast({
+          title: "Formulário inválido",
+          description: "Por favor, corrija os erros no formulário.",
+          variant: "destructive",
+        });
       }
     }
   };
 
-  const handleDeleteConfirm = () => {
-    if (currentProject) {
-      deleteProjectMutation.mutate(currentProject.id);
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="flex justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <header className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Gerenciar Projetos</h1>
-          <p className="text-gray-600">Adicione, edite ou remova projetos do portfólio.</p>
-        </div>
-        <Button onClick={openAddDialog} className="flex items-center gap-2">
-          <RemixIcon name="ri-add-line" /> Novo Projeto
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold tracking-tight">Projetos</h2>
+        <Button onClick={openAddDialog}>
+          <RemixIcon name="ri-add-line" className="mr-2 h-4 w-4" />
+          Novo Projeto
         </Button>
-      </header>
-
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : projects && projects.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <Card key={project.id} className="overflow-hidden">
-              <div className="h-48 overflow-hidden">
-                <img 
-                  src={project.image} 
-                  alt={project.title} 
-                  className="w-full h-full object-cover"
-                />
+      </div>
+      
+      <Separator />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {projects?.map((project) => (
+          <Card key={project.id} className="overflow-hidden flex flex-col">
+            <div className="relative aspect-video overflow-hidden">
+              <img
+                src={project.image}
+                alt={project.title}
+                className="object-cover w-full h-full"
+              />
+              {project.featured && (
+                <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-md">
+                  Destacado
+                </span>
+              )}
+            </div>
+            <CardHeader className="pb-2">
+              <CardTitle>{project.title}</CardTitle>
+              <Badge>{project.category}</Badge>
+            </CardHeader>
+            <CardContent className="pb-3 flex-grow">
+              <p className="text-muted-foreground text-sm line-clamp-3">
+                {project.description}
+              </p>
+              <div className="flex flex-wrap gap-1 mt-3">
+                {project.technologies.map((tech, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    {tech}
+                  </Badge>
+                ))}
               </div>
-              <CardHeader>
-                <CardTitle>{project.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600 mb-4">{project.description}</p>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {project.tags.map((tag, index) => (
-                    <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => openEditDialog(project)}
-                >
-                  <RemixIcon name="ri-edit-line mr-1" /> Editar
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
-                  onClick={() => openDeleteDialog(project)}
-                >
-                  <RemixIcon name="ri-delete-bin-line mr-1" /> Excluir
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-16 bg-gray-50 rounded-lg">
-          <RemixIcon name="ri-folder-add-line text-4xl text-gray-400 mb-2" />
-          <h3 className="text-lg font-medium text-gray-600">Nenhum projeto cadastrado</h3>
-          <p className="text-gray-500 mb-4">Adicione projetos para exibir no portfólio.</p>
-          <Button onClick={openAddDialog}>Adicionar Projeto</Button>
-        </div>
-      )}
+            </CardContent>
+            <CardFooter className="border-t pt-3 flex justify-end space-x-2">
+              <Button variant="outline" size="sm" onClick={() => openEditDialog(project)}>
+                <RemixIcon name="ri-edit-line" className="mr-1" />
+                Editar
+              </Button>
+              <Button variant="destructive" size="sm" onClick={() => openDeleteDialog(project)}>
+                <RemixIcon name="ri-delete-bin-line" className="mr-1" />
+                Excluir
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
 
-      {/* Add Project Dialog */}
+      {/* Add Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
-            <DialogTitle>Adicionar Novo Projeto</DialogTitle>
+            <DialogTitle>Adicionar Projeto</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
               <Label htmlFor="title">Título</Label>
               <Input
                 id="title"
                 name="title"
                 value={formData.title}
-                onChange={handleChange}
-                className={formErrors.title ? "border-red-500" : ""}
+                onChange={handleInputChange}
               />
               {formErrors.title && (
                 <p className="text-red-500 text-sm">{formErrors.title}</p>
               )}
             </div>
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="category">Categoria</Label>
+                <Select value={formData.category} onValueChange={handleCategoryChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecionar categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Web">Web</SelectItem>
+                    <SelectItem value="Mobile">Mobile</SelectItem>
+                    <SelectItem value="Desktop">Desktop</SelectItem>
+                    <SelectItem value="API">API</SelectItem>
+                    <SelectItem value="Outros">Outros</SelectItem>
+                  </SelectContent>
+                </Select>
+                {formErrors.category && (
+                  <p className="text-red-500 text-sm">{formErrors.category}</p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="order">Ordem</Label>
+                <Input
+                  id="order"
+                  name="order"
+                  type="number"
+                  value={formData.order?.toString() || "0"}
+                  onChange={handleInputChange}
+                />
+                {formErrors.order && (
+                  <p className="text-red-500 text-sm">{formErrors.order}</p>
+                )}
+              </div>
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="description">Descrição</Label>
               <Textarea
                 id="description"
                 name="description"
-                rows={3}
                 value={formData.description}
-                onChange={handleChange}
-                className={formErrors.description ? "border-red-500" : ""}
+                onChange={handleInputChange}
+                rows={3}
               />
               {formErrors.description && (
                 <p className="text-red-500 text-sm">{formErrors.description}</p>
               )}
             </div>
-            <div className="space-y-2">
+            <div className="grid gap-2">
               <Label htmlFor="image">URL da Imagem</Label>
               <Input
                 id="image"
                 name="image"
                 value={formData.image}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 placeholder="https://exemplo.com/imagem.jpg"
-                className={formErrors.image ? "border-red-500" : ""}
               />
               {formErrors.image && (
                 <p className="text-red-500 text-sm">{formErrors.image}</p>
               )}
             </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="featured"
+                checked={formData.featured === true}
+                onCheckedChange={handleSwitchChange}
+              />
+              <Label htmlFor="featured">Projeto Destacado</Label>
+            </div>
             <div className="space-y-2">
-              <Label>Tags</Label>
+              <Label>Tecnologias</Label>
               <div className="flex items-center gap-2">
                 <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  placeholder="Adicionar tag"
+                  value={technologyInput}
+                  onChange={(e) => setTechnologyInput(e.target.value)}
+                  placeholder="Adicionar tecnologia"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      handleTagAdd();
+                      handleTechnologyAdd();
                     }
                   }}
                 />
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={handleTagAdd}
+                  onClick={handleTechnologyAdd}
                   size="icon"
                 >
                   <RemixIcon name="ri-add-line" />
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
-                {formData.tags.map((tag, index) => (
+                {formData.technologies.map((tech, index) => (
                   <Badge key={index} variant="secondary" className="flex items-center gap-1 bg-blue-100 text-blue-800">
-                    {tag}
+                    {tech}
                     <button 
                       type="button" 
-                      onClick={() => handleTagRemove(tag)}
+                      onClick={() => handleTechnologyRemove(tech)}
                       className="text-blue-800 hover:text-blue-900 focus:outline-none"
                     >
                       <RemixIcon name="ri-close-line" />
@@ -366,8 +411,8 @@ export function AdminProjects() {
                   </Badge>
                 ))}
               </div>
-              {formErrors.tags && (
-                <p className="text-red-500 text-sm">{formErrors.tags}</p>
+              {formErrors.technologies && (
+                <p className="text-red-500 text-sm">{formErrors.technologies}</p>
               )}
             </div>
           </div>
@@ -384,102 +429,130 @@ export function AdminProjects() {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Salvando...
                 </>
-              ) : "Salvar Projeto"}
+              ) : (
+                "Adicionar Projeto"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Edit Project Dialog */}
+      {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>Editar Projeto</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-title">Título</Label>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="title-edit">Título</Label>
               <Input
-                id="edit-title"
+                id="title-edit"
                 name="title"
                 value={formData.title}
-                onChange={handleChange}
-                className={formErrors.title ? "border-red-500" : ""}
+                onChange={handleInputChange}
               />
               {formErrors.title && (
                 <p className="text-red-500 text-sm">{formErrors.title}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Descrição</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="category-edit">Categoria</Label>
+                <Select value={formData.category} onValueChange={handleCategoryChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecionar categoria" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Web">Web</SelectItem>
+                    <SelectItem value="Mobile">Mobile</SelectItem>
+                    <SelectItem value="Desktop">Desktop</SelectItem>
+                    <SelectItem value="API">API</SelectItem>
+                    <SelectItem value="Outros">Outros</SelectItem>
+                  </SelectContent>
+                </Select>
+                {formErrors.category && (
+                  <p className="text-red-500 text-sm">{formErrors.category}</p>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="order-edit">Ordem</Label>
+                <Input
+                  id="order-edit"
+                  name="order"
+                  type="number"
+                  value={formData.order?.toString() || "0"}
+                  onChange={handleInputChange}
+                />
+                {formErrors.order && (
+                  <p className="text-red-500 text-sm">{formErrors.order}</p>
+                )}
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description-edit">Descrição</Label>
               <Textarea
-                id="edit-description"
+                id="description-edit"
                 name="description"
-                rows={3}
                 value={formData.description}
-                onChange={handleChange}
-                className={formErrors.description ? "border-red-500" : ""}
+                onChange={handleInputChange}
+                rows={3}
               />
               {formErrors.description && (
                 <p className="text-red-500 text-sm">{formErrors.description}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-image">URL da Imagem</Label>
+            <div className="grid gap-2">
+              <Label htmlFor="image-edit">URL da Imagem</Label>
               <Input
-                id="edit-image"
+                id="image-edit"
                 name="image"
                 value={formData.image}
-                onChange={handleChange}
+                onChange={handleInputChange}
                 placeholder="https://exemplo.com/imagem.jpg"
-                className={formErrors.image ? "border-red-500" : ""}
               />
               {formErrors.image && (
                 <p className="text-red-500 text-sm">{formErrors.image}</p>
               )}
-              {formData.image && (
-                <div className="mt-2 border rounded-md p-2">
-                  <img 
-                    src={formData.image} 
-                    alt="Preview" 
-                    className="h-24 object-cover rounded" 
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://via.placeholder.com/150?text=Imagem+Inválida";
-                    }}
-                  />
-                </div>
-              )}
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="featured-edit"
+                checked={formData.featured === true}
+                onCheckedChange={handleSwitchChange}
+              />
+              <Label htmlFor="featured-edit">Projeto Destacado</Label>
             </div>
             <div className="space-y-2">
-              <Label>Tags</Label>
+              <Label>Tecnologias</Label>
               <div className="flex items-center gap-2">
                 <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  placeholder="Adicionar tag"
+                  value={technologyInput}
+                  onChange={(e) => setTechnologyInput(e.target.value)}
+                  placeholder="Adicionar tecnologia"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      handleTagAdd();
+                      handleTechnologyAdd();
                     }
                   }}
                 />
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={handleTagAdd}
+                  onClick={handleTechnologyAdd}
                   size="icon"
                 >
                   <RemixIcon name="ri-add-line" />
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
-                {formData.tags.map((tag, index) => (
+                {formData.technologies.map((tech, index) => (
                   <Badge key={index} variant="secondary" className="flex items-center gap-1 bg-blue-100 text-blue-800">
-                    {tag}
+                    {tech}
                     <button 
                       type="button" 
-                      onClick={() => handleTagRemove(tag)}
+                      onClick={() => handleTechnologyRemove(tech)}
                       className="text-blue-800 hover:text-blue-900 focus:outline-none"
                     >
                       <RemixIcon name="ri-close-line" />
@@ -487,8 +560,8 @@ export function AdminProjects() {
                   </Badge>
                 ))}
               </div>
-              {formErrors.tags && (
-                <p className="text-red-500 text-sm">{formErrors.tags}</p>
+              {formErrors.technologies && (
+                <p className="text-red-500 text-sm">{formErrors.technologies}</p>
               )}
             </div>
           </div>
@@ -498,14 +571,16 @@ export function AdminProjects() {
             </Button>
             <Button 
               onClick={() => handleSubmit(true)}
-              disabled={editProjectMutation.isPending}
+              disabled={updateProjectMutation.isPending}
             >
-              {editProjectMutation.isPending ? (
+              {updateProjectMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Atualizando...
+                  Salvando...
                 </>
-              ) : "Atualizar Projeto"}
+              ) : (
+                "Salvar Alterações"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -515,23 +590,27 @@ export function AdminProjects() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir Projeto</AlertDialogTitle>
+            <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir o projeto "{currentProject?.title}"? Esta ação não pode ser desfeita.
+              Esta ação não pode ser desfeita. Isso excluirá permanentemente o projeto
+              <strong> {currentProject?.title}</strong> do seu portfólio.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteConfirm}
-              className="bg-red-500 hover:bg-red-600 text-white"
+            <AlertDialogAction
+              onClick={() => currentProject && deleteProjectMutation.mutate(currentProject.id)}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              disabled={deleteProjectMutation.isPending}
             >
               {deleteProjectMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Excluindo...
                 </>
-              ) : "Excluir"}
+              ) : (
+                "Sim, excluir projeto"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
-import { AdminProjects } from "@/components/admin/admin-projects";
+import { AdminProjects } from "@/components/admin/admin-projects-new";
 import { AdminServices } from "@/components/admin/admin-services";
 import { AdminTestimonials } from "@/components/admin/admin-testimonials";
 import { AdminChat } from "@/components/admin/admin-chat";
