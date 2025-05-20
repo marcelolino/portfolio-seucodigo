@@ -50,9 +50,9 @@ export function ProjectsSection() {
                   <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
                   <p className="text-gray-600 mb-4">{project.description}</p>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {project.tags.map((tag, index) => (
+                    {project.technologies && project.technologies.map((tech, index) => (
                       <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
-                        {tag}
+                        {tech}
                       </Badge>
                     ))}
                   </div>
