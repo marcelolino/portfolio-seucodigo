@@ -141,8 +141,8 @@ export type SiteSettings = typeof siteSettings.$inferSelect;
 
 // Extended schemas for validation
 export const loginSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  username: z.string().min(1, "Nome de usuário é obrigatório"),
+  password: z.string().min(1, "A senha é obrigatória"),
 });
 
 export const registerSchema = insertUserSchema.extend({
