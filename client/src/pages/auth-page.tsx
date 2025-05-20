@@ -16,7 +16,7 @@ export default function AuthPage() {
   const [, navigate] = useLocation();
   
   const [loginData, setLoginData] = useState({
-    username: "admin",
+    username: "admin@gmail.com",
     password: "admin123"
   });
   
