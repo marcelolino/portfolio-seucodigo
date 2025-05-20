@@ -137,7 +137,8 @@ export function AdminServices() {
     setFormData({
       title: "",
       description: "",
-      icon: ""
+      icon: "",
+      price: ""
     });
     setFormErrors({});
   };
@@ -152,7 +153,8 @@ export function AdminServices() {
     setFormData({
       title: service.title,
       description: service.description,
-      icon: service.icon
+      icon: service.icon,
+      price: service.price.toString()
     });
     setIsEditDialogOpen(true);
   };
@@ -325,6 +327,21 @@ export function AdminServices() {
                     <RemixIcon name={formData.icon} />
                   </div>
                 </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="price">Preço (R$)</Label>
+              <Input
+                id="price"
+                name="price"
+                type="text"
+                value={formData.price}
+                onChange={handleChange}
+                placeholder="ex: 2500.00"
+                className={formErrors.price ? "border-red-500" : ""}
+              />
+              {formErrors.price && (
+                <p className="text-red-500 text-sm">{formErrors.price}</p>
               )}
             </div>
           </div>
