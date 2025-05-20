@@ -3,12 +3,12 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RemixIcon } from "@/components/ui/remixicon";
 import { useAuth } from "@/hooks/use-auth";
-import { registerSchema, loginSchema } from "@shared/schema";
+import { registerSchema } from "@shared/schema";
 import { z } from "zod";
 
 export default function AuthPage() {
@@ -72,26 +72,8 @@ export default function AuthPage() {
   
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     console.log("Tentando login com:", loginData);
     loginMutation.mutate(loginData);
-    
-    /* Comentando a validação para simplificar o processo de login
-    try {
-      loginSchema.parse(loginData);
-      loginMutation.mutate(loginData);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-    */
-        const errors: { [key: string]: string } = {};
-        error.errors.forEach(err => {
-          if (err.path) {
-            errors[err.path[0]] = err.message;
-          }
-        });
-        setLoginErrors(errors);
-      }
-    }
   };
   
   const handleRegisterSubmit = (e: React.FormEvent) => {
