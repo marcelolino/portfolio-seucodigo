@@ -271,6 +271,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   wss.on('connection', (ws: WebSocket, req) => {
     let userId: number | undefined;
     let isAdmin = false;
+    let isVisitor = false;
+    let visitorId = Date.now().toString(); // Generate a unique ID for the visitor
     
     // Handle messages
     ws.on('message', async (message: string) => {
@@ -291,16 +293,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   clients.set(userId, ws);
                 }
               }
+            } else {
+              // This is a visitor without authentication
+              isVisitor = true;
+              // Store visitor connection in a way that admins can reach it
+              clients.set(parseInt(visitorId), ws);
             }
             break;
             
           case 'message':
-            if (!userId && !isAdmin) break;
+            // Allow messages from visitors too (no auth required)
+            if (!userId && !isAdmin && !isVisitor) break;
             
             if (data.content && data.content.trim() !== '') {
               // Save message to database
               const newMessage = await storage.createMessage({
-                userId: isAdmin ? undefined : userId,
+                userId: isAdmin ? undefined : userId, // Will be null for visitors
                 content: data.content,
                 isAdmin: isAdmin
               });
@@ -317,8 +325,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 if (userWs && userWs.readyState === WebSocket.OPEN) {
                   userWs.send(messagePayload);
                 }
-              } else if (userId) {
-                // User sending message, send to all admins
+              } else {
+                // User or visitor sending message, send to all admins
                 adminClients.forEach(adminWs => {
                   if (adminWs.readyState === WebSocket.OPEN) {
                     adminWs.send(messagePayload);
