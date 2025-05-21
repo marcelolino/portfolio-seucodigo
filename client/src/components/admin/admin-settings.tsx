@@ -30,7 +30,7 @@ export function AdminSettings() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   
   // Carregar configurações existentes
-  const { data: settings, isLoading } = useQuery({
+  const { data: settings, isLoading } = useQuery<Record<string, any>>({
     queryKey: ["/api/settings"],
   });
   
@@ -51,23 +51,29 @@ export function AdminSettings() {
   
   // Atualizar form state quando os dados forem carregados
   useEffect(() => {
-    if (settings) {
-      setFormData({
-        siteName: settings.siteName || "",
-        siteTitle: settings.siteTitle || "",
-        contactEmail: settings.contactEmail || "",
-        contactPhone: settings.contactPhone || "",
-        address: settings.address || "",
-        logo: settings.logo || "",
-        github: settings.github || "",
-        linkedin: settings.linkedin || "",
-        twitter: settings.twitter || "",
-        instagram: settings.instagram || "",
-        whatsapp: settings.whatsapp || "",
-      });
+    if (settings && typeof settings === 'object') {
+      const s = settings as Record<string, any>;
       
-      if (settings.logo) {
-        setLogoPreview(settings.logo);
+      // Usando operador de coalescência nula para garantir valores seguros
+      const updatedData = {
+        siteName: s.siteName ?? "",
+        siteTitle: s.siteTitle ?? "",
+        contactEmail: s.contactEmail ?? "",
+        contactPhone: s.contactPhone ?? "",
+        address: s.address ?? "",
+        logo: s.logo ?? "",
+        github: s.github ?? "",
+        linkedin: s.linkedin ?? "",
+        twitter: s.twitter ?? "",
+        instagram: s.instagram ?? "",
+        whatsapp: s.whatsapp ?? "",
+      };
+      
+      setFormData(updatedData);
+      
+      // Se temos um logo, definimos o preview
+      if (s.logo) {
+        setLogoPreview(s.logo);
       }
     }
   }, [settings]);
