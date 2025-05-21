@@ -5,19 +5,28 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Message } from "@/shared/schema";
 import { Loader2, X, MessageSquare, Send } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+// Define the Message interface since we're having import issues
+interface Message {
+  id: number;
+  userId?: number;
+  content: string;
+  isAdmin: boolean;
+  isRead: boolean;
+  createdAt: Date;
+}
 
 interface ChatMessage extends Message {
   animateIn?: boolean;
 }
 
 interface VisitorChatProps {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
-export function VisitorChat({ onClose }: VisitorChatProps) {
+export function VisitorChat({ onClose = () => {} }: VisitorChatProps) {
   const { user } = useAuth();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
