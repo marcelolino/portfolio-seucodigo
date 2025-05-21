@@ -58,10 +58,21 @@ export function VisitorChat({ onClose = () => {} }: VisitorChatProps) {
     };
     
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      
-      if (data.type === "message" && data.message) {
-        setMessages(prev => [...prev, { ...data.message, animateIn: true }]);
+      try {
+        const data = JSON.parse(event.data);
+        console.log("WebSocket message received:", data);
+        
+        if (data.type === "message" && data.message) {
+          // Adicionar nova mensagem à lista com animação
+          setMessages(prev => [...prev, { ...data.message, animateIn: true }]);
+          
+          // Garantir que o chat será aberto se receber mensagem do admin
+          if (data.message.isAdmin && !isOpen) {
+            setIsOpen(true);
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
       }
     };
     
