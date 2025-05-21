@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+// Importamos o componente de ícones
 import { RemixIcon } from "@/components/ui/remixicon";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -62,11 +63,7 @@ export function AdminSettings() {
   // Mutation para salvar as configurações
   const updateMutation = useMutation({
     mutationFn: async (data: Partial<SiteSettings>) => {
-      const response = await apiRequest("/api/settings", {
-        method: "PUT",
-        body: JSON.stringify(data),
-      });
-      return response;
+      return await apiRequest("PUT", "/api/settings", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
@@ -97,14 +94,13 @@ export function AdminSettings() {
       // Criar preview da imagem
       const reader = new FileReader();
       reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
+        const result = reader.result as string;
+        setLogoPreview(result);
+        // Armazenar a imagem como base64
+        setFormData(prev => ({ ...prev, logo: result }));
       };
       reader.readAsDataURL(file);
       setUploadedLogo(file);
-      
-      // TODO: Implementar upload da imagem para o servidor
-      // Por enquanto, vamos apenas armazenar o nome da imagem
-      setFormData((prev) => ({ ...prev, logo: URL.createObjectURL(file) }));
     }
   };
   

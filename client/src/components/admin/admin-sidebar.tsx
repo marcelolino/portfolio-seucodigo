@@ -82,6 +82,13 @@ export function AdminSidebar({ activeSection, setActiveSection, closeSidebar }: 
         >
           <RemixIcon name="ri-user-line mr-2" /> Usuários
         </Button>
+        <Button
+          variant={activeSection === "settings" ? "secondary" : "ghost"}
+          className={`w-full justify-start ${activeSection === "settings" ? "" : "text-gray-300 hover:text-white"}`}
+          onClick={() => handleSectionChange("settings")}
+        >
+          <RemixIcon name="ri-settings-3-line mr-2" /> Configurações
+        </Button>
       </nav>
 
       <div className="p-4 border-t border-gray-700">

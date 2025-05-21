@@ -5,12 +5,13 @@ import { AdminServices } from "@/components/admin/admin-services";
 import { AdminTestimonials } from "@/components/admin/admin-testimonials";
 import { AdminChat } from "@/components/admin/admin-chat";
 import { AdminUsers } from "@/components/admin/admin-users";
+import { AdminSettings } from "@/components/admin/admin-settings";
 import { Button } from "@/components/ui/button";
 import { RemixIcon } from "@/components/ui/remixicon";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
 
-type AdminSection = "dashboard" | "projects" | "services" | "testimonials" | "chat" | "users";
+type AdminSection = "dashboard" | "projects" | "services" | "testimonials" | "chat" | "users" | "settings";
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -29,6 +30,8 @@ export default function AdminPage() {
         return <AdminChat />;
       case "users":
         return <AdminUsers />;
+      case "settings":
+        return <AdminSettings />;
       default:
         return <AdminDashboard />;
     }
