@@ -4,7 +4,13 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { WebSocketServer, WebSocket } from "ws";
 import { z } from "zod";
-import { insertContactSchema, insertProjectSchema, insertServiceSchema, insertTestimonialSchema } from "@shared/schema";
+import { 
+  insertContactSchema, 
+  insertProjectSchema, 
+  insertServiceSchema, 
+  insertTestimonialSchema,
+  insertSiteSettingsSchema
+} from "@shared/schema";
 
 interface WebSocketMessage {
   type: string;
@@ -268,6 +274,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
       }
       res.status(500).json({ message: "Erro ao enviar mensagem de contato" });
+    }
+  });
+  
+  // Site Settings
+  app.get("/api/settings", async (req, res) => {
+    try {
+      const settings = await storage.getSiteSettings();
+      res.json(settings || {});
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+      res.status(500).json({ message: "Erro ao buscar configurações do site" });
+    }
+  });
+  
+  app.put("/api/settings", checkAdmin, async (req, res) => {
+    try {
+      const settingsData = insertSiteSettingsSchema.partial().parse(req.body);
+      const settings = await storage.updateSiteSettings(settingsData);
+      res.json(settings);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      }
+      console.error("Error updating settings:", error);
+      res.status(500).json({ message: "Erro ao atualizar configurações do site" });
     }
   });
   

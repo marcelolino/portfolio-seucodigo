@@ -4,7 +4,7 @@ import { RemixIcon } from "@/components/ui/remixicon";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
 
-type AdminSection = "dashboard" | "projects" | "services" | "testimonials" | "chat" | "users";
+type AdminSection = "dashboard" | "projects" | "services" | "testimonials" | "chat" | "users" | "settings";
 
 interface AdminSidebarProps {
   activeSection: AdminSection;
