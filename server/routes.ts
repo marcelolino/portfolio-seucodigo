@@ -234,6 +234,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Endpoint para criar mensagens via REST API (útil para testes)
+  app.post("/api/messages", async (req, res) => {
+    try {
+      const { content, isAdmin = false } = req.body;
+      
+      if (!content) {
+        return res.status(400).json({ message: "Conteúdo da mensagem é obrigatório" });
+      }
+      
+      // Criar mensagem como visitante (sem userId)
+      const newMessage = await storage.createMessage({
+        userId: undefined,
+        content,
+        isAdmin
+      });
+      
+      res.status(200).json(newMessage);
+    } catch (error) {
+      console.error("Error creating message:", error);
+      res.status(500).json({ message: "Erro ao criar mensagem" });
+    }
+  });
+  
   // Contacts
   app.post("/api/contacts", async (req, res) => {
     try {

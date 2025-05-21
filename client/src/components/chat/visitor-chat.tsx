@@ -37,20 +37,8 @@ export function VisitorChat({ onClose = () => {} }: VisitorChatProps) {
   
   // Initialize chat
   useEffect(() => {
-    async function fetchMessages() {
-      try {
-        const response = await fetch("/api/messages", {
-          credentials: "include"
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setMessages(data.map((msg: Message) => ({ ...msg, animateIn: false })));
-        }
-      } catch (error) {
-        console.error("Failed to fetch messages:", error);
-      }
-    }
+    // Carregar mensagens iniciais
+    fetchMessages();
     
     // Setup WebSocket connection
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -99,9 +87,31 @@ export function VisitorChat({ onClose = () => {} }: VisitorChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   
+  // Função para buscar mensagens
+  async function fetchMessages() {
+    try {
+      // Buscar mensagens específicas para visitantes
+      const response = await fetch("/api/messages?visitor=true", {
+        credentials: "include"
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Visitor messages loaded:", data);
+        setMessages(data.map((msg: Message) => ({ ...msg, animateIn: false })));
+      }
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
+    }
+  }
+
   // Toggle chat open/closed
   const toggleChat = () => {
     setIsOpen(!isOpen);
+    // Atualizar mensagens quando abrir o chat
+    if (!isOpen) {
+      fetchMessages();
+    }
   };
   
   // Send a message

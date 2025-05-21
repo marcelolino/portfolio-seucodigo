@@ -33,8 +33,12 @@ export function AdminChat() {
   });
 
   const { data: messages, isLoading: isLoadingMessages } = useQuery<Message[]>({
-    queryKey: ["/api/messages"],
-    onSuccess: (messages) => {
+    queryKey: ["/api/messages"]
+  });
+
+  // Processar mensagens quando elas chegarem
+  useEffect(() => {
+    if (messages) {
       // Group messages by user ID
       const messagesByUser: { [userId: number]: ChatMessage[] } = {};
       let hasVisitors = false;
@@ -57,7 +61,7 @@ export function AdminChat() {
       setUserMessages(messagesByUser);
       setAllMessages(messages as ChatMessage[]);
     }
-  });
+  }, [messages]);
 
   useEffect(() => {
     // Setup WebSocket connection
