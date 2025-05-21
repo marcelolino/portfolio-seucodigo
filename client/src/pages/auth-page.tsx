@@ -73,7 +73,14 @@ export default function AuthPage() {
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Tentando login com:", loginData);
-    loginMutation.mutate(loginData);
+    
+    // Certifique-se de que o loginData tem os campos corretos
+    const loginPayload = {
+      username: loginData.username,
+      password: loginData.password
+    };
+    
+    loginMutation.mutate(loginPayload);
   };
   
   const handleRegisterSubmit = (e: React.FormEvent) => {
