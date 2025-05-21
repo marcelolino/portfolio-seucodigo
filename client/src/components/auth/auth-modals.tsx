@@ -33,7 +33,7 @@ export function AuthModals({
   
   // Login form state
   const [loginData, setLoginData] = useState({
-    email: "",
+    username: "",
     password: ""
   });
   const [loginErrors, setLoginErrors] = useState<{ [key: string]: string }>({});
@@ -165,17 +165,17 @@ export function AuthModals({
             <CardContent className="pt-6">
               <form id="loginForm" onSubmit={handleLoginSubmit}>
                 <div className="mb-4">
-                  <Label htmlFor="loginEmail">Email</Label>
+                  <Label htmlFor="loginUsername">Email ou Usuário</Label>
                   <Input 
-                    type="email" 
-                    id="loginEmail" 
-                    name="email"
-                    value={loginData.email}
+                    type="text" 
+                    id="loginUsername" 
+                    name="username"
+                    value={loginData.username}
                     onChange={handleLoginChange}
-                    className={loginErrors.email ? "border-red-500" : ""}
+                    className={loginErrors.username ? "border-red-500" : ""}
                   />
-                  {loginErrors.email && (
-                    <p className="text-red-500 text-sm mt-1">{loginErrors.email}</p>
+                  {loginErrors.username && (
+                    <p className="text-red-500 text-sm mt-1">{loginErrors.username}</p>
                   )}
                 </div>
                 <div className="mb-6">
