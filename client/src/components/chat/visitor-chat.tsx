@@ -54,16 +54,19 @@ export function VisitorChat({ onClose = () => {} }: VisitorChatProps) {
     
     // Setup WebSocket connection
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    const host = window.location.host;
+    const wsUrl = `${protocol}//${host}/ws`;
+    console.log("Connecting to WebSocket URL:", wsUrl);
     const ws = new WebSocket(wsUrl);
     
     ws.onopen = () => {
       setIsConnected(true);
-      // Authenticate with the WebSocket server
+      // Authenticate with the WebSocket server (como visitante se não estiver logado)
       ws.send(JSON.stringify({
         type: "authenticate",
-        userId: user?.id
+        userId: user?.id || null // Enviar null para visitantes não autenticados
       }));
+      console.log("WebSocket connected, authenticated as:", user?.id ? "User "+user.id : "Visitor");
     };
     
     ws.onmessage = (event) => {
@@ -106,11 +109,14 @@ export function VisitorChat({ onClose = () => {} }: VisitorChatProps) {
     e.preventDefault();
     
     if (message.trim() && socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({
+      const messageData = {
         type: "message",
         content: message,
         isAdmin: false
-      }));
+      };
+      
+      console.log("Sending message as visitor:", messageData);
+      socket.send(JSON.stringify(messageData));
       
       setMessage("");
     }

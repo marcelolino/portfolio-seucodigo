@@ -208,13 +208,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Messages
-  app.get("/api/messages", checkAuth, async (req, res) => {
+  // Messages - visitantes podem buscar suas próprias mensagens (sem autenticação)
+  app.get("/api/messages", async (req, res) => {
     try {
-      const userId = req.user!.role === "admin" ? undefined : req.user!.id;
-      const messages = await storage.getMessages(userId);
-      res.json(messages);
+      // Para mensagens de visitantes, usamos um parâmetro especial 'visitor'
+      if (req.query.visitor === 'true') {
+        // Retornar todas as mensagens sem userId (mensagens de visitantes)
+        const allMessages = await storage.getMessages(undefined);
+        const visitorMessages = allMessages.filter(msg => msg.userId === null);
+        return res.json(visitorMessages);
+      }
+      
+      // Se o usuário está autenticado, verifica seu papel
+      if (req.isAuthenticated()) {
+        const userId = req.user!.role === "admin" ? undefined : req.user!.id;
+        const messages = await storage.getMessages(userId);
+        return res.json(messages);
+      } else {
+        // Para visitantes sem o parâmetro especial, retornar array vazio
+        return res.json([]);
+      }
     } catch (error) {
+      console.error("Error fetching messages:", error);
       res.status(500).json({ message: "Erro ao buscar mensagens" });
     }
   });
@@ -276,6 +291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     ws.on('message', async (message: string) => {
       try {
         const data: WebSocketMessage = JSON.parse(message);
+        console.log("WebSocket message received:", data.type, data);
         
         switch (data.type) {
           case 'authenticate':
@@ -287,8 +303,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 if (user.role === 'admin') {
                   isAdmin = true;
                   adminClients.push(ws);
+                  console.log("Admin authenticated:", userId);
                 } else {
                   clients.set(userId, ws);
+                  console.log("User authenticated:", userId);
                 }
               }
             } else {
@@ -296,6 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               isVisitor = true;
               // Store visitor connection in a way that admins can reach it
               clients.set(parseInt(visitorId), ws);
+              console.log("Visitor authenticated with visitorId:", visitorId);
             }
             break;
             
@@ -304,12 +323,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (!userId && !isAdmin && !isVisitor) break;
             
             if (data.content && data.content.trim() !== '') {
+              console.log("Message processing - isAdmin:", isAdmin, "userId:", userId, "isVisitor:", isVisitor);
+              
               // Save message to database
               const newMessage = await storage.createMessage({
-                userId: isAdmin ? undefined : userId, // Will be null for visitors
+                userId: isAdmin ? data.userId : userId, // userId para mensagens admin->user, null para visitantes
                 content: data.content,
                 isAdmin: isAdmin
               });
+              console.log("Message saved to database:", newMessage);
               
               // Send to appropriate recipients
               const messagePayload = JSON.stringify({
@@ -318,16 +340,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
               });
               
               if (isAdmin && data.userId) {
-                // Admin sending to specific user
+                // Admin sending to specific user ou visitante
+                console.log("Admin sending to userId:", data.userId);
                 const userWs = clients.get(data.userId);
                 if (userWs && userWs.readyState === WebSocket.OPEN) {
                   userWs.send(messagePayload);
+                  console.log("Message sent to user/visitor:", data.userId);
+                } else {
+                  console.log("User/visitor not connected or connection closed:", data.userId);
                 }
-              } else {
-                // User or visitor sending message, send to all admins
-                adminClients.forEach(adminWs => {
+              } else if (isVisitor || userId) {
+                // Visitor ou user enviando mensagem, mandar para todos os admins
+                console.log("User/visitor sending to all admins. AdminClients count:", adminClients.length);
+                adminClients.forEach((adminWs, index) => {
                   if (adminWs.readyState === WebSocket.OPEN) {
                     adminWs.send(messagePayload);
+                    console.log("Message sent to admin #", index);
+                  } else {
+                    console.log("Admin #", index, "connection not open");
                   }
                 });
               }
