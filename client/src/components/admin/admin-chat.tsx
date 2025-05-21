@@ -25,6 +25,7 @@ export function AdminChat() {
   const [userMessages, setUserMessages] = useState<{ [userId: number]: ChatMessage[] }>({});
   const [allMessages, setAllMessages] = useState<ChatMessage[]>([]);
   const [chatConnected, setChatConnected] = useState(false);
+  const [hasVisitorMessages, setHasVisitorMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: users, isLoading: isLoadingUsers } = useQuery<User[]>({
@@ -33,21 +34,28 @@ export function AdminChat() {
 
   const { data: messages, isLoading: isLoadingMessages } = useQuery<Message[]>({
     queryKey: ["/api/messages"],
-    onSuccess: (data) => {
+    onSuccess: (messages) => {
       // Group messages by user ID
       const messagesByUser: { [userId: number]: ChatMessage[] } = {};
+      let hasVisitors = false;
       
-      data.forEach(msg => {
-        if (msg.userId) {
-          if (!messagesByUser[msg.userId]) {
-            messagesByUser[msg.userId] = [];
-          }
-          messagesByUser[msg.userId].push({ ...msg, animateIn: false });
+      messages.forEach((msg: Message) => {
+        // Lidar com mensagens de visitantes (sem userId)
+        const userKey = msg.userId || 0; // Usar 0 como chave para visitantes
+        
+        if (userKey === 0) {
+          hasVisitors = true;
         }
+        
+        if (!messagesByUser[userKey]) {
+          messagesByUser[userKey] = [];
+        }
+        messagesByUser[userKey].push({ ...msg, animateIn: false });
       });
       
+      setHasVisitorMessages(hasVisitors);
       setUserMessages(messagesByUser);
-      setAllMessages(data as ChatMessage[]);
+      setAllMessages(messages as ChatMessage[]);
     }
   });
 
@@ -123,10 +131,11 @@ export function AdminChat() {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (message.trim() && socket && socket.readyState === WebSocket.OPEN && activeUser) {
+    // Permitir enviar mensagens para visitantes (sem userId) ou usuários autenticados
+    if (message.trim() && socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({
         type: "message",
-        userId: activeUser.id,
+        userId: activeUser?.id || 0, // Usar 0 para visitantes
         content: message,
         isAdmin: true
       }));
@@ -149,8 +158,14 @@ export function AdminChat() {
   };
 
   const getDisplayMessages = () => {
-    if (!activeUser) return [];
-    return userMessages[activeUser.id] || [];
+    if (activeUser) {
+      // Mensagens de usuário registrado
+      return userMessages[activeUser.id] || [];
+    } else if (hasVisitorMessages) {
+      // Mensagens de visitantes (userId = 0)
+      return userMessages[0] || [];
+    }
+    return [];
   };
 
   const getUnreadCount = (userId: number) => {
@@ -186,7 +201,40 @@ export function AdminChat() {
               </div>
             ) : users && users.length > 0 ? (
               <div className="space-y-1 p-2">
-                {users.filter(user => user.role !== "admin").map((user) => {
+                {/* Visitantes (não autenticados) */}
+                {hasVisitorMessages && (
+                  <button
+                    className={`w-full flex items-center p-3 rounded-md transition-colors ${
+                      activeUser === null && !isLoadingMessages
+                        ? 'bg-primary/10 text-primary'
+                        : 'hover:bg-gray-100'
+                    }`}
+                    onClick={() => setActiveUser(null)}
+                  >
+                    <Avatar className="h-10 w-10 mr-3">
+                      <AvatarImage src={`https://ui-avatars.com/api/?name=Visitante&background=4f46e5&color=fff`} />
+                      <AvatarFallback>V</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 text-left">
+                      <div className="flex justify-between">
+                        <p className="font-medium truncate">Visitante</p>
+                        {userMessages[0]?.filter(msg => !msg.isAdmin).length > 0 && (
+                          <Badge variant="destructive" className="ml-2">
+                            {userMessages[0]?.filter(msg => !msg.isAdmin).length}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500 truncate">
+                        {userMessages[0]?.length > 0 
+                          ? userMessages[0][userMessages[0].length - 1].content 
+                          : "Nenhuma mensagem"}
+                      </p>
+                    </div>
+                  </button>
+                )}
+
+                {/* Usuários registrados */}
+                {users?.filter(user => user.role !== "admin").map((user) => {
                   const lastMsg = getUserLastMessage(user.id);
                   const unreadCount = getUnreadCount(user.id);
                   
@@ -234,16 +282,27 @@ export function AdminChat() {
 
         {/* Chat area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {activeUser ? (
+          {(activeUser || hasVisitorMessages) ? (
             <>
               <div className="p-4 border-b flex items-center">
                 <Avatar className="h-10 w-10 mr-3">
-                  <AvatarImage src={`https://ui-avatars.com/api/?name=${activeUser.name}&background=2563eb&color=fff`} />
-                  <AvatarFallback>{activeUser.name.charAt(0)}</AvatarFallback>
+                  {activeUser ? (
+                    <>
+                      <AvatarImage src={`https://ui-avatars.com/api/?name=${activeUser.name}&background=2563eb&color=fff`} />
+                      <AvatarFallback>{activeUser.name.charAt(0)}</AvatarFallback>
+                    </>
+                  ) : (
+                    <>
+                      <AvatarImage src="https://ui-avatars.com/api/?name=Visitante&background=4f46e5&color=fff" />
+                      <AvatarFallback>V</AvatarFallback>
+                    </>
+                  )}
                 </Avatar>
                 <div>
-                  <h3 className="font-semibold">{activeUser.name}</h3>
-                  <p className="text-sm text-gray-500">{activeUser.email}</p>
+                  <h3 className="font-semibold">{activeUser ? activeUser.name : "Visitante"}</h3>
+                  <p className="text-sm text-gray-500">
+                    {activeUser ? activeUser.email : "Usuário não autenticado"}
+                  </p>
                 </div>
               </div>
 
