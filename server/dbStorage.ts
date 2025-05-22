@@ -114,7 +114,13 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getTestimonials(): Promise<Testimonial[]> {
-    return await db.select().from(testimonials).orderBy(testimonials.order);
+    try {
+      return await db.select().from(testimonials).orderBy(testimonials.order);
+    } catch (error) {
+      console.error("Erro ao buscar depoimentos:", error);
+      // Em caso de erro, retornamos um array vazio
+      return [];
+    }
   }
   
   async createTestimonial(insertTestimonial: InsertTestimonial): Promise<Testimonial> {
@@ -143,16 +149,22 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getMessages(userId?: number): Promise<Message[]> {
-    if (userId) {
+    try {
+      if (userId) {
+        return await db.select()
+          .from(messages)
+          .where(eq(messages.userId, userId))
+          .orderBy(messages.createdAt);
+      }
+      
       return await db.select()
         .from(messages)
-        .where(eq(messages.senderId, userId))
         .orderBy(messages.createdAt);
+    } catch (error) {
+      console.error("Erro ao buscar mensagens:", error);
+      // Em caso de erro, retornamos um array vazio
+      return [];
     }
-    
-    return await db.select()
-      .from(messages)
-      .orderBy(messages.createdAt);
   }
   
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
