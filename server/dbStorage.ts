@@ -146,7 +146,7 @@ export class DatabaseStorage implements IStorage {
     if (userId) {
       return await db.select()
         .from(messages)
-        .where(eq(messages.userId, userId))
+        .where(eq(messages.senderId, userId))
         .orderBy(messages.createdAt);
     }
     
