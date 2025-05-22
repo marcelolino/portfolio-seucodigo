@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { RemixIcon } from "@/components/ui/remixicon";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
+import "@/styles/admin-theme.css";
 
 type AdminSection = "dashboard" | "projects" | "services" | "testimonials" | "chat" | "contacts" | "users" | "settings";
 
@@ -42,12 +43,12 @@ export default function AdminPage() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Acesso Restrito</h1>
-          <p className="mb-6">Você não tem permissão para acessar esta página.</p>
+      <div className="admin-theme admin-container flex items-center justify-center h-screen">
+        <div className="admin-card p-8 text-center max-w-md">
+          <h1 className="admin-header text-2xl mb-4">Acesso Restrito</h1>
+          <p className="admin-subheader mb-6">Você não tem permissão para acessar esta página.</p>
           <Link href="/">
-            <Button>Voltar ao Início</Button>
+            <Button className="admin-btn-primary">Voltar ao Início</Button>
           </Link>
         </div>
       </div>
@@ -55,12 +56,12 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="admin-theme admin-container min-h-screen flex">
       {/* Mobile sidebar toggle */}
       <Button
         variant="outline"
         size="icon"
-        className="fixed top-4 left-4 md:hidden z-50"
+        className="admin-btn-secondary fixed top-4 left-4 md:hidden z-50 border-[#E5E5E5] hover:bg-[#F8F9FA]"
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
         <RemixIcon name={sidebarOpen ? "ri-menu-fold-line" : "ri-menu-unfold-line"} />
@@ -76,7 +77,7 @@ export default function AdminPage() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 p-4 md:p-8 overflow-auto">
+      <div className="flex-1 p-4 md:p-8 overflow-auto bg-[#FFFFFF]">
         {renderContent()}
       </div>
     </div>
