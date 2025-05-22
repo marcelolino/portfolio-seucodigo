@@ -49,9 +49,10 @@ export const testimonials = pgTable("testimonials", {
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
+  receiverId: integer("receiver_id"),
   content: text("content").notNull(),
   isAdmin: boolean("is_admin").notNull().default(false),
-  isRead: boolean("is_read").default(false),
+  isRead: boolean("read").default(false), // Alterado de "is_read" para "read" para corresponder ao banco
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

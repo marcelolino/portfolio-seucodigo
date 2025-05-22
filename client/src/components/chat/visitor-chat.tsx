@@ -14,7 +14,8 @@ interface Message {
   userId?: number;
   content: string;
   isAdmin: boolean;
-  isRead: boolean;
+  isRead: boolean; // Mantemos isRead na interface para compatibilidade com o código
+  read: boolean;   // Adicionamos read que é o nome real no banco
   createdAt: Date;
 }
 
@@ -109,7 +110,20 @@ export function VisitorChat({ onClose = () => {} }: VisitorChatProps) {
       if (response.ok) {
         const data = await response.json();
         console.log("Visitor messages loaded:", data);
-        setMessages(data.map((msg: Message) => ({ ...msg, animateIn: false })));
+        
+        // Processar os dados retornados para garantir a compatibilidade com a interface ChatMessage
+        const processedMessages = data.map((msg: any) => ({
+          id: msg.id,
+          userId: msg.userId || msg.user_id,
+          content: msg.content,
+          isAdmin: msg.isAdmin || msg.is_admin,
+          isRead: msg.isRead || msg.read,
+          read: msg.read || false,
+          createdAt: new Date(msg.createdAt || msg.created_at),
+          animateIn: false
+        }));
+        
+        setMessages(processedMessages);
       }
     } catch (error) {
       console.error("Failed to fetch messages:", error);

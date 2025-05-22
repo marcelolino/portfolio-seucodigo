@@ -222,14 +222,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Retornar todas as mensagens sem userId (mensagens de visitantes)
         const allMessages = await storage.getMessages(undefined);
         const visitorMessages = allMessages.filter(msg => msg.userId === null);
-        return res.json(visitorMessages);
+        
+        // Mapear as mensagens para garantir que isRead está disponível para o frontend
+        const formattedMessages = visitorMessages.map(msg => ({
+          ...msg,
+          isRead: msg.read // Garantindo que temos a propriedade isRead para compatibilidade
+        }));
+        
+        return res.json(formattedMessages);
       }
       
       // Se o usuário está autenticado, verifica seu papel
       if (req.isAuthenticated()) {
         const userId = req.user!.role === "admin" ? undefined : req.user!.id;
         const messages = await storage.getMessages(userId);
-        return res.json(messages);
+        
+        // Mapear as mensagens para garantir que isRead está disponível para o frontend
+        const formattedMessages = messages.map(msg => ({
+          ...msg,
+          isRead: msg.read // Garantindo que temos a propriedade isRead para compatibilidade
+        }));
+        
+        return res.json(formattedMessages);
       } else {
         // Para visitantes sem o parâmetro especial, retornar array vazio
         return res.json([]);
