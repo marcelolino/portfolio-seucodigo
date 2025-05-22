@@ -294,23 +294,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Site Settings
   app.get("/api/settings", async (req, res) => {
     try {
-      const settings = await storage.getSiteSettings();
-      res.json(settings || {});
+      const result = await db.execute(sql`SELECT * FROM site_settings LIMIT 1`);
+      
+      if (result.rows.length > 0) {
+        res.json(result.rows[0]);
+      } else {
+        res.json({
+          siteName: 'SeuCodigo',
+          siteTitle: 'Desenvolvedor Full Stack',
+          contactEmail: 'contato@seucodigo.com',
+          contactPhone: '(11) 9999-8888',
+          address: 'São Paulo, SP - Brasil',
+          logo: '',
+          github: '',
+          linkedin: '',
+          twitter: '',
+          instagram: '',
+          whatsapp: ''
+        });
+      }
     } catch (error) {
       console.error("Error fetching settings:", error);
-      res.status(500).json({ message: "Erro ao buscar configurações do site" });
+      res.json({
+        siteName: 'SeuCodigo',
+        siteTitle: 'Desenvolvedor Full Stack',
+        contactEmail: 'contato@seucodigo.com',
+        contactPhone: '(11) 9999-8888',
+        address: 'São Paulo, SP - Brasil',
+        logo: '',
+        github: '',
+        linkedin: '',
+        twitter: '',
+        instagram: '',
+        whatsapp: ''
+      });
     }
   });
   
   app.put("/api/settings", checkAdmin, async (req, res) => {
     try {
-      const settingsData = insertSiteSettingsSchema.partial().parse(req.body);
-      const settings = await storage.updateSiteSettings(settingsData);
-      res.json(settings);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      const settings = req.body;
+      
+      const existing = await db.execute(sql`SELECT * FROM site_settings LIMIT 1`);
+      
+      if (existing.rows.length > 0) {
+        await db.execute(sql`
+          UPDATE site_settings 
+          SET 
+            site_name = ${settings.siteName || 'SeuCodigo'},
+            site_title = ${settings.siteTitle || 'Desenvolvedor Full Stack'},
+            contact_email = ${settings.contactEmail || 'contato@seucodigo.com'},
+            contact_phone = ${settings.contactPhone || '(11) 9999-8888'},
+            address = ${settings.address || 'São Paulo, SP - Brasil'},
+            logo = ${settings.logo || ''},
+            github = ${settings.github || ''},
+            linkedin = ${settings.linkedin || ''},
+            twitter = ${settings.twitter || ''},
+            instagram = ${settings.instagram || ''},
+            whatsapp = ${settings.whatsapp || ''}
+          WHERE id = ${existing.rows[0].id}
+        `);
+      } else {
+        await db.execute(sql`
+          INSERT INTO site_settings (
+            site_name, site_title, contact_email, contact_phone, address,
+            logo, github, linkedin, twitter, instagram, whatsapp
+          ) VALUES (
+            ${settings.siteName || 'SeuCodigo'},
+            ${settings.siteTitle || 'Desenvolvedor Full Stack'},
+            ${settings.contactEmail || 'contato@seucodigo.com'},
+            ${settings.contactPhone || '(11) 9999-8888'},
+            ${settings.address || 'São Paulo, SP - Brasil'},
+            ${settings.logo || ''},
+            ${settings.github || ''},
+            ${settings.linkedin || ''},
+            ${settings.twitter || ''},
+            ${settings.instagram || ''},
+            ${settings.whatsapp || ''}
+          )
+        `);
       }
+      
+      const updated = await db.execute(sql`SELECT * FROM site_settings LIMIT 1`);
+      res.json(updated.rows[0]);
+      
+    } catch (error) {
       console.error("Error updating settings:", error);
       res.status(500).json({ message: "Erro ao atualizar configurações do site" });
     }
