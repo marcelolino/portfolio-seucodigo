@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+import { Footer } from "@/components/layout/dynamic-footer";
 import { HeroSection } from "@/components/home/hero-section";
 import { ServicesSection } from "@/components/home/services-section";
 import { ProjectsSection } from "@/components/home/projects-section";
