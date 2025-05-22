@@ -63,7 +63,7 @@ export function Header() {
               </Link>
             ) : (
               <Link href="/auth">
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
+                <Button variant="outline" className="border-[#00A8E8] text-[#00A8E8] hover:bg-[#00A8E8] hover:text-white">
                   Login
                 </Button>
               </Link>
@@ -132,7 +132,7 @@ export function Header() {
               <Link href="/auth">
                 <Button 
                   variant="outline" 
-                  className="border-primary text-primary hover:bg-primary hover:text-white"
+                  className="border-[#00A8E8] text-[#00A8E8] hover:bg-[#00A8E8] hover:text-white"
                   onClick={() => setMenuOpen(false)}
                 >
                   Login

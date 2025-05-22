@@ -22,12 +22,12 @@ async function initializeDatabase() {
       CREATE TABLE IF NOT EXISTS projects (
         id SERIAL PRIMARY KEY,
         title TEXT NOT NULL,
-        description TEXT,
-        image TEXT,
-        tech_stack TEXT[],
-        github_url TEXT,
-        live_url TEXT,
-        category TEXT DEFAULT 'web',
+        description TEXT NOT NULL,
+        category TEXT NOT NULL,
+        technologies TEXT[],
+        image TEXT NOT NULL,
+        featured BOOLEAN DEFAULT false,
+        "order" INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -48,11 +48,12 @@ async function initializeDatabase() {
       CREATE TABLE IF NOT EXISTS testimonials (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
-        role TEXT NOT NULL,
-        company TEXT,
-        content TEXT NOT NULL,
-        rating INTEGER DEFAULT 5,
-        avatar TEXT,
+        company TEXT NOT NULL,
+        position TEXT,
+        avatar TEXT NOT NULL,
+        message TEXT NOT NULL,
+        rating INTEGER NOT NULL,
+        "order" INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);

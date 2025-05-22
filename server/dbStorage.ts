@@ -214,7 +214,7 @@ export class DatabaseStorage implements IStorage {
     
     if (existingSettings) {
       const [updatedSettings] = await db.update(siteSettings)
-        .set({ ...settings, updatedAt: new Date() })
+        .set(settings)
         .where(eq(siteSettings.id, existingSettings.id))
         .returning();
       
