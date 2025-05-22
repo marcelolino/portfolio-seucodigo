@@ -227,7 +227,7 @@ export class DatabaseStorage implements IStorage {
     // Verifica se já existem dados
     const usersCount = await db.select({ count: db.fn.count() }).from(users);
     
-    if (usersCount[0].count === '0') {
+    if (!usersCount[0] || usersCount[0].count === '0') {
       // Cria admin
       const adminPassword = await hashPassword('admin123');
       await this.createUser({
