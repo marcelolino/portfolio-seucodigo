@@ -4,7 +4,7 @@ import { RemixIcon } from "@/components/ui/remixicon";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
 
-type AdminSection = "dashboard" | "projects" | "services" | "testimonials" | "chat" | "users" | "settings";
+type AdminSection = "dashboard" | "projects" | "services" | "testimonials" | "chat" | "contacts" | "users" | "settings";
 
 interface AdminSidebarProps {
   activeSection: AdminSection;
@@ -74,6 +74,13 @@ export function AdminSidebar({ activeSection, setActiveSection, closeSidebar }: 
           onClick={() => handleSectionChange("chat")}
         >
           <RemixIcon name="ri-message-3-line mr-2" /> Chat
+        </Button>
+        <Button
+          variant={activeSection === "contacts" ? "secondary" : "ghost"}
+          className={`w-full justify-start ${activeSection === "contacts" ? "" : "text-gray-300 hover:text-white"}`}
+          onClick={() => handleSectionChange("contacts")}
+        >
+          <RemixIcon name="ri-mail-open-line mr-2" /> Caixa de Entrada
         </Button>
         <Button
           variant={activeSection === "users" ? "secondary" : "ghost"}

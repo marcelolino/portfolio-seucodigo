@@ -4,6 +4,7 @@ import { AdminProjects } from "@/components/admin/admin-projects-new";
 import { AdminServices } from "@/components/admin/admin-services";
 import { AdminTestimonials } from "@/components/admin/admin-testimonials";
 import { AdminChat } from "@/components/admin/admin-chat";
+import { AdminContacts } from "@/components/admin/admin-contacts";
 import { AdminUsers } from "@/components/admin/admin-users";
 import { AdminSettings } from "@/components/admin/admin-settings";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { RemixIcon } from "@/components/ui/remixicon";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
 
-type AdminSection = "dashboard" | "projects" | "services" | "testimonials" | "chat" | "users" | "settings";
+type AdminSection = "dashboard" | "projects" | "services" | "testimonials" | "chat" | "contacts" | "users" | "settings";
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -28,6 +29,8 @@ export default function AdminPage() {
         return <AdminTestimonials />;
       case "chat":
         return <AdminChat />;
+      case "contacts":
+        return <AdminContacts />;
       case "users":
         return <AdminUsers />;
       case "settings":
@@ -87,7 +90,8 @@ function AdminDashboard() {
     services: 4,
     testimonials: 4,
     users: 1,
-    chatMessages: 0
+    chatMessages: 0,
+    contacts: 0
   });
 
   return (
