@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminProjects } from "@/components/admin/admin-projects-new";
 import { AdminServices } from "@/components/admin/admin-services";
@@ -85,14 +85,58 @@ export default function AdminPage() {
 
 function AdminDashboard() {
   const { user } = useAuth();
-  const [stats] = useState({
-    projects: 6,
-    services: 4,
-    testimonials: 4,
-    users: 1,
+  const [stats, setStats] = useState({
+    projects: 0,
+    services: 0,
+    testimonials: 0,
+    users: 0,
     chatMessages: 0,
     contacts: 0
   });
+  
+  // Buscar os dados do dashboard
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        // Projetos
+        const projectsRes = await fetch('/api/projects');
+        const projects = await projectsRes.json();
+        
+        // Serviços
+        const servicesRes = await fetch('/api/services');
+        const services = await servicesRes.json();
+        
+        // Depoimentos
+        const testimonialsRes = await fetch('/api/testimonials');
+        const testimonials = await testimonialsRes.json();
+        
+        // Contatos
+        const contactsRes = await fetch('/api/contacts');
+        const contacts = await contactsRes.json();
+        
+        // Usuários (apenas admin)
+        const usersRes = await fetch('/api/users');
+        const users = usersRes.ok ? await usersRes.json() : [];
+        
+        // Mensagens
+        const messagesRes = await fetch('/api/messages');
+        const messages = messagesRes.ok ? await messagesRes.json() : [];
+        
+        setStats({
+          projects: projects.length || 0,
+          services: services.length || 0,
+          testimonials: testimonials.length || 0,
+          users: users.length || 0,
+          chatMessages: messages.length || 0,
+          contacts: contacts.length || 0
+        });
+      } catch (error) {
+        console.error("Erro ao buscar estatísticas:", error);
+      }
+    };
+    
+    fetchCounts();
+  }, []);
 
   return (
     <div>
@@ -165,6 +209,17 @@ function AdminDashboard() {
           <p className="text-3xl font-bold mt-2">{stats.chatMessages}</p>
           <p className="text-gray-500 text-sm mt-1">Total de mensagens no chat</p>
         </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-lg">Contatos</h3>
+            <div className="p-2 bg-teal-100 text-teal-600 rounded-full">
+              <RemixIcon name="ri-mail-open-line text-xl" />
+            </div>
+          </div>
+          <p className="text-3xl font-bold mt-2">{stats.contacts}</p>
+          <p className="text-gray-500 text-sm mt-1">Mensagens de contato recebidas</p>
+        </div>
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -181,6 +236,9 @@ function AdminDashboard() {
           </Button>
           <Button onClick={() => window.location.href="/admin?section=chat"} className="flex items-center justify-center gap-2 h-auto py-4">
             <RemixIcon name="ri-chat-check-line" /> Atender Chat
+          </Button>
+          <Button onClick={() => window.location.href="/admin?section=contacts"} className="flex items-center justify-center gap-2 h-auto py-4">
+            <RemixIcon name="ri-mail-open-line" /> Ver Mensagens de Contato
           </Button>
         </div>
       </div>
