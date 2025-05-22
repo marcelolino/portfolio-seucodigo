@@ -40,7 +40,7 @@ export const testimonials = pgTable("testimonials", {
   company: text("company").notNull(),
   position: text("position"),
   avatar: text("avatar").notNull(),
-  content: text("content").notNull(),
+  message: text("message").notNull(), // Alterado de content para message para corresponder ao banco
   rating: integer("rating").notNull(),
   order: integer("order").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),

@@ -168,12 +168,21 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
-    const [message] = await db.insert(messages).values({
-      ...insertMessage,
-      isAdmin: insertMessage.isAdmin || false,
-      isRead: false
-    }).returning();
-    return message;
+    try {
+      // Transformando as chaves para corresponder com a estrutura do banco
+      const messageData = {
+        user_id: insertMessage.userId,
+        content: insertMessage.content,
+        is_admin: insertMessage.isAdmin || false,
+        read: false  // usando "read" em vez de "isRead"
+      };
+      
+      const [message] = await db.insert(messages).values(messageData).returning();
+      return message;
+    } catch (error) {
+      console.error("Erro ao criar mensagem:", error);
+      throw error;
+    }
   }
   
   // Contacts

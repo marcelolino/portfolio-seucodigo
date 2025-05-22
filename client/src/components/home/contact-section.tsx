@@ -6,13 +6,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useMutation } from "@tanstack/react-query";
-import { InsertContact } from "@shared/schema";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { InsertContact, SiteSettings } from "@shared/schema";
 import { contactFormSchema } from "@shared/schema";
 import { z } from "zod";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function ContactSection() {
   const { toast } = useToast();
+  
+  // Carregar configurações do site
+  const { data: settings, isLoading: isLoadingSettings } = useQuery<SiteSettings>({
+    queryKey: ["/api/settings"],
+  });
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -170,7 +176,11 @@ export function ContactSection() {
                 </div>
                 <div>
                   <h4 className="font-medium">Endereço</h4>
-                  <p className="text-gray-600">São Paulo, SP - Brasil</p>
+                  {isLoadingSettings ? (
+                    <Skeleton className="h-5 w-48" />
+                  ) : (
+                    <p className="text-gray-600">{settings?.address || 'São Paulo, SP - Brasil'}</p>
+                  )}
                 </div>
               </div>
               
@@ -180,7 +190,11 @@ export function ContactSection() {
                 </div>
                 <div>
                   <h4 className="font-medium">Email</h4>
-                  <p className="text-gray-600">contato@seucodigo.com</p>
+                  {isLoadingSettings ? (
+                    <Skeleton className="h-5 w-48" />
+                  ) : (
+                    <p className="text-gray-600">{settings?.contactEmail || 'contato@seucodigo.com'}</p>
+                  )}
                 </div>
               </div>
               
@@ -190,7 +204,11 @@ export function ContactSection() {
                 </div>
                 <div>
                   <h4 className="font-medium">Telefone</h4>
-                  <p className="text-gray-600">(11) 9999-8888</p>
+                  {isLoadingSettings ? (
+                    <Skeleton className="h-5 w-48" />
+                  ) : (
+                    <p className="text-gray-600">{settings?.contactPhone || '(11) 9999-8888'}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -198,24 +216,32 @@ export function ContactSection() {
             <div className="mt-8">
               <h4 className="font-semibold mb-4">Siga-me nas redes sociais</h4>
               <div className="flex space-x-4">
-                <a href="#" className="text-gray-600 hover:text-primary transition-colors">
-                  <RemixIcon name="ri-github-fill text-2xl" />
-                </a>
-                <a href="#" className="text-gray-600 hover:text-primary transition-colors">
-                  <RemixIcon name="ri-linkedin-box-fill text-2xl" />
-                </a>
-                <a href="#" className="text-gray-600 hover:text-primary transition-colors">
-                  <RemixIcon name="ri-twitter-fill text-2xl" />
-                </a>
-                <a href="#" className="text-gray-600 hover:text-primary transition-colors">
-                  <RemixIcon name="ri-instagram-fill text-2xl" />
-                </a>
+                {settings?.github && (
+                  <a href={settings.github} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-primary transition-colors">
+                    <RemixIcon name="ri-github-fill text-2xl" />
+                  </a>
+                )}
+                {settings?.linkedin && (
+                  <a href={settings.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-primary transition-colors">
+                    <RemixIcon name="ri-linkedin-box-fill text-2xl" />
+                  </a>
+                )}
+                {settings?.twitter && (
+                  <a href={settings.twitter} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-primary transition-colors">
+                    <RemixIcon name="ri-twitter-fill text-2xl" />
+                  </a>
+                )}
+                {settings?.instagram && (
+                  <a href={settings.instagram} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-primary transition-colors">
+                    <RemixIcon name="ri-instagram-fill text-2xl" />
+                  </a>
+                )}
               </div>
             </div>
             
             <div className="mt-8">
               <a 
-                href="https://wa.me/5511999988888" 
+                href={settings?.whatsapp ? `https://wa.me/${settings.whatsapp.replace(/\D/g, '')}` : 'https://wa.me/5511999988888'} 
                 className="flex items-center justify-center gap-2 font-medium text-white bg-green-500 hover:bg-green-600 transition-colors px-6 py-3 rounded-md"
                 target="_blank"
                 rel="noopener noreferrer"
