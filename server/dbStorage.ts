@@ -1,6 +1,6 @@
 import { User, InsertUser, Project, InsertProject, Service, InsertService, Testimonial, InsertTestimonial, Message, InsertMessage, Contact, InsertContact, SiteSettings, InsertSiteSettings } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { users, projects, services, testimonials, messages, contacts, siteSettings } from "@shared/schema";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
@@ -205,41 +205,67 @@ export class DatabaseStorage implements IStorage {
   
   // Site Settings
   async getSiteSettings(): Promise<SiteSettings | undefined> {
-    const allSettings = await db.select().from(siteSettings);
-    return allSettings[0];
+    try {
+      const allSettings = await db.execute(sql`SELECT * FROM site_settings LIMIT 1`);
+      return allSettings.rows[0] as SiteSettings;
+    } catch (error) {
+      console.error("Erro ao buscar configurações:", error);
+      return undefined;
+    }
   }
   
   async updateSiteSettings(settings: Partial<InsertSiteSettings>): Promise<SiteSettings> {
-    const existingSettings = await this.getSiteSettings();
-    
-    if (existingSettings) {
-      const [updatedSettings] = await db.update(siteSettings)
-        .set(settings)
-        .where(eq(siteSettings.id, existingSettings.id))
-        .returning();
+    try {
+      const existingSettings = await this.getSiteSettings();
       
-      return updatedSettings;
-    } else {
-      // Se não existe configurações, cria uma nova
-      const defaultSettings: InsertSiteSettings = {
-        siteName: settings.siteName || "SeuCodigo",
-        siteTitle: settings.siteTitle || "Portfólio & Serviços",
-        contactEmail: settings.contactEmail || "contato@seucodigo.com",
-        contactPhone: settings.contactPhone,
-        address: settings.address,
-        logo: settings.logo,
-        github: settings.github,
-        linkedin: settings.linkedin,
-        twitter: settings.twitter,
-        instagram: settings.instagram,
-        whatsapp: settings.whatsapp,
-      };
-      
-      const [newSettings] = await db.insert(siteSettings)
-        .values(defaultSettings)
-        .returning();
-      
-      return newSettings;
+      if (existingSettings) {
+        // Usar SQL direto para evitar problemas de schema
+        const result = await db.execute(sql`
+          UPDATE site_settings 
+          SET 
+            site_name = COALESCE(${settings.siteName}, site_name),
+            site_title = COALESCE(${settings.siteTitle}, site_title),
+            contact_email = COALESCE(${settings.contactEmail}, contact_email),
+            contact_phone = COALESCE(${settings.contactPhone}, contact_phone),
+            address = COALESCE(${settings.address}, address),
+            logo = COALESCE(${settings.logo}, logo),
+            github = COALESCE(${settings.github}, github),
+            linkedin = COALESCE(${settings.linkedin}, linkedin),
+            twitter = COALESCE(${settings.twitter}, twitter),
+            instagram = COALESCE(${settings.instagram}, instagram),
+            whatsapp = COALESCE(${settings.whatsapp}, whatsapp)
+          WHERE id = ${existingSettings.id}
+          RETURNING *
+        `);
+        
+        return result.rows[0] as SiteSettings;
+      } else {
+        // Criar novas configurações usando SQL direto
+        const result = await db.execute(sql`
+          INSERT INTO site_settings (
+            site_name, site_title, contact_email, contact_phone, address,
+            logo, github, linkedin, twitter, instagram, whatsapp
+          ) VALUES (
+            ${settings.siteName || 'SeuCodigo'},
+            ${settings.siteTitle || 'Desenvolvedor Full Stack'},
+            ${settings.contactEmail || 'contato@seucodigo.com'},
+            ${settings.contactPhone || '(11) 9999-8888'},
+            ${settings.address || 'São Paulo, SP - Brasil'},
+            ${settings.logo || ''},
+            ${settings.github || ''},
+            ${settings.linkedin || ''},
+            ${settings.twitter || ''},
+            ${settings.instagram || ''},
+            ${settings.whatsapp || ''}
+          )
+          RETURNING *
+        `);
+        
+        return result.rows[0] as SiteSettings;
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar configurações:", error);
+      throw new Error("Erro ao atualizar configurações do site");
     }
   }
   
