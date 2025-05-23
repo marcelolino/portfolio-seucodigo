@@ -56,11 +56,7 @@ export function Header() {
             <a href="#contato" className="text-white hover:text-primary transition-colors">Contato</a>
             
             {user ? (
-              <Link href="/admin">
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
-                  Painel Admin
-                </Button>
-              </Link>
+              <UserProfileDropdown />
             ) : (
               <Link href="/auth">
                 <Button variant="outline" className="border-[#00A8E8] text-[#00A8E8] hover:bg-[#00A8E8] hover:text-white">
@@ -119,15 +115,9 @@ export function Header() {
             </a>
             
             {user ? (
-              <Link href="/admin">
-                <Button 
-                  variant="outline" 
-                  className="border-primary text-primary hover:bg-primary hover:text-white"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Painel Admin
-                </Button>
-              </Link>
+              <div onClick={() => setMenuOpen(false)}>
+                <UserProfileDropdown />
+              </div>
             ) : (
               <Link href="/auth">
                 <Button 

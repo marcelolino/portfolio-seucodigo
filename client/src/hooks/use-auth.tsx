@@ -66,8 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/user"], user);
       toast({
         title: "Login realizado com sucesso",
-        description: `Bem-vindo, ${user.name}!`,
+        description: `Bem-vindo de volta, ${user.name}!`,
       });
+      // Redirecionar para home após login bem-sucedido
+      window.location.href = "/";
     },
     onError: (error: Error) => {
       toast({
@@ -87,8 +89,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/user"], user);
       toast({
         title: "Cadastro realizado com sucesso",
-        description: `Bem-vindo, ${user.name}!`,
+        description: `Bem-vindo, ${user.name}! Você foi automaticamente logado.`,
       });
+      // Redirecionar para home após cadastro bem-sucedido
+      window.location.href = "/";
     },
     onError: (error: Error) => {
       toast({
