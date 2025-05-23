@@ -1,0 +1,46 @@
+dynamic-header.tsx:59 
+ Uncaught ReferenceError: UserProfileDropdown is not defined
+    at Header (dynamic-header.tsx:59:16)
+react-dom.development.js:86 
+ Warning: validateDOMNesting(...): <div> cannot appear as a descendant of <p>.
+    at div
+    at Skeleton (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.dev/src/components/ui/skeleton.tsx:19:3)
+    at p
+    at div
+    at div
+    at div
+    at footer
+    at Footer (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.dev/src/components/layout/dynamic-footer.tsx:23:41)
+    at HomePage (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.dev/src/pages/home-page.tsx:29:20)
+    at Route (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e23fbab8:323:16)
+    at Switch (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e23fbab8:379:17)
+    at Router
+    at Provider (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.…unner/workspace/node_modules/.vite/deps/chunk-5AJU3CG7.js?v=e23fbab8:38:15)
+    at TooltipProvider (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=e23fbab8:63:5)
+    at AuthProvider (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.dev/src/hooks/use-auth.tsx:26:32)
+    at App
+    at AuthProvider (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.dev/src/hooks/use-auth.tsx?v=0B4zNk2yghRLV_4ADzYkn:26:32)
+    at QueryClientProvider (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=e23fbab8:2805:3)
+dynamic-header.tsx:59 
+ Uncaught ReferenceError: UserProfileDropdown is not defined
+    at Header (dynamic-header.tsx:59:16)
+react-dom.development.js:18704 
+ The above error occurred in the <Header> component:
+
+    at Header (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.dev/src/components/layout/dynamic-header.tsx:26:20)
+    at HomePage (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.dev/src/pages/home-page.tsx:29:20)
+    at Route (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e23fbab8:323:16)
+    at Switch (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e23fbab8:379:17)
+    at Router
+    at Provider (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.…unner/workspace/node_modules/.vite/deps/chunk-5AJU3CG7.js?v=e23fbab8:38:15)
+    at TooltipProvider (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=e23fbab8:63:5)
+    at AuthProvider (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.dev/src/hooks/use-auth.tsx:26:32)
+    at App
+    at AuthProvider (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.dev/src/hooks/use-auth.tsx?v=0B4zNk2yghRLV_4ADzYkn:26:32)
+    at QueryClientProvider (https://cfb2799a-f151-4678-921d-94f5d6a5f4a2-00-1iw08tq9u8i7z.riker.replit.…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=e23fbab8:2805:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+react-dom.development.js:12056 
+ Uncaught ReferenceError: UserProfileDropdown is not defined
+    at Header (dynamic-header.tsx:59:16)
