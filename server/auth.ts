@@ -22,12 +22,6 @@ export async function hashPassword(password: string) {
 }
 
 export async function comparePasswords(supplied: string, stored: string) {
-  // Verificar se é um hash antigo (bcrypt) e permitir comparação
-  if (stored.startsWith('$2b$') || stored.startsWith('$2a$')) {
-    // Para compatibilidade com senhas antigas, vamos permitir login com senha padrão
-    return supplied === 'admin123';
-  }
-  
   const parts = stored.split(".");
   if (parts.length !== 2) {
     return false;
