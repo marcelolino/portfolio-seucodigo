@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { WebSocketServer, WebSocket } from "ws";
 import { z } from "zod";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 import { 
   insertContactSchema, 
   insertProjectSchema, 
