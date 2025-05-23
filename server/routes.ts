@@ -409,6 +409,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Erro ao buscar usuários" });
     }
   });
+
+  // Update user profile
+  app.put("/api/profile", checkAuth, async (req, res) => {
+    try {
+      const { name, email, username, avatar } = req.body;
+      const userId = req.user!.id;
+      
+      // Check if email or username is already taken by another user
+      const existingUserByEmail = await storage.getUserByEmail(email);
+      if (existingUserByEmail && existingUserByEmail.id !== userId) {
+        return res.status(400).json({ message: "Email já está em uso por outro usuário" });
+      }
+      
+      const existingUserByUsername = await storage.getUserByUsername(username);
+      if (existingUserByUsername && existingUserByUsername.id !== userId) {
+        return res.status(400).json({ message: "Username já está em uso por outro usuário" });
+      }
+      
+      // Update user profile
+      const updatedUser = await storage.updateUser(userId, {
+        name,
+        email,
+        username,
+        avatar: avatar || null
+      });
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      // Remove password from response
+      const { password, ...userResponse } = updatedUser;
+      res.json(userResponse);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Erro ao atualizar perfil" });
+    }
+  });
   
   // Create HTTP server for WebSocket
   const httpServer = createServer(app);

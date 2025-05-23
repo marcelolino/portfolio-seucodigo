@@ -111,7 +111,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/user"], null);
       toast({
         title: "Logout realizado com sucesso",
+        description: "Você foi desconectado com sucesso!",
       });
+      // Redirecionar para home após logout
+      window.location.href = "/";
     },
     onError: (error: Error) => {
       toast({

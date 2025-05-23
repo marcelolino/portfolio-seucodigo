@@ -83,13 +83,15 @@ export function UserProfileDropdown() {
             {/* Menu Items */}
             <div className="py-2">
               {/* Meu Perfil */}
-              <button
-                onClick={() => setIsOpen(false)}
-                className="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-              >
-                <User className="h-4 w-4" />
-                Meu Perfil
-              </button>
+              <Link href="/profile">
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                >
+                  <User className="h-4 w-4" />
+                  Meu Perfil
+                </button>
+              </Link>
 
               {/* Painel Admin (apenas para admins) */}
               {user.role === 'admin' && (
