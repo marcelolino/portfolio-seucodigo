@@ -124,7 +124,7 @@ async function seed() {
       company: "Silva & Associados",
       position: "Diretora de Marketing",
       avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-      content: "A equipe do SeuCodigo entregou nosso projeto antes do prazo e com qualidade excepcional. O processo foi transparente do início ao fim, e estamos extremamente satisfeitos com o resultado.",
+      message: "A equipe do SeuCodigo entregou nosso projeto antes do prazo e com qualidade excepcional. O processo foi transparente do início ao fim, e estamos extremamente satisfeitos com o resultado.",
       rating: 5,
       order: 1
     },
@@ -133,7 +133,7 @@ async function seed() {
       company: "Oliveira Tech",
       position: "CEO",
       avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-      content: "Após tentativas frustradas com outras empresas, finalmente encontramos uma solução que realmente funciona! O sistema desenvolvido pelo SeuCodigo aumentou nossa produtividade em 40%.",
+      message: "Após tentativas frustradas com outras empresas, finalmente encontramos uma solução que realmente funciona! O sistema desenvolvido pelo SeuCodigo aumentou nossa produtividade em 40%.",
       rating: 5,
       order: 2
     },
@@ -142,7 +142,7 @@ async function seed() {
       company: "Santos Imóveis",
       position: "Gerente de Operações",
       avatar: "https://randomuser.me/api/portraits/women/3.jpg",
-      content: "O atendimento consultivo fez toda diferença no nosso projeto. Eles não apenas implementaram o que pedimos, mas sugeriram melhorias que nem tínhamos considerado.",
+      message: "O atendimento consultivo fez toda diferença no nosso projeto. Eles não apenas implementaram o que pedimos, mas sugeriram melhorias que nem tínhamos considerado.",
       rating: 4,
       order: 3
     },
@@ -151,7 +151,7 @@ async function seed() {
       company: "Ferreira Comércio",
       position: "Proprietário",
       avatar: "https://randomuser.me/api/portraits/men/4.jpg",
-      content: "Nosso e-commerce cresceu 300% após a implementação das melhorias sugeridas pela equipe. Especialmente as otimizações de SEO e performance que fizeram toda a diferença.",
+      message: "Nosso e-commerce cresceu 300% após a implementação das melhorias sugeridas pela equipe. Especialmente as otimizações de SEO e performance que fizeram toda a diferença.",
       rating: 5,
       order: 4
     },
@@ -160,7 +160,7 @@ async function seed() {
       company: "Mendes Consultoria",
       position: "Consultora Sênior",
       avatar: "https://randomuser.me/api/portraits/women/5.jpg",
-      content: "A manutenção mensal tem sido essencial para manter nosso site sempre atualizado e seguro. O suporte é rápido e as atualizações são implementadas sem interromper nossos serviços.",
+      message: "A manutenção mensal tem sido essencial para manter nosso site sempre atualizado e seguro. O suporte é rápido e as atualizações são implementadas sem interromper nossos serviços.",
       rating: 4,
       order: 5
     }
