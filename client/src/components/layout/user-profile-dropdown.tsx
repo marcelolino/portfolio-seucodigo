@@ -34,7 +34,7 @@ export function UserProfileDropdown() {
         className="flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-colors"
       >
         <Avatar className="h-8 w-8">
-          <AvatarImage src={user.avatar} alt={user.name} />
+          <AvatarImage src={user.avatar || undefined} alt={user.name} />
           <AvatarFallback className="bg-primary text-white text-sm font-semibold">
             {getInitials(user.name)}
           </AvatarFallback>
@@ -58,7 +58,7 @@ export function UserProfileDropdown() {
             <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage src={user.avatar ?? undefined} alt={user.name} />
                   <AvatarFallback className="bg-primary text-white">
                     {getInitials(user.name)}
                   </AvatarFallback>
