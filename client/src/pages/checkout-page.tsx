@@ -14,8 +14,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { RemixIcon } from "@/components/ui/remixicon";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Project, Service, insertOrderSchema } from "@shared/schema";
+import { PaymentMethods } from "@/components/checkout/payment-methods";
+import StripeCheckout from "@/components/checkout/stripe-checkout";
+import MercadoPagoCheckout from "@/components/checkout/mercadopago-checkout";
 
 // Schema para validação do formulário de checkout
 const checkoutSchema = z.object({
@@ -37,6 +40,10 @@ export default function CheckoutPage() {
   const { toast } = useToast();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [step, setStep] = useState<"form" | "payment" | "processing">("form");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"stripe" | "mercadopago" | "">("");
+  const [createdOrderId, setCreatedOrderId] = useState<number | null>(null);
+  const [orderAmount, setOrderAmount] = useState<number>(0);
 
   // Obter parâmetros da URL
   const urlParams = new URLSearchParams(window.location.search);
@@ -71,42 +78,42 @@ export default function CheckoutPage() {
   // Mutation para criar pedido
   const createOrderMutation = useMutation({
     mutationFn: async (data: CheckoutFormData) => {
+      // Calcular valor total
+      let totalValue = 0;
+      if (selectedProject?.price) {
+        totalValue = parseFloat(selectedProject.price);
+      } else if (selectedService?.price) {
+        totalValue = parseFloat(selectedService.price.toString());
+      } else if (data.budget) {
+        totalValue = parseFloat(data.budget);
+      }
+
       const orderData = {
-        customerName: data.customerName,
-        customerEmail: data.customerEmail,
-        customerPhone: data.customerPhone,
-        customerCompany: data.customerCompany || null,
+        clientName: data.customerName,
+        clientEmail: data.customerEmail,
+        clientPhone: data.customerPhone,
         projectId: selectedProject?.id || null,
         serviceId: selectedService?.id || null,
         projectTitle: selectedProject?.title || (data.projectDescription || "Projeto Personalizado"),
-        projectDescription: data.projectDescription,
+        description: data.projectDescription,
         budget: data.budget,
-        totalValue: selectedService?.price || data.budget,
+        totalValue: totalValue.toString(),
         deadline: data.deadline,
-        status: "Pendente" as const,
-        priority: data.priority,
-        observations: data.observations || null,
+        priority: data.priority.toLowerCase(),
+        notes: data.observations || null,
       };
 
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
-      });
-      
-      if (!response.ok) {
-        throw new Error("Erro ao criar pedido");
-      }
-      
+      const response = await apiRequest("POST", "/api/orders", orderData);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (order) => {
+      setCreatedOrderId(order.id);
+      setOrderAmount(parseFloat(order.totalValue));
+      setStep("payment");
       toast({
         title: "Pedido criado com sucesso!",
-        description: "Entraremos em contato em breve para discutir os detalhes do seu projeto.",
+        description: "Agora escolha o método de pagamento para finalizar.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
-      setLocation("/");
     },
     onError: () => {
       toast({
@@ -139,6 +146,23 @@ export default function CheckoutPage() {
     createOrderMutation.mutate(data);
   };
 
+  const handlePaymentMethodSelect = (method: "stripe" | "mercadopago") => {
+    setSelectedPaymentMethod(method);
+  };
+
+  const handleProceedToPayment = () => {
+    if (!selectedPaymentMethod) return;
+    setStep("processing");
+  };
+
+  const handlePaymentSuccess = () => {
+    toast({
+      title: "Pagamento realizado com sucesso!",
+      description: "Obrigado pela confiança. Entraremos em contato em breve.",
+    });
+    setLocation("/");
+  };
+
   return (
     <div className="min-h-screen bg-background py-12">
       <div className="container mx-auto px-4 max-w-4xl">
@@ -151,61 +175,67 @@ export default function CheckoutPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Resumo do Pedido */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <RemixIcon name="ri-shopping-bag-line" />
-                  Resumo do Pedido
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {selectedProject && (
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2">Projeto Selecionado</h4>
-                    <div className="p-3 bg-secondary/10 rounded-lg">
-                      <h5 className="font-medium">{selectedProject.title}</h5>
-                      <p className="text-sm text-foreground/70 mt-1">{selectedProject.category}</p>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {selectedProject.technologies.slice(0, 3).map((tech, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {tech}
-                          </Badge>
-                        ))}
+        {step === "form" && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Resumo do Pedido */}
+            <div className="lg:col-span-1">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <RemixIcon name="ri-shopping-bag-line" />
+                    Resumo do Pedido
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {selectedProject && (
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-2">Projeto Selecionado</h4>
+                      <div className="p-3 bg-secondary/10 rounded-lg">
+                        <h5 className="font-medium">{selectedProject.title}</h5>
+                        <p className="text-sm text-foreground/70 mt-1">{selectedProject.category}</p>
+                        {selectedProject.price && (
+                          <p className="text-sm font-medium text-green-600 mt-1">
+                            R$ {parseFloat(selectedProject.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </p>
+                        )}
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {selectedProject.technologies.slice(0, 3).map((tech, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {tech}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {selectedService && (
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2">Serviço Selecionado</h4>
-                    <div className="p-3 bg-secondary/10 rounded-lg">
-                      <h5 className="font-medium">{selectedService.title}</h5>
-                      <p className="text-sm text-foreground/70 mt-1">
-                        R$ {parseFloat(selectedService.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </p>
+                  {selectedService && (
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-2">Serviço Selecionado</h4>
+                      <div className="p-3 bg-secondary/10 rounded-lg">
+                        <h5 className="font-medium">{selectedService.title}</h5>
+                        <p className="text-sm text-foreground/70 mt-1">
+                          R$ {parseFloat(selectedService.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <Separator />
+                  
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-foreground/70">Tipo:</span>
+                      <span>{selectedProject ? 'Projeto' : selectedService ? 'Serviço' : 'Personalizado'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-foreground/70">Status:</span>
+                      <Badge variant="outline">Orçamento</Badge>
                     </div>
                   </div>
-                )}
-
-                <Separator />
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-foreground/70">Tipo:</span>
-                    <span>{selectedProject ? 'Projeto' : selectedService ? 'Serviço' : 'Personalizado'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-foreground/70">Status:</span>
-                    <Badge variant="outline">Orçamento</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+            </div>
 
           {/* Formulário */}
           <div className="lg:col-span-2">
