@@ -179,201 +179,6 @@ export default function CheckoutPage() {
 
         {step === "form" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Formulário de checkout */}
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Dados para Orçamento</CardTitle>
-                  <CardDescription>
-                    Preencha suas informações para recebermos um orçamento personalizado
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="customerName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Nome Completo *</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Seu nome completo" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="customerEmail"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email *</FormLabel>
-                              <FormControl>
-                                <Input type="email" placeholder="seu@email.com" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="customerPhone"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Telefone *</FormLabel>
-                              <FormControl>
-                                <Input placeholder="(11) 99999-9999" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="customerCompany"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Empresa (opcional)</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Nome da empresa" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <FormField
-                        control={form.control}
-                        name="projectDescription"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Descrição do Projeto *</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Descreva detalhadamente o que você precisa..."
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="budget"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Orçamento Estimado *</FormLabel>
-                              <FormControl>
-                                <Input placeholder="R$ 5.000,00" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="deadline"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Prazo Desejado *</FormLabel>
-                              <FormControl>
-                                <Input type="date" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <FormField
-                        control={form.control}
-                        name="priority"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Prioridade</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione a prioridade" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="Baixa">Baixa</SelectItem>
-                                <SelectItem value="Média">Média</SelectItem>
-                                <SelectItem value="Alta">Alta</SelectItem>
-                                <SelectItem value="Urgente">Urgente</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="observations"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Observações Adicionais</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Informações extras, referências, requisitos específicos..."
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="flex gap-4 pt-4">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="flex-1"
-                          onClick={() => setLocation("/")}
-                        >
-                          <RemixIcon name="ri-arrow-left-line" className="w-4 h-4 mr-2" />
-                          Voltar
-                        </Button>
-                        
-                        <Button
-                          type="submit"
-                          className="flex-1 bg-accent hover:bg-accent/80"
-                          disabled={createOrderMutation.isPending}
-                        >
-                          {createOrderMutation.isPending ? (
-                            <>
-                              <RemixIcon name="ri-loader-4-line" className="w-4 h-4 mr-2 animate-spin" />
-                              Enviando...
-                            </>
-                          ) : (
-                            <>
-                              <RemixIcon name="ri-send-plane-line" className="w-4 h-4 mr-2" />
-                              Solicitar Orçamento
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-            </div>
-
             {/* Resumo do Pedido */}
             <div className="lg:col-span-1">
               <Card>
@@ -433,6 +238,216 @@ export default function CheckoutPage() {
                 </CardContent>
               </Card>
             </div>
+
+          {/* Formulário */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Dados para Orçamento</CardTitle>
+                <CardDescription>
+                  Preencha suas informações para recebermos um orçamento personalizado
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                    {/* Dados do Cliente */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Dados de Contato</h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="customerName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nome Completo *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Seu nome completo" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="customerEmail"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email *</FormLabel>
+                              <FormControl>
+                                <Input type="email" placeholder="seu@email.com" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="customerPhone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Telefone *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="(11) 99999-9999" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="customerCompany"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Empresa (opcional)</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Nome da empresa" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Detalhes do Projeto */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Detalhes do Projeto</h3>
+                      
+                      <FormField
+                        control={form.control}
+                        name="projectDescription"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Descrição do Projeto *</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Descreva detalhadamente o que você precisa..."
+                                className="min-h-[120px]"
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="budget"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Orçamento Estimado *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="R$ 5.000,00" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="deadline"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Prazo Desejado *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="30 dias" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="priority"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Prioridade</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Selecione a prioridade" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="Baixa">Baixa</SelectItem>
+                                  <SelectItem value="Média">Média</SelectItem>
+                                  <SelectItem value="Alta">Alta</SelectItem>
+                                  <SelectItem value="Urgente">Urgente</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <FormField
+                        control={form.control}
+                        name="observations"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Observações Adicionais</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Informações extras, referências, requisitos específicos..."
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <Separator />
+
+                    {/* Botões de Ação */}
+                    <div className="flex gap-4 pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setLocation("/")}
+                      >
+                        <RemixIcon name="ri-arrow-left-line" className="w-4 h-4 mr-2" />
+                        Voltar
+                      </Button>
+                      
+                      <Button
+                        type="submit"
+                        className="flex-1 bg-accent hover:bg-accent/80"
+                        disabled={createOrderMutation.isPending}
+                      >
+                        {createOrderMutation.isPending ? (
+                          <>
+                            <RemixIcon name="ri-loader-4-line" className="w-4 h-4 mr-2 animate-spin" />
+                            Enviando...
+                          </>
+                        ) : (
+                          <>
+                            <RemixIcon name="ri-send-plane-line" className="w-4 h-4 mr-2" />
+                            Solicitar Orçamento
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
           </div>
         )}
 

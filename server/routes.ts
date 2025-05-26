@@ -542,6 +542,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Erro ao atualizar perfil" });
     }
   });
+
+  // Rotas de pagamento Stripe
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      if (!stripe) {
+        return res.status(400).json({ 
+          message: "Stripe não configurado. Configure as chaves do Stripe para aceitar pagamentos." 
+        });
+      }
+
+      const { amount, orderId } = req.body;
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "brl",
+        metadata: {
+          orderId: orderId.toString()
+        },
+      });
+
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+      console.error("Erro ao criar payment intent:", error);
+      res.status(500).json({ 
+        message: "Erro ao criar intenção de pagamento: " + error.message 
+      });
+    }
+  });
+
+  // Rotas de pagamento Mercado Pago
+  app.post("/api/create-mercadopago-preference", async (req, res) => {
+    try {
+      const { amount, orderId } = req.body;
+      
+      // Simulação de preferência do Mercado Pago
+      // Em produção, use a SDK do Mercado Pago
+      const preference = {
+        preferenceId: `MP-${Date.now()}-${orderId}`,
+        amount: amount,
+        orderId: orderId
+      };
+
+      res.json({ preferenceId: preference.preferenceId });
+    } catch (error: any) {
+      console.error("Erro ao criar preferência Mercado Pago:", error);
+      res.status(500).json({ 
+        message: "Erro ao criar preferência de pagamento: " + error.message 
+      });
+    }
+  });
+
+  // Webhook do Stripe para confirmar pagamentos
+  app.post("/api/stripe-webhook", async (req, res) => {
+    try {
+      const event = req.body;
+      
+      if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object;
+        const orderId = paymentIntent.metadata.orderId;
+        
+        // Atualizar status do pedido
+        await db.execute(sql`
+          UPDATE orders 
+          SET payment_status = 'completed', payment_method = 'stripe', payment_id = ${paymentIntent.id}
+          WHERE id = ${parseInt(orderId)}
+        `);
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error("Erro no webhook Stripe:", error);
+      res.status(400).json({ message: "Erro no webhook" });
+    }
+  });
   
   // Create HTTP server for WebSocket
   const httpServer = createServer(app);
