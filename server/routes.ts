@@ -11,7 +11,8 @@ import {
   insertProjectSchema, 
   insertServiceSchema, 
   insertTestimonialSchema,
-  insertSiteSettingsSchema
+  insertSiteSettingsSchema,
+  insertOrderSchema
 } from "@shared/schema";
 
 interface WebSocketMessage {
@@ -290,6 +291,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
       }
       res.status(500).json({ message: "Erro ao enviar mensagem de contato" });
+    }
+  });
+
+  app.get("/api/contacts", checkAdmin, async (req, res) => {
+    try {
+      const contacts = await storage.getContacts();
+      res.json(contacts);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar contatos" });
+    }
+  });
+
+  // Orders
+  app.get("/api/orders", checkAdmin, async (req, res) => {
+    try {
+      const orders = await storage.getOrders();
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar pedidos" });
+    }
+  });
+
+  app.get("/api/orders/:id", checkAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const order = await storage.getOrder(id);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Pedido não encontrado" });
+      }
+      
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar pedido" });
+    }
+  });
+
+  app.post("/api/orders", async (req, res) => {
+    try {
+      const orderData = insertOrderSchema.parse(req.body);
+      const order = await storage.createOrder(orderData);
+      res.status(201).json(order);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      }
+      res.status(500).json({ message: "Erro ao criar pedido" });
+    }
+  });
+
+  app.put("/api/orders/:id", checkAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const orderData = insertOrderSchema.parse(req.body);
+      const order = await storage.updateOrder(id, orderData);
+      
+      if (!order) {
+        return res.status(404).json({ message: "Pedido não encontrado" });
+      }
+      
+      res.json(order);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      }
+      res.status(500).json({ message: "Erro ao atualizar pedido" });
+    }
+  });
+
+  app.delete("/api/orders/:id", checkAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteOrder(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Pedido não encontrado" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao deletar pedido" });
     }
   });
   
