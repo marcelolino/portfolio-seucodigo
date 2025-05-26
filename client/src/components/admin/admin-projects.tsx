@@ -33,7 +33,8 @@ export function AdminProjects() {
     technologies: [],
     image: "",
     featured: false,
-    order: 0
+    order: 0,
+    price: "0"
   });
   
   const [technologyInput, setTechnologyInput] = useState("");
@@ -245,9 +246,9 @@ export function AdminProjects() {
               <CardContent>
                 <p className="text-sm text-gray-600 mb-4">{project.description}</p>
                 <div className="flex flex-wrap gap-2 mb-2">
-                  {project.tags.map((tag, index) => (
+                  {project.technologies.map((tech, index) => (
                     <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800">
-                      {tag}
+                      {tech}
                     </Badge>
                   ))}
                 </div>
@@ -327,6 +328,23 @@ export function AdminProjects() {
               />
               {formErrors.image && (
                 <p className="text-red-500 text-sm">{formErrors.image}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="price">Valor do Projeto (R$)</Label>
+              <Input
+                id="price"
+                name="price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.price || ""}
+                onChange={handleChange}
+                placeholder="0.00"
+                className={formErrors.price ? "border-red-500" : ""}
+              />
+              {formErrors.price && (
+                <p className="text-red-500 text-sm">{formErrors.price}</p>
               )}
             </div>
             <div className="space-y-2">

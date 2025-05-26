@@ -22,6 +22,7 @@ export const projects = pgTable("projects", {
   image: text("image").notNull(),
   featured: boolean("featured").default(false),
   order: integer("order").default(0),
+  price: numeric("price", { precision: 10, scale: 2 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -98,6 +99,9 @@ export const orders = pgTable("orders", {
   priority: text("priority").notNull().default("medium"), // low, medium, high, urgent
   notes: text("notes"),
   totalValue: numeric("total_value", { precision: 10, scale: 2 }),
+  paymentMethod: text("payment_method"), // stripe, mercadopago
+  paymentStatus: text("payment_status").default("pending"), // pending, processing, completed, failed
+  paymentId: text("payment_id"), // ID do pagamento no gateway
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
