@@ -343,13 +343,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/orders", async (req, res) => {
     try {
-      const orderData = insertOrderSchema.parse(req.body);
+      // Preparar dados do pedido com campos obrigatórios
+      const orderData = {
+        clientName: req.body.clientName,
+        clientEmail: req.body.clientEmail,
+        clientPhone: req.body.clientPhone || null,
+        projectId: req.body.projectId || null,
+        serviceId: req.body.serviceId || null,
+        projectTitle: req.body.projectTitle || null,
+        description: req.body.description,
+        budget: req.body.budget || null,
+        totalValue: req.body.totalValue || null,
+        deadline: req.body.deadline || null,
+        priority: req.body.priority || "medium",
+        notes: req.body.notes || null,
+        paymentMethod: req.body.paymentMethod || null,
+        paymentStatus: "pending",
+        paymentId: req.body.paymentId || null
+      };
+      
       const order = await storage.createOrder(orderData);
       res.status(201).json(order);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
-      }
+      console.error("Erro ao criar pedido:", error);
       res.status(500).json({ message: "Erro ao criar pedido" });
     }
   });
