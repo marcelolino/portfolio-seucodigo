@@ -6,7 +6,7 @@ export const seedUsers: InsertUser[] = [
     name: "Admin",
     username: "admin",
     email: "admin@seucodigo.com",
-    password: "", // Será definido durante a execução
+    password: "admin123", // Será definido durante a execução
     role: "admin"
   },
   {
