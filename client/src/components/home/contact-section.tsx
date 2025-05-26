@@ -237,7 +237,7 @@ export function ContactSection() {
                   {isLoadingSettings ? (
                     <Skeleton className="h-5 w-48 bg-secondary/20" />
                   ) : (
-                    <p className="text-foreground/70">{settings?.contactPhone || '(11) 9999-8888'}</p>
+                    <p className="text-foreground/70">{settings?.contactPhone || '(62) 3202-8119'}</p>
                   )}
                 </div>
               </div>
