@@ -1,7 +1,7 @@
-import { User, InsertUser, Project, InsertProject, Service, InsertService, Testimonial, InsertTestimonial, Message, InsertMessage, Contact, InsertContact, SiteSettings, InsertSiteSettings } from "@shared/schema";
+import { User, InsertUser, Project, InsertProject, Service, InsertService, Testimonial, InsertTestimonial, Message, InsertMessage, Contact, InsertContact, SiteSettings, InsertSiteSettings, Order, InsertOrder } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
-import { users, projects, services, testimonials, messages, contacts, siteSettings } from "@shared/schema";
+import { users, projects, services, testimonials, messages, contacts, siteSettings, orders } from "@shared/schema";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -210,6 +210,38 @@ export class DatabaseStorage implements IStorage {
       isRead: false
     }).returning();
     return contact;
+  }
+
+  // Orders
+  async getOrder(id: number): Promise<Order | undefined> {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    return order;
+  }
+
+  async getOrders(): Promise<Order[]> {
+    return await db.select().from(orders).orderBy(desc(orders.createdAt));
+  }
+
+  async createOrder(insertOrder: InsertOrder): Promise<Order> {
+    const [order] = await db.insert(orders).values({
+      ...insertOrder,
+      status: insertOrder.status || "pending",
+      priority: insertOrder.priority || "medium"
+    }).returning();
+    return order;
+  }
+
+  async updateOrder(id: number, orderData: Partial<InsertOrder>): Promise<Order | undefined> {
+    const [order] = await db.update(orders)
+      .set({ ...orderData, updatedAt: new Date() })
+      .where(eq(orders.id, id))
+      .returning();
+    return order;
+  }
+
+  async deleteOrder(id: number): Promise<boolean> {
+    const result = await db.delete(orders).where(eq(orders.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
   }
   
   // Site Settings

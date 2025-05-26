@@ -1,5 +1,5 @@
-import { users, projects, services, testimonials, messages, contacts, siteSettings } from "@shared/schema";
-import type { User, InsertUser, Project, InsertProject, Service, InsertService, Testimonial, InsertTestimonial, Message, InsertMessage, Contact, InsertContact, SiteSettings, InsertSiteSettings } from "@shared/schema";
+import { users, projects, services, testimonials, messages, contacts, siteSettings, orders } from "@shared/schema";
+import type { User, InsertUser, Project, InsertProject, Service, InsertService, Testimonial, InsertTestimonial, Message, InsertMessage, Contact, InsertContact, SiteSettings, InsertSiteSettings, Order, InsertOrder } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 import session from "express-session";
@@ -50,6 +50,13 @@ export interface IStorage {
   getContact(id: number): Promise<Contact | undefined>;
   getContacts(): Promise<Contact[]>;
   createContact(contact: InsertContact): Promise<Contact>;
+  
+  // Orders
+  getOrder(id: number): Promise<Order | undefined>;
+  getOrders(): Promise<Order[]>;
+  createOrder(order: InsertOrder): Promise<Order>;
+  updateOrder(id: number, order: Partial<InsertOrder>): Promise<Order | undefined>;
+  deleteOrder(id: number): Promise<boolean>;
   
   // Session store
   sessionStore: session.SessionStore;

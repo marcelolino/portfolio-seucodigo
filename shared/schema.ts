@@ -83,6 +83,25 @@ export const siteSettings = pgTable("site_settings", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  clientName: text("client_name").notNull(),
+  clientEmail: text("client_email").notNull(),
+  clientPhone: text("client_phone"),
+  projectId: integer("project_id").references(() => projects.id),
+  serviceId: integer("service_id").references(() => services.id),
+  projectTitle: text("project_title"), // Para projetos customizados
+  description: text("description").notNull(),
+  budget: numeric("budget", { precision: 10, scale: 2 }),
+  deadline: timestamp("deadline"),
+  status: text("status").notNull().default("pending"), // pending, approved, in_progress, completed, cancelled
+  priority: text("priority").notNull().default("medium"), // low, medium, high, urgent
+  notes: text("notes"),
+  totalValue: numeric("total_value", { precision: 10, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -119,6 +138,12 @@ export const insertSiteSettingsSchema = createInsertSchema(siteSettings).omit({
   updatedAt: true,
 });
 
+export const insertOrderSchema = createInsertSchema(orders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -141,6 +166,9 @@ export type Contact = typeof contacts.$inferSelect;
 export type InsertSiteSettings = z.infer<typeof insertSiteSettingsSchema>;
 export type SiteSettings = typeof siteSettings.$inferSelect;
 
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
+export type Order = typeof orders.$inferSelect;
+
 // Extended schemas for validation
 export const loginSchema = z.object({
   username: z.string().min(1, "Nome de usuário é obrigatório"),
@@ -155,3 +183,17 @@ export const registerSchema = insertUserSchema.extend({
 });
 
 export const contactFormSchema = insertContactSchema;
+
+export const orderFormSchema = insertOrderSchema.extend({
+  clientEmail: z.string().email("Email inválido"),
+  budget: z.string().optional(),
+  totalValue: z.string().optional(),
+}).refine(data => {
+  if (!data.projectId && !data.serviceId && !data.projectTitle) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Selecione um projeto, serviço ou defina um título personalizado",
+  path: ["projectId"],
+});
