@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Service } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProductCard } from "@/components/cart/product-card";
 
 export function ServicesSection() {
   const { data: services, isLoading } = useQuery<Service[]>({
@@ -37,44 +38,24 @@ export function ServicesSection() {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {isLoading ? (
-            Array(4).fill(0).map((_, index) => (
+            Array(3).fill(0).map((_, index) => (
               <div key={index} className="bg-background/80 border border-secondary/30 rounded-lg p-6">
-                <Skeleton className="h-12 w-12 mb-4 rounded-full bg-secondary/20" />
+                <Skeleton className="h-48 w-full mb-4 rounded-lg bg-secondary/20" />
                 <Skeleton className="h-6 w-3/4 mb-3 bg-secondary/20" />
                 <Skeleton className="h-4 w-full mb-2 bg-secondary/20" />
                 <Skeleton className="h-4 w-full mb-2 bg-secondary/20" />
-                <Skeleton className="h-4 w-2/3 mb-4 bg-secondary/20" />
-                <Skeleton className="h-4 w-1/3 bg-secondary/20" />
+                <Skeleton className="h-10 w-full bg-secondary/20" />
               </div>
             ))
           ) : (
             services?.map((service) => (
-              <div 
-                key={service.id} 
-                className="bg-background/60 backdrop-blur-sm border border-secondary/30 rounded-lg p-6 hover:border-accent/50 transition-all duration-300 group relative"
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-accent/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
-                <div className="text-secondary text-4xl mb-4 group-hover:text-accent transition-colors relative z-10 neon-glow">
-                  <RemixIcon name={service.icon} />
-                </div>
-                <h3 className="text-xl font-semibold mb-3 text-foreground relative z-10">{service.title}</h3>
-                <p className="text-foreground/70 mb-4 relative z-10">{service.description}</p>
-                <div className="flex items-center justify-between relative z-10">
-                  <span className="text-accent font-bold text-lg">
-                    R$ {parseFloat(service.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                  <Button 
-                    size="sm"
-                    className="bg-accent hover:bg-accent/80 text-white neon-button"
-                    onClick={() => window.location.href = `/checkout?service=${service.id}`}
-                  >
-                    <RemixIcon name="ri-shopping-cart-line" className="w-4 h-4 mr-1" />
-                    Contratar
-                  </Button>
-                </div>
-              </div>
+              <ProductCard 
+                key={service.id}
+                item={service}
+                type="service"
+              />
             ))
           )}
         </div>

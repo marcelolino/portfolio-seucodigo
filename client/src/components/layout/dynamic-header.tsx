@@ -57,6 +57,8 @@ export function Header() {
             <a href="#depoimentos" className="text-white hover:text-primary transition-colors">Depoimentos</a>
             <a href="#contato" className="text-white hover:text-primary transition-colors">Contato</a>
             
+            <CartButton />
+            
             {user ? (
               <UserProfileDropdown />
             ) : (
@@ -115,6 +117,10 @@ export function Header() {
             >
               Contato
             </a>
+            
+            <div onClick={() => setMenuOpen(false)}>
+              <CartButton />
+            </div>
             
             {user ? (
               <div onClick={() => setMenuOpen(false)}>
