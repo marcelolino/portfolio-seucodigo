@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { UserProfileDropdown } from "./user-profile-dropdown";
+import { CartButton } from "@/components/cart/cart-button";
 import { RemixIcon } from "@/components/ui/remixicon";
 import { useQuery } from "@tanstack/react-query";
 import { SiteSettings } from "@shared/schema";

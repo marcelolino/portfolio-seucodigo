@@ -9,6 +9,7 @@ import AdminPage from "@/pages/admin-page";
 import ProfilePage from "@/pages/profile-page";
 import CheckoutPage from "@/pages/checkout-page";
 import { AuthProvider } from "./hooks/use-auth";
+import { CartProvider } from "./hooks/use-cart";
 
 function Router() {
   return (
@@ -26,10 +27,12 @@ function Router() {
 function App() {
   return (
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <CartProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </CartProvider>
     </AuthProvider>
   );
 }
