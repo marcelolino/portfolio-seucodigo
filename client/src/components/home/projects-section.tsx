@@ -84,9 +84,19 @@ export function ProjectsSection() {
                       </Badge>
                     ))}
                   </div>
-                  <a href="#" className="text-secondary hover:text-accent font-medium flex items-center gap-1 group-hover:neon-text">
-                    Ver detalhes <RemixIcon name="ri-arrow-right-line" className="transition-transform group-hover:translate-x-1"/>
-                  </a>
+                  <div className="flex items-center justify-between">
+                    <a href="#" className="text-secondary hover:text-accent font-medium flex items-center gap-1 group-hover:neon-text">
+                      Ver detalhes <RemixIcon name="ri-arrow-right-line" className="transition-transform group-hover:translate-x-1"/>
+                    </a>
+                    <Button 
+                      size="sm"
+                      className="bg-accent hover:bg-accent/80 text-white neon-button"
+                      onClick={() => window.location.href = `/checkout?project=${project.id}`}
+                    >
+                      <RemixIcon name="ri-shopping-cart-line" className="w-4 h-4 mr-1" />
+                      Fazer Pedido
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))

@@ -1,4 +1,5 @@
 import { RemixIcon } from "@/components/ui/remixicon";
+import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Service } from "@shared/schema";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -60,9 +61,19 @@ export function ServicesSection() {
                 </div>
                 <h3 className="text-xl font-semibold mb-3 text-foreground relative z-10">{service.title}</h3>
                 <p className="text-foreground/70 mb-4 relative z-10">{service.description}</p>
-                <a href="#" className="text-secondary hover:text-accent font-medium flex items-center gap-1 relative z-10 group-hover:neon-text">
-                  Saiba mais <RemixIcon name="ri-arrow-right-line" />
-                </a>
+                <div className="flex items-center justify-between relative z-10">
+                  <span className="text-accent font-bold text-lg">
+                    R$ {parseFloat(service.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </span>
+                  <Button 
+                    size="sm"
+                    className="bg-accent hover:bg-accent/80 text-white neon-button"
+                    onClick={() => window.location.href = `/checkout?service=${service.id}`}
+                  >
+                    <RemixIcon name="ri-shopping-cart-line" className="w-4 h-4 mr-1" />
+                    Contratar
+                  </Button>
+                </div>
               </div>
             ))
           )}
