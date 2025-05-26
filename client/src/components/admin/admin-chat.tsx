@@ -184,7 +184,6 @@ export function AdminChat() {
         <h1 className="text-2xl font-bold">Chat com Clientes</h1>
         <p className="text-gray-600">Gerencie as conversas com os usuários.</p>
       </header>
-
       <div className="flex h-[calc(100vh-10rem)] bg-white rounded-lg shadow-sm overflow-hidden">
         {/* User list sidebar */}
         <div className="w-80 border-r flex flex-col">
@@ -345,12 +344,12 @@ export function AdminChat() {
                 </div>
               </ScrollArea>
 
-              <form onSubmit={handleSendMessage} className="p-4 border-t flex">
+              <form onSubmit={handleSendMessage} className="p-4 border-t flex text-[#ffffff]">
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Digite sua mensagem..."
-                  className="flex-1 mr-2"
+                  className="flex-1 mr-2 bg-[#6178fa]"
                   disabled={!chatConnected}
                 />
                 <Button
