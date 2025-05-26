@@ -56,11 +56,13 @@ export function AdminOrders() {
   // Mutation para criar pedido
   const createMutation = useMutation({
     mutationFn: async (data: InsertOrder) => {
-      return await apiRequest("/api/orders", {
+      const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+      if (!response.ok) throw new Error("Erro ao criar pedido");
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
@@ -83,11 +85,13 @@ export function AdminOrders() {
   // Mutation para atualizar pedido
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: InsertOrder }) => {
-      return await apiRequest(`/api/orders/${id}`, {
+      const response = await fetch(`/api/orders/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+      if (!response.ok) throw new Error("Erro ao atualizar pedido");
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
@@ -111,9 +115,11 @@ export function AdminOrders() {
   // Mutation para deletar pedido
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/orders/${id}`, {
+      const response = await fetch(`/api/orders/${id}`, {
         method: "DELETE",
       });
+      if (!response.ok) throw new Error("Erro ao deletar pedido");
+      return response.ok;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });

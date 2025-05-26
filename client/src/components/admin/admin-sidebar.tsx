@@ -109,6 +109,17 @@ export function AdminSidebar({ activeSection, setActiveSection, closeSidebar }: 
         <Button
           variant="ghost"
           className={`admin-sidebar-item w-full justify-start ${
+            activeSection === "orders" 
+              ? "admin-sidebar-item active bg-[#00A8E8] text-white" 
+              : "text-[#4D4D4D] hover:bg-[#F8F9FA] hover:text-[#1A1A1A]"
+          }`}
+          onClick={() => handleSectionChange("orders")}
+        >
+          <RemixIcon name="ri-shopping-cart-line mr-2" /> Pedidos
+        </Button>
+        <Button
+          variant="ghost"
+          className={`admin-sidebar-item w-full justify-start ${
             activeSection === "users" 
               ? "admin-sidebar-item active bg-[#00A8E8] text-white" 
               : "text-[#4D4D4D] hover:bg-[#F8F9FA] hover:text-[#1A1A1A]"
