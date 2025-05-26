@@ -168,10 +168,12 @@ export default function CheckoutPage() {
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-4">
-            Finalizar Pedido
+            {step === "form" ? "Finalizar Pedido" : step === "payment" ? "Escolha o Método de Pagamento" : "Processando Pagamento"}
           </h1>
           <p className="text-foreground/70">
-            Preencha os dados abaixo para solicitar seu orçamento personalizado
+            {step === "form" ? "Preencha os dados abaixo para solicitar seu orçamento personalizado" : 
+             step === "payment" ? "Selecione como deseja pagar seu pedido" : 
+             "Finalize seu pagamento com segurança"}
           </p>
         </div>
 
@@ -447,7 +449,37 @@ export default function CheckoutPage() {
               </CardContent>
             </Card>
           </div>
-        </div>
+        )}
+
+        {step === "payment" && createdOrderId && (
+          <div className="max-w-2xl mx-auto">
+            <PaymentMethods
+              onMethodSelect={handlePaymentMethodSelect}
+              onProceedToPayment={handleProceedToPayment}
+              selectedMethod={selectedPaymentMethod}
+              amount={orderAmount}
+            />
+          </div>
+        )}
+
+        {step === "processing" && createdOrderId && selectedPaymentMethod && (
+          <div className="max-w-2xl mx-auto">
+            {selectedPaymentMethod === "stripe" && (
+              <StripeCheckout
+                orderId={createdOrderId}
+                amount={orderAmount}
+                onSuccess={handlePaymentSuccess}
+              />
+            )}
+            {selectedPaymentMethod === "mercadopago" && (
+              <MercadoPagoCheckout
+                orderId={createdOrderId}
+                amount={orderAmount}
+                onSuccess={handlePaymentSuccess}
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
