@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
-import { AdminProjects } from "@/components/admin/admin-projects-new";
+import { ProjectsAdmin } from "@/components/admin/projects-admin";
 import { AdminServices } from "@/components/admin/admin-services";
 import { AdminTestimonials } from "@/components/admin/admin-testimonials";
 import { AdminChat } from "@/components/admin/admin-chat";
@@ -25,7 +25,7 @@ export default function AdminPage() {
   const renderContent = () => {
     switch (activeSection) {
       case "projects":
-        return <AdminProjects />;
+        return <ProjectsAdmin />;
       case "services":
         return <AdminServices />;
       case "testimonials":

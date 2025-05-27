@@ -20,9 +20,11 @@ export const projects = pgTable("projects", {
   category: text("category").notNull(),
   technologies: text("technologies").array().notNull(),
   image: text("image").notNull(),
+  imageUrl: text("image_url"),
   featured: boolean("featured").default(false),
   order: integer("order").default(0),
   price: numeric("price", { precision: 10, scale: 2 }),
+  status: text("status").notNull().default("active"), // active, inactive, in_progress, completed
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
