@@ -133,312 +133,332 @@ export function PaymentMethodsAdmin() {
     );
   }
 
+  const currentMethod = selectedProvider === "stripe" ? stripeMethod : mercadoPagoMethod;
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Métodos de Pagamento</h2>
-          <p className="text-muted-foreground">
-            Configure os métodos de pagamento disponíveis na sua plataforma
-          </p>
+    <div className="h-full flex bg-gray-50">
+      {/* Header */}
+      <div className="absolute top-0 left-0 right-0 bg-white border-b px-6 py-4 z-10">
+        <h1 className="text-xl font-semibold text-gray-900">Métodos de Pagamento</h1>
+      </div>
+
+      {/* Sidebar */}
+      <div className="w-80 bg-white border-r pt-20">
+        <div className="p-4">
+          <div className="space-y-2">
+            <Button
+              variant={selectedProvider === "paypal" ? "default" : "ghost"}
+              className="w-full justify-start text-left h-auto py-3 px-4"
+              onClick={() => setSelectedProvider("paypal")}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">P</span>
+                </div>
+                <span>Paypal</span>
+              </div>
+            </Button>
+            
+            <Button
+              variant={selectedProvider === "stripe" ? "default" : "ghost"}
+              className="w-full justify-start text-left h-auto py-3 px-4"
+              onClick={() => setSelectedProvider("stripe")}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-purple-600 rounded flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">S</span>
+                </div>
+                <span>Stripe</span>
+              </div>
+            </Button>
+            
+            <Button
+              variant={selectedProvider === "razorpay" ? "default" : "ghost"}
+              className="w-full justify-start text-left h-auto py-3 px-4"
+              onClick={() => setSelectedProvider("razorpay")}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-500 rounded flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">R</span>
+                </div>
+                <span>Razorpay</span>
+              </div>
+            </Button>
+            
+            <Button
+              variant={selectedProvider === "flutterwave" ? "default" : "ghost"}
+              className="w-full justify-start text-left h-auto py-3 px-4"
+              onClick={() => setSelectedProvider("flutterwave")}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">F</span>
+                </div>
+                <span>Flutterwave</span>
+              </div>
+            </Button>
+            
+            <Button
+              variant={selectedProvider === "mollie" ? "default" : "ghost"}
+              className="w-full justify-start text-left h-auto py-3 px-4"
+              onClick={() => setSelectedProvider("mollie")}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-black rounded flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">M</span>
+                </div>
+                <span>Mollie</span>
+              </div>
+            </Button>
+            
+            <Button
+              variant={selectedProvider === "mercadopago" ? "default" : "ghost"}
+              className="w-full justify-start text-left h-auto py-3 px-4"
+              onClick={() => setSelectedProvider("mercadopago")}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-400 rounded flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">MP</span>
+                </div>
+                <span>PayStack</span>
+              </div>
+            </Button>
+            
+            <Button
+              variant={selectedProvider === "instamojo" ? "default" : "ghost"}
+              className="w-full justify-start text-left h-auto py-3 px-4"
+              onClick={() => setSelectedProvider("instamojo")}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-pink-500 rounded flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">I</span>
+                </div>
+                <span>Instamojo</span>
+              </div>
+            </Button>
+            
+            <Button
+              variant={selectedProvider === "banktransfer" ? "default" : "ghost"}
+              className="w-full justify-start text-left h-auto py-3 px-4"
+              onClick={() => setSelectedProvider("banktransfer")}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gray-600 rounded flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">B</span>
+                </div>
+                <span>Bank Account</span>
+              </div>
+            </Button>
+            
+            <Button
+              variant={selectedProvider === "sslcommerz" ? "default" : "ghost"}
+              className="w-full justify-start text-left h-auto py-3 px-4"
+              onClick={() => setSelectedProvider("sslcommerz")}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-green-600 rounded flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">S</span>
+                </div>
+                <span>Sslcommerz</span>
+              </div>
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Stripe Configuration */}
-        {stripeMethod && (
-          <Card>
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
+      {/* Main Content */}
+      <div className="flex-1 pt-20">
+        {selectedProvider === "stripe" && stripeMethod && (
+          <div className="p-6">
+            <div className="max-w-2xl">
+              {/* Status Toggle */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-semibold">Status do Stripe</h2>
+                </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-8 bg-[#635BFF] rounded flex items-center justify-center">
-                    <span className="text-white font-bold text-xs">stripe</span>
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">Stripe</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Processamento global de pagamentos
-                    </p>
-                  </div>
+                  <Button
+                    variant={stripeMethod.enabled ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleUpdatePaymentMethod(stripeMethod, "enabled", true)}
+                  >
+                    Ativar
+                  </Button>
+                  <Button
+                    variant={!stripeMethod.enabled ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleUpdatePaymentMethod(stripeMethod, "enabled", false)}
+                  >
+                    Desativar
+                  </Button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={stripeMethod.enabled ? "default" : "secondary"}>
-                    {stripeMethod.enabled ? "Ativo" : "Inativo"}
-                  </Badge>
-                  <Switch
-                    checked={stripeMethod.enabled}
-                    onCheckedChange={(checked) => 
-                      handleUpdatePaymentMethod(stripeMethod, "enabled", checked)
-                    }
-                  />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="stripe-currency">Moeda</Label>
-                <Select
-                  value={stripeMethod.currency || "BRL"}
-                  onValueChange={(value) => 
-                    handleUpdatePaymentMethod(stripeMethod, "currency", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="BRL">Real Brasileiro (BRL)</SelectItem>
-                    <SelectItem value="USD">Dólar Americano (USD)</SelectItem>
-                    <SelectItem value="EUR">Euro (EUR)</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="stripe-public-key">Chave Pública</Label>
-                <div className="relative">
+              {/* Form Fields */}
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="stripe-key" className="text-sm font-medium text-gray-700">
+                    Chave do Stripe
+                  </Label>
                   <Input
-                    id="stripe-public-key"
-                    type={showSecrets["stripe-public"] ? "text" : "password"}
+                    id="stripe-key"
                     value={stripeMethod.publicKey || ""}
                     onChange={(e) => 
                       handleUpdatePaymentMethod(stripeMethod, "publicKey", e.target.value)
                     }
-                    placeholder="pk_test_..."
+                    placeholder="pk_test_TJBgDbPwm72JBTwJwxA2fRMwjJJqkwgbqOubibtRMmrnK1YBEBSKtjaiMc6GQnOpqGUBnP2gFgFB2DNt2qKcPlsqb300qQgN0QS3"
+                    className="font-mono text-sm"
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
-                    onClick={() => toggleSecret("stripe-public")}
-                  >
-                    {showSecrets["stripe-public"] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="stripe-secret-key">Chave Secreta</Label>
-                <div className="relative">
+                <div className="space-y-2">
+                  <Label htmlFor="stripe-secret" className="text-sm font-medium text-gray-700">
+                    Chave Secreta do Stripe
+                  </Label>
                   <Input
-                    id="stripe-secret-key"
-                    type={showSecrets["stripe-secret"] ? "text" : "password"}
+                    id="stripe-secret"
                     value={stripeMethod.secretKey || ""}
                     onChange={(e) => 
                       handleUpdatePaymentMethod(stripeMethod, "secretKey", e.target.value)
                     }
-                    placeholder="sk_test_..."
+                    placeholder="sk_test_51L8gJoSRrnr72JBTwJwJJzqkwgbqOubibtRMmrnK1YBEBSKtjaiMc6GQnOpqGUBnP2gFgFB2DNt2qKcPlsqb300qQgNkm"
+                    className="font-mono text-sm"
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
-                    onClick={() => toggleSecret("stripe-secret")}
+                </div>
+
+                <div className="space-y-4">
+                  <Label className="text-sm font-medium text-gray-700">
+                    Imagem Existente
+                  </Label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 h-12 bg-blue-600 rounded flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">stripe</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    Imagem Existente
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm">
+                      Escolher Arquivo
+                    </Button>
+                    <span className="text-sm text-gray-500">Nenhum arquivo escolhido</span>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+                    onClick={() => {
+                      toast({
+                        title: "Sucesso",
+                        description: "Configurações do Stripe atualizadas!",
+                      });
+                    }}
                   >
-                    {showSecrets["stripe-secret"] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    Atualizar
                   </Button>
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="stripe-webhook-secret">Webhook Secret</Label>
-                <div className="relative">
-                  <Input
-                    id="stripe-webhook-secret"
-                    type={showSecrets["stripe-webhook"] ? "text" : "password"}
-                    value={stripeMethod.webhookSecret || ""}
-                    onChange={(e) => 
-                      handleUpdatePaymentMethod(stripeMethod, "webhookSecret", e.target.value)
-                    }
-                    placeholder="whsec_..."
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
-                    onClick={() => toggleSecret("stripe-webhook")}
-                  >
-                    {showSecrets["stripe-webhook"] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-200">
-                  <Globe className="h-4 w-4" />
-                  <span>Aceita cartões internacionais e PIX</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
-        {/* Mercado Pago Configuration */}
-        {mercadoPagoMethod && (
-          <Card>
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
+        {selectedProvider === "mercadopago" && mercadoPagoMethod && (
+          <div className="p-6">
+            <div className="max-w-2xl">
+              {/* Status Toggle */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-semibold">Status do Mercado Pago</h2>
+                </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-8 bg-[#009EE3] rounded flex items-center justify-center">
-                    <span className="text-white font-bold text-xs">MP</span>
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">Mercado Pago</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Pagamentos para América Latina
-                    </p>
-                  </div>
+                  <Button
+                    variant={mercadoPagoMethod.enabled ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleUpdatePaymentMethod(mercadoPagoMethod, "enabled", true)}
+                  >
+                    Ativar
+                  </Button>
+                  <Button
+                    variant={!mercadoPagoMethod.enabled ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleUpdatePaymentMethod(mercadoPagoMethod, "enabled", false)}
+                  >
+                    Desativar
+                  </Button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={mercadoPagoMethod.enabled ? "default" : "secondary"}>
-                    {mercadoPagoMethod.enabled ? "Ativo" : "Inativo"}
-                  </Badge>
-                  <Switch
-                    checked={mercadoPagoMethod.enabled}
-                    onCheckedChange={(checked) => 
-                      handleUpdatePaymentMethod(mercadoPagoMethod, "enabled", checked)
-                    }
-                  />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="mp-currency">Moeda</Label>
-                <Select
-                  value={mercadoPagoMethod.currency || "BRL"}
-                  onValueChange={(value) => 
-                    handleUpdatePaymentMethod(mercadoPagoMethod, "currency", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="BRL">Real Brasileiro (BRL)</SelectItem>
-                    <SelectItem value="ARS">Peso Argentino (ARS)</SelectItem>
-                    <SelectItem value="MXN">Peso Mexicano (MXN)</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="mp-public-key">Chave Pública</Label>
-                <div className="relative">
+              {/* Form Fields */}
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="mp-public-key" className="text-sm font-medium text-gray-700">
+                    Chave Pública
+                  </Label>
                   <Input
                     id="mp-public-key"
-                    type={showSecrets["mp-public"] ? "text" : "password"}
                     value={mercadoPagoMethod.publicKey || ""}
                     onChange={(e) => 
                       handleUpdatePaymentMethod(mercadoPagoMethod, "publicKey", e.target.value)
                     }
                     placeholder="APP_USR_..."
+                    className="font-mono text-sm"
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
-                    onClick={() => toggleSecret("mp-public")}
-                  >
-                    {showSecrets["mp-public"] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="mp-secret-key">Access Token</Label>
-                <div className="relative">
+                <div className="space-y-2">
+                  <Label htmlFor="mp-access-token" className="text-sm font-medium text-gray-700">
+                    Access Token
+                  </Label>
                   <Input
-                    id="mp-secret-key"
-                    type={showSecrets["mp-secret"] ? "text" : "password"}
+                    id="mp-access-token"
                     value={mercadoPagoMethod.secretKey || ""}
                     onChange={(e) => 
                       handleUpdatePaymentMethod(mercadoPagoMethod, "secretKey", e.target.value)
                     }
                     placeholder="APP_USR_..."
+                    className="font-mono text-sm"
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
-                    onClick={() => toggleSecret("mp-secret")}
+                </div>
+
+                <div className="pt-4">
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+                    onClick={() => {
+                      toast({
+                        title: "Sucesso",
+                        description: "Configurações do Mercado Pago atualizadas!",
+                      });
+                    }}
                   >
-                    {showSecrets["mp-secret"] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    Atualizar
                   </Button>
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="mp-webhook-secret">Webhook Secret</Label>
-                <div className="relative">
-                  <Input
-                    id="mp-webhook-secret"
-                    type={showSecrets["mp-webhook"] ? "text" : "password"}
-                    value={mercadoPagoMethod.webhookSecret || ""}
-                    onChange={(e) => 
-                      handleUpdatePaymentMethod(mercadoPagoMethod, "webhookSecret", e.target.value)
-                    }
-                    placeholder="webhook_secret_..."
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
-                    onClick={() => toggleSecret("mp-webhook")}
-                  >
-                    {showSecrets["mp-webhook"] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
-                <div className="flex items-center gap-2 text-sm text-green-800 dark:text-green-200">
-                  <DollarSign className="h-4 w-4" />
-                  <span>PIX, boleto, cartões e saldo MP</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Help Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Key className="h-5 w-5" />
-            Como obter as chaves de API
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-semibold mb-2">Stripe</h4>
-              <ol className="text-sm text-muted-foreground space-y-1">
-                <li>1. Acesse o dashboard do Stripe</li>
-                <li>2. Vá em "Developers" → "API Keys"</li>
-                <li>3. Copie a chave pública e secreta</li>
-                <li>4. Configure webhooks em "Webhooks"</li>
-              </ol>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-semibold mb-2">Mercado Pago</h4>
-              <ol className="text-sm text-muted-foreground space-y-1">
-                <li>1. Acesse suas credenciais MP</li>
-                <li>2. Copie o Public Key e Access Token</li>
-                <li>3. Configure as notificações IPN</li>
-                <li>4. Teste em modo sandbox primeiro</li>
-              </ol>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        )}
+
+        {/* Default view for other providers */}
+        {!["stripe", "mercadopago"].includes(selectedProvider) && (
+          <div className="p-6">
+            <div className="max-w-2xl">
+              <div className="text-center py-12">
+                <h3 className="text-lg font-medium text-gray-500 mb-2">
+                  {selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1)}
+                </h3>
+                <p className="text-gray-400">
+                  Configuração em desenvolvimento
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
