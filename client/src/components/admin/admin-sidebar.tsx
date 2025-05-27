@@ -4,7 +4,7 @@ import { RemixIcon } from "@/components/ui/remixicon";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
 
-type AdminSection = "dashboard" | "projects" | "services" | "testimonials" | "chat" | "contacts" | "users" | "settings";
+type AdminSection = "dashboard" | "projects" | "services" | "testimonials" | "chat" | "contacts" | "orders" | "users" | "payment-methods" | "settings";
 
 interface AdminSidebarProps {
   activeSection: AdminSection;
@@ -127,6 +127,17 @@ export function AdminSidebar({ activeSection, setActiveSection, closeSidebar }: 
           onClick={() => handleSectionChange("users")}
         >
           <RemixIcon name="ri-user-line mr-2" /> Usuários
+        </Button>
+        <Button
+          variant="ghost"
+          className={`admin-sidebar-item w-full justify-start ${
+            activeSection === "payment-methods" 
+              ? "admin-sidebar-item active bg-[#00A8E8] text-white" 
+              : "text-[#4D4D4D] hover:bg-[#F8F9FA] hover:text-[#1A1A1A]"
+          }`}
+          onClick={() => handleSectionChange("payment-methods")}
+        >
+          <RemixIcon name="ri-bank-card-line mr-2" /> Métodos de Pagamento
         </Button>
         <Button
           variant="ghost"

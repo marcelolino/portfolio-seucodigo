@@ -470,4 +470,37 @@ export class DatabaseStorage implements IStorage {
       });
     }
   }
+
+  // Payment Methods
+  async getPaymentMethod(id: number): Promise<PaymentMethod | undefined> {
+    const [paymentMethod] = await db.select().from(paymentMethods).where(eq(paymentMethods.id, id));
+    return paymentMethod;
+  }
+
+  async getPaymentMethods(): Promise<PaymentMethod[]> {
+    return await db.select().from(paymentMethods).orderBy(paymentMethods.provider);
+  }
+
+  async getPaymentMethodByProvider(provider: string): Promise<PaymentMethod | undefined> {
+    const [paymentMethod] = await db.select().from(paymentMethods).where(eq(paymentMethods.provider, provider));
+    return paymentMethod;
+  }
+
+  async createPaymentMethod(insertPaymentMethod: InsertPaymentMethod): Promise<PaymentMethod> {
+    const [paymentMethod] = await db.insert(paymentMethods).values(insertPaymentMethod).returning();
+    return paymentMethod;
+  }
+
+  async updatePaymentMethod(id: number, paymentMethodData: Partial<InsertPaymentMethod>): Promise<PaymentMethod | undefined> {
+    const [paymentMethod] = await db.update(paymentMethods)
+      .set({ ...paymentMethodData, updatedAt: new Date() })
+      .where(eq(paymentMethods.id, id))
+      .returning();
+    return paymentMethod;
+  }
+
+  async deletePaymentMethod(id: number): Promise<boolean> {
+    const result = await db.delete(paymentMethods).where(eq(paymentMethods.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
 }

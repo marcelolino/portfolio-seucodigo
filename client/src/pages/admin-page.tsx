@@ -8,13 +8,14 @@ import { AdminContacts } from "@/components/admin/admin-contacts";
 import { AdminOrders } from "@/components/admin/admin-orders";
 import { AdminUsers } from "@/components/admin/admin-users";
 import { AdminSettings } from "@/components/admin/admin-settings";
+import { PaymentMethodsAdmin } from "@/components/admin/payment-methods-admin";
 import { Button } from "@/components/ui/button";
 import { RemixIcon } from "@/components/ui/remixicon";
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "wouter";
 import "@/styles/admin-theme.css";
 
-type AdminSection = "dashboard" | "projects" | "services" | "testimonials" | "chat" | "contacts" | "orders" | "users" | "settings";
+type AdminSection = "dashboard" | "projects" | "services" | "testimonials" | "chat" | "contacts" | "orders" | "users" | "payment-methods" | "settings";
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -37,6 +38,8 @@ export default function AdminPage() {
         return <AdminOrders />;
       case "users":
         return <AdminUsers />;
+      case "payment-methods":
+        return <PaymentMethodsAdmin />;
       case "settings":
         return <AdminSettings />;
       default:

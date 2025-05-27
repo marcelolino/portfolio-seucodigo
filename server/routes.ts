@@ -12,7 +12,8 @@ import {
   insertServiceSchema, 
   insertTestimonialSchema,
   insertSiteSettingsSchema,
-  insertOrderSchema
+  insertOrderSchema,
+  insertPaymentMethodSchema
 } from "@shared/schema";
 
 // Importar Stripe condicionalmente
@@ -745,6 +746,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
     });
+  });
+
+  // Payment Methods API routes
+  app.get("/api/payment-methods", checkAdmin, async (req, res) => {
+    try {
+      const paymentMethods = await storage.getPaymentMethods();
+      res.json(paymentMethods);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar métodos de pagamento" });
+    }
+  });
+
+  app.post("/api/payment-methods", checkAdmin, async (req, res) => {
+    try {
+      const data = insertPaymentMethodSchema.parse(req.body);
+      const paymentMethod = await storage.createPaymentMethod(data);
+      res.json(paymentMethod);
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      }
+      res.status(500).json({ message: "Erro ao criar método de pagamento" });
+    }
+  });
+
+  app.put("/api/payment-methods/:id", checkAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const data = req.body;
+      const paymentMethod = await storage.updatePaymentMethod(id, data);
+      
+      if (!paymentMethod) {
+        return res.status(404).json({ message: "Método de pagamento não encontrado" });
+      }
+      
+      res.json(paymentMethod);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao atualizar método de pagamento" });
+    }
+  });
+
+  app.delete("/api/payment-methods/:id", checkAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deletePaymentMethod(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Método de pagamento não encontrado" });
+      }
+      
+      res.json({ message: "Método de pagamento removido com sucesso" });
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao remover método de pagamento" });
+    }
   });
   
   return httpServer;
