@@ -6,117 +6,36 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { PaymentMethod, InsertPaymentMethod } from "@shared/schema";
-import { Loader2, CreditCard, DollarSign, Globe, Key, Eye, EyeOff, CheckCircle, AlertCircle, Settings } from "lucide-react";
+import { Loader2, CreditCard, DollarSign, Globe, Key, Settings, CheckCircle, AlertCircle } from "lucide-react";
 
 export function PaymentMethodsAdmin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedProvider, setSelectedProvider] = useState<string>("stripe");
-  const [showSecrets, setShowSecrets] = useState<{ [key: string]: boolean }>({});
 
   const { data: paymentMethods = [], isLoading } = useQuery<PaymentMethod[]>({
     queryKey: ["/api/payment-methods"],
   });
 
   const updatePaymentMethodMutation = useMutation({
-    mutationFn: (data: { id: number; updates: Partial<InsertPaymentMethod> }) =>
-      apiRequest("PUT", `/api/payment-methods/${data.id}`, data.updates),
+    mutationFn: async ({ id, updates }: { id: number; updates: Partial<InsertPaymentMethod> }) => {
+      const res = await apiRequest("PATCH", `/api/payment-methods/${id}`, updates);
+      return await res.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/payment-methods"] });
-      toast({
-        title: "Sucesso",
-        description: "Método de pagamento atualizado com sucesso!",
-      });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Erro",
-        description: "Erro ao atualizar método de pagamento",
+        description: error.message,
         variant: "destructive",
       });
     },
   });
-
-  const createPaymentMethodMutation = useMutation({
-    mutationFn: (data: InsertPaymentMethod) =>
-      apiRequest("POST", "/api/payment-methods", data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/payment-methods"] });
-      toast({
-        title: "Sucesso",
-        description: "Método de pagamento criado com sucesso!",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Erro ao criar método de pagamento",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Initialize payment methods if they don't exist
-  useEffect(() => {
-    const initializePaymentMethods = async () => {
-      if (paymentMethods.length === 0 && !isLoading) {
-        // Create default Stripe configuration
-        const stripeData: InsertPaymentMethod = {
-          provider: "stripe",
-          name: "Stripe",
-          enabled: false,
-          currency: "BRL",
-          publicKey: "",
-          secretKey: "",
-          webhookSecret: "",
-          logo: "https://stripe.com/img/v3/home/social.png",
-          config: JSON.stringify({
-            supportedPaymentMethods: ["card", "pix"]
-          })
-        };
-
-        // Create default Mercado Pago configuration
-        const mercadoPagoData: InsertPaymentMethod = {
-          provider: "mercadopago",
-          name: "Mercado Pago",
-          enabled: false,
-          currency: "BRL",
-          publicKey: "",
-          secretKey: "",
-          webhookSecret: "",
-          logo: "https://http2.mlstatic.com/frontend-assets/ui-navigation/5.18.9/mercadopago/logo__large_plus.png",
-          config: JSON.stringify({
-            supportedPaymentMethods: ["pix", "credit_card", "boleto"]
-          })
-        };
-
-        try {
-          await createPaymentMethodMutation.mutateAsync(stripeData);
-          await createPaymentMethodMutation.mutateAsync(mercadoPagoData);
-        } catch (error) {
-          console.error("Error initializing payment methods:", error);
-        }
-      }
-    };
-
-    initializePaymentMethods();
-  }, [paymentMethods, isLoading]);
-
-  const stripeMethod = paymentMethods.find(pm => pm.provider === "stripe");
-  const mercadoPagoMethod = paymentMethods.find(pm => pm.provider === "mercadopago");
-
-  const toggleSecret = (field: string) => {
-    setShowSecrets(prev => ({
-      ...prev,
-      [field]: !prev[field]
-    }));
-  };
 
   const handleUpdatePaymentMethod = (paymentMethod: PaymentMethod, field: string, value: any) => {
     updatePaymentMethodMutation.mutate({
@@ -133,7 +52,8 @@ export function PaymentMethodsAdmin() {
     );
   }
 
-  const currentMethod = selectedProvider === "stripe" ? stripeMethod : mercadoPagoMethod;
+  const stripeMethod = paymentMethods.find(pm => pm.provider === "stripe");
+  const mercadoPagoMethod = paymentMethods.find(pm => pm.provider === "mercadopago");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-6">
@@ -239,7 +159,6 @@ export function PaymentMethodsAdmin() {
                 </div>
               </div>
 
-              {/* Formulário com design moderno - Tema Azul */}
               <div className="space-y-6">
                 <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
                   <Label className="text-blue-800 font-semibold flex items-center gap-2 mb-2">
@@ -265,12 +184,11 @@ export function PaymentMethodsAdmin() {
                 </div>
 
                 <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                  <Label htmlFor="stripe-published-key" className="text-blue-800 font-semibold flex items-center gap-2 mb-2">
+                  <Label className="text-blue-800 font-semibold flex items-center gap-2 mb-2">
                     <Key className="w-4 h-4" />
                     Chave Pública *
                   </Label>
                   <Input
-                    id="stripe-published-key"
                     value={stripeMethod.publicKey || ""}
                     onChange={(e) => 
                       handleUpdatePaymentMethod(stripeMethod, "publicKey", e.target.value)
@@ -278,35 +196,6 @@ export function PaymentMethodsAdmin() {
                     placeholder="pk_test_TYooMQauvdEDq54NiTphI7jx"
                     className="border-blue-300 focus:border-blue-500 bg-white"
                   />
-                </div>
-
-                <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
-                  <Label className="text-amber-800 font-semibold flex items-center gap-2 mb-2">
-                    <Globe className="w-4 h-4" />
-                    Nome do Gateway
-                  </Label>
-                  <Input
-                    value="Stripe Payment Gateway"
-                    readOnly
-                    className="bg-amber-100 text-amber-800 border-amber-300"
-                  />
-                </div>
-
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                  <Label className="text-blue-800 font-semibold flex items-center gap-2 mb-2">
-                    <CreditCard className="w-4 h-4" />
-                    Logo do Gateway
-                  </Label>
-                  <div className="flex items-center gap-3">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                    >
-                      📁 Escolher Arquivo
-                    </Button>
-                    <span className="text-blue-600 text-sm">Formato: PNG, JPG (máx. 2MB)</span>
-                  </div>
                 </div>
 
                 <Button 
@@ -368,7 +257,6 @@ export function PaymentMethodsAdmin() {
                 </div>
               </div>
 
-              {/* Formulário com design moderno - Tema Verde */}
               <div className="space-y-6">
                 <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200">
                   <Label className="text-emerald-800 font-semibold flex items-center gap-2 mb-2">
@@ -408,50 +296,6 @@ export function PaymentMethodsAdmin() {
                   />
                 </div>
 
-                <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200">
-                  <Label className="text-emerald-800 font-semibold flex items-center gap-2 mb-2">
-                    <Globe className="w-4 h-4" />
-                    Public Key *
-                  </Label>
-                  <Input
-                    value={mercadoPagoMethod.publicKey || ""}
-                    onChange={(e) => 
-                      handleUpdatePaymentMethod(mercadoPagoMethod, "publicKey", e.target.value)
-                    }
-                    placeholder="APP_USR-xxxxxxxxxx-xxxxxx-xxxxxxxxxx"
-                    className="border-emerald-300 focus:border-emerald-500 bg-white"
-                  />
-                </div>
-
-                <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
-                  <Label className="text-amber-800 font-semibold flex items-center gap-2 mb-2">
-                    <Globe className="w-4 h-4" />
-                    Nome do Gateway
-                  </Label>
-                  <Input
-                    value="Mercado Pago"
-                    readOnly
-                    className="bg-amber-100 text-amber-800 border-amber-300"
-                  />
-                </div>
-
-                <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200">
-                  <Label className="text-emerald-800 font-semibold flex items-center gap-2 mb-2">
-                    <CreditCard className="w-4 h-4" />
-                    Logo do Gateway
-                  </Label>
-                  <div className="flex items-center gap-3">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="border-emerald-300 text-emerald-700 hover:bg-emerald-100"
-                    >
-                      📁 Escolher Arquivo
-                    </Button>
-                    <span className="text-emerald-600 text-sm">Formato: PNG, JPG (máx. 2MB)</span>
-                  </div>
-                </div>
-
                 <Button 
                   className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-3 shadow-lg transform hover:scale-105 transition-all duration-200"
                   onClick={() => {
@@ -465,94 +309,6 @@ export function PaymentMethodsAdmin() {
                 </Button>
               </div>
             </CardContent>
-          </Card>
-        )}
-      </div>
-    </div>
-              <div>
-                <Select
-                  value={mercadoPagoMethod.config ? JSON.parse(mercadoPagoMethod.config).mode || "test" : "test"}
-                  onValueChange={(value) => {
-                    const config = mercadoPagoMethod.config ? JSON.parse(mercadoPagoMethod.config) : {};
-                    config.mode = value;
-                    handleUpdatePaymentMethod(mercadoPagoMethod, "config", JSON.stringify(config));
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o modo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="test">Test</SelectItem>
-                    <SelectItem value="live">Live</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="mp-access-token" className="text-sm font-medium text-gray-700">
-                  Access Token *
-                </Label>
-                <Input
-                  id="mp-access-token"
-                  value={mercadoPagoMethod.secretKey || ""}
-                  onChange={(e) => 
-                    handleUpdatePaymentMethod(mercadoPagoMethod, "secretKey", e.target.value)
-                  }
-                  placeholder="Access Token *"
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="mp-public-key" className="text-sm font-medium text-gray-700">
-                  Public Key *
-                </Label>
-                <Input
-                  id="mp-public-key"
-                  value={mercadoPagoMethod.publicKey || ""}
-                  onChange={(e) => 
-                    handleUpdatePaymentMethod(mercadoPagoMethod, "publicKey", e.target.value)
-                  }
-                  placeholder="Public Key *"
-                  className="mt-1"
-                />
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-gray-700 bg-yellow-100 px-2 py-1 rounded">
-                  Payment Gateway Title
-                </Label>
-                <Input
-                  value="Mercadopago"
-                  readOnly
-                  className="mt-1 bg-gray-50"
-                />
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-gray-700">
-                  Logo
-                </Label>
-                <div className="flex items-center gap-2 mt-1">
-                  <Button variant="outline" size="sm">
-                    Escolher Arquivo
-                  </Button>
-                  <span className="text-sm text-gray-500">Nenhum arquivo escolhido</span>
-                </div>
-              </div>
-
-              <Button 
-                className="w-full bg-teal-600 hover:bg-teal-700 text-white"
-                onClick={() => {
-                  toast({
-                    title: "Sucesso", 
-                    description: "Configurações do Mercado Pago salvas!",
-                  });
-                }}
-              >
-                Save
-              </Button>
-            </div>
           </Card>
         )}
       </div>
