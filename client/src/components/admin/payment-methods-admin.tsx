@@ -116,37 +116,19 @@ export function PaymentMethodsAdmin() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Stripe Card - Tema Azul */}
+        {/* Stripe Card */}
         {stripeMethod && (
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-blue-50 to-indigo-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+          <Card className="border border-gray-200 shadow-sm">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <CreditCard className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-blue-900">💙 Stripe</h2>
-                    <p className="text-blue-600 text-sm">Gateway internacional</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge 
-                    variant={stripeMethod.enabled ? "default" : "secondary"}
-                    className={`px-3 py-1 font-semibold ${
-                      stripeMethod.enabled 
-                        ? "bg-emerald-500 text-white shadow-lg" 
-                        : "bg-slate-300 text-slate-600"
-                    }`}
-                  >
-                    {stripeMethod.enabled ? "🟢 ATIVO" : "🔴 INATIVO"}
-                  </Badge>
+                <h2 className="text-lg font-semibold text-gray-900">STRIPE</h2>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">{stripeMethod.enabled ? "ON" : "OFF"}</span>
                   <Switch
                     checked={stripeMethod.enabled || false}
                     onCheckedChange={(checked) => 
                       handleUpdatePaymentMethod(stripeMethod, "enabled", checked)
                     }
-                    className="data-[state=checked]:bg-blue-500"
                   />
                 </div>
               </div>
@@ -154,17 +136,13 @@ export function PaymentMethodsAdmin() {
 
             <CardContent className="space-y-4">
               <div className="flex justify-center mb-6">
-                <div className="w-40 h-24 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl transform rotate-1 hover:rotate-0 transition-transform duration-300">
-                  <span className="text-white font-bold text-2xl tracking-wider">stripe</span>
+                <div className="w-40 h-20 bg-gradient-to-r from-blue-400 to-purple-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">stripe</span>
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                  <Label className="text-blue-800 font-semibold flex items-center gap-2 mb-2">
-                    <Settings className="w-4 h-4" />
-                    Modo de Operação
-                  </Label>
+              <div className="space-y-4">
+                <div>
                   <Select
                     value={stripeMethod.config ? JSON.parse(stripeMethod.config).mode || "test" : "test"}
                     onValueChange={(value) => {
@@ -173,78 +151,83 @@ export function PaymentMethodsAdmin() {
                       handleUpdatePaymentMethod(stripeMethod, "config", JSON.stringify(config));
                     }}
                   >
-                    <SelectTrigger className="border-blue-300 focus:border-blue-500 bg-white">
+                    <SelectTrigger>
                       <SelectValue placeholder="Selecione o modo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="test">🧪 Test (Desenvolvimento)</SelectItem>
-                      <SelectItem value="live">🚀 Live (Produção)</SelectItem>
+                      <SelectItem value="test">Test</SelectItem>
+                      <SelectItem value="live">Live</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                  <Label className="text-blue-800 font-semibold flex items-center gap-2 mb-2">
-                    <Key className="w-4 h-4" />
-                    Chave Pública *
+                <div>
+                  <Label htmlFor="stripe-published-key" className="text-sm font-medium text-gray-700">
+                    Published Key *
                   </Label>
                   <Input
+                    id="stripe-published-key"
                     value={stripeMethod.publicKey || ""}
                     onChange={(e) => 
                       handleUpdatePaymentMethod(stripeMethod, "publicKey", e.target.value)
                     }
                     placeholder="pk_test_TYooMQauvdEDq54NiTphI7jx"
-                    className="border-blue-300 focus:border-blue-500 bg-white"
+                    className="mt-1"
                   />
                 </div>
 
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 bg-yellow-100 px-2 py-1 rounded">
+                    Payment Gateway Title
+                  </Label>
+                  <Input
+                    value="Stripe"
+                    readOnly
+                    className="mt-1 bg-gray-50"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">
+                    Logo
+                  </Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Button variant="outline" size="sm">
+                      Escolher Arquivo
+                    </Button>
+                    <span className="text-sm text-gray-500">Nenhum arquivo escolhido</span>
+                  </div>
+                </div>
+
                 <Button 
-                  className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-3 shadow-lg transform hover:scale-105 transition-all duration-200"
+                  className="w-full bg-teal-600 hover:bg-teal-700 text-white"
                   onClick={() => {
                     toast({
-                      title: "✅ Configurações Salvas!",
-                      description: "Stripe configurado com sucesso!",
+                      title: "Sucesso",
+                      description: "Configurações do Stripe salvas!",
                     });
                   }}
                 >
-                  💾 Salvar Configurações
+                  Save
                 </Button>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Mercado Pago Card - Tema Verde */}
+        {/* Mercado Pago Card */}
         {mercadoPagoMethod && (
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-emerald-50 to-green-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+          <Card className="border border-gray-200 shadow-sm">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <DollarSign className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-emerald-900">💚 Mercado Pago</h2>
-                    <p className="text-emerald-600 text-sm">Gateway brasileiro</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge 
-                    variant={mercadoPagoMethod.enabled ? "default" : "secondary"}
-                    className={`px-3 py-1 font-semibold ${
-                      mercadoPagoMethod.enabled 
-                        ? "bg-emerald-500 text-white shadow-lg" 
-                        : "bg-slate-300 text-slate-600"
-                    }`}
-                  >
-                    {mercadoPagoMethod.enabled ? "🟢 ATIVO" : "🔴 INATIVO"}
-                  </Badge>
+                <h2 className="text-lg font-semibold text-gray-900">MERCADOPAGO</h2>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">{mercadoPagoMethod.enabled ? "ON" : "OFF"}</span>
                   <Switch
                     checked={mercadoPagoMethod.enabled || false}
                     onCheckedChange={(checked) => 
                       handleUpdatePaymentMethod(mercadoPagoMethod, "enabled", checked)
                     }
-                    className="data-[state=checked]:bg-emerald-500"
                   />
                 </div>
               </div>
@@ -252,60 +235,94 @@ export function PaymentMethodsAdmin() {
 
             <CardContent className="space-y-4">
               <div className="flex justify-center mb-6">
-                <div className="w-40 h-24 bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center shadow-xl transform -rotate-1 hover:rotate-0 transition-transform duration-300">
-                  <span className="text-white font-bold text-lg tracking-wide">mercado pago</span>
+                <div className="w-40 h-20 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">mercado pago</span>
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200">
-                  <Label className="text-emerald-800 font-semibold flex items-center gap-2 mb-2">
-                    <Settings className="w-4 h-4" />
-                    Modo de Operação
-                  </Label>
+              <div className="space-y-4">
+                <div>
                   <Select
-                    value={mercadoPagoMethod.config ? JSON.parse(mercadoPagoMethod.config).mode || "test" : "test"}
+                    value={mercadoPagoMethod.config ? JSON.parse(mercadoPagoMethod.config).mode || "live" : "live"}
                     onValueChange={(value) => {
                       const config = mercadoPagoMethod.config ? JSON.parse(mercadoPagoMethod.config) : {};
                       config.mode = value;
                       handleUpdatePaymentMethod(mercadoPagoMethod, "config", JSON.stringify(config));
                     }}
                   >
-                    <SelectTrigger className="border-emerald-300 focus:border-emerald-500 bg-white">
+                    <SelectTrigger>
                       <SelectValue placeholder="Selecione o modo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="test">🧪 Test (Desenvolvimento)</SelectItem>
-                      <SelectItem value="live">🚀 Live (Produção)</SelectItem>
+                      <SelectItem value="live">Live</SelectItem>
+                      <SelectItem value="test">Test</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200">
-                  <Label className="text-emerald-800 font-semibold flex items-center gap-2 mb-2">
-                    <Key className="w-4 h-4" />
+                <div>
+                  <Label htmlFor="mp-access-token" className="text-sm font-medium text-gray-700">
                     Access Token *
                   </Label>
                   <Input
+                    id="mp-access-token"
                     value={mercadoPagoMethod.secretKey || ""}
                     onChange={(e) => 
                       handleUpdatePaymentMethod(mercadoPagoMethod, "secretKey", e.target.value)
                     }
-                    placeholder="APP_USR-xxxxxxxxxx-xxxxxx-xxxxxxxxxx"
-                    className="border-emerald-300 focus:border-emerald-500 bg-white"
+                    placeholder="Access Token *"
+                    className="mt-1"
                   />
                 </div>
 
+                <div>
+                  <Label htmlFor="mp-public-key" className="text-sm font-medium text-gray-700">
+                    Public Key *
+                  </Label>
+                  <Input
+                    id="mp-public-key"
+                    value={mercadoPagoMethod.publicKey || ""}
+                    onChange={(e) => 
+                      handleUpdatePaymentMethod(mercadoPagoMethod, "publicKey", e.target.value)
+                    }
+                    placeholder="Public Key *"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium text-gray-700 bg-yellow-100 px-2 py-1 rounded">
+                    Payment Gateway Title
+                  </Label>
+                  <Input
+                    value="Mercadopago"
+                    readOnly
+                    className="mt-1 bg-gray-50"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">
+                    Logo
+                  </Label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Button variant="outline" size="sm">
+                      Escolher Arquivo
+                    </Button>
+                    <span className="text-sm text-gray-500">Nenhum arquivo escolhido</span>
+                  </div>
+                </div>
+
                 <Button 
-                  className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-3 shadow-lg transform hover:scale-105 transition-all duration-200"
+                  className="w-full bg-teal-600 hover:bg-teal-700 text-white"
                   onClick={() => {
                     toast({
-                      title: "✅ Configurações Salvas!",
-                      description: "Mercado Pago configurado com sucesso!",
+                      title: "Sucesso",
+                      description: "Configurações do Mercado Pago salvas!",
                     });
                   }}
                 >
-                  💾 Salvar Configurações
+                  Save
                 </Button>
               </div>
             </CardContent>
