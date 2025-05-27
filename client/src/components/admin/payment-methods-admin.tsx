@@ -26,7 +26,7 @@ export function PaymentMethodsAdmin() {
 
   const updatePaymentMethodMutation = useMutation({
     mutationFn: (data: { id: number; updates: Partial<InsertPaymentMethod> }) =>
-      apiRequest(`/api/payment-methods/${data.id}`, "PUT", data.updates),
+      apiRequest("PUT", `/api/payment-methods/${data.id}`, data.updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/payment-methods"] });
       toast({
@@ -45,7 +45,7 @@ export function PaymentMethodsAdmin() {
 
   const createPaymentMethodMutation = useMutation({
     mutationFn: (data: InsertPaymentMethod) =>
-      apiRequest("/api/payment-methods", "POST", data),
+      apiRequest("POST", "/api/payment-methods", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/payment-methods"] });
       toast({
