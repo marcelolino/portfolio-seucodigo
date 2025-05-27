@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { ProjectsAdmin } from "@/components/admin/projects-admin";
-import { AdminServices } from "@/components/admin/admin-services";
+import { ServicesAdmin } from "@/components/admin/services-admin";
 import { AdminTestimonials } from "@/components/admin/admin-testimonials";
 import { AdminChat } from "@/components/admin/admin-chat";
 import { AdminContacts } from "@/components/admin/admin-contacts";
@@ -27,7 +27,7 @@ export default function AdminPage() {
       case "projects":
         return <ProjectsAdmin />;
       case "services":
-        return <AdminServices />;
+        return <ServicesAdmin />;
       case "testimonials":
         return <AdminTestimonials />;
       case "chat":
