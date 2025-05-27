@@ -95,6 +95,43 @@ export async function runCompleteMigration() {
       console.log("💬 Depoimentos já existem, pulando criação...");
     }
 
+    // 6. Criar métodos de pagamento (se não existirem)
+    if (paymentMethodsCount.count === 0) {
+      console.log("💳 Criando métodos de pagamento...");
+      
+      // Stripe
+      await db.insert(paymentMethods).values({
+        name: "Stripe",
+        provider: "stripe",
+        enabled: false,
+        currency: "BRL",
+        publicKey: "",
+        secretKey: "",
+        config: JSON.stringify({
+          mode: "test",
+          webhookUrl: ""
+        })
+      });
+      console.log("   ✓ Stripe configurado");
+
+      // Mercado Pago
+      await db.insert(paymentMethods).values({
+        name: "Mercado Pago",
+        provider: "mercadopago",
+        enabled: false,
+        currency: "BRL", 
+        publicKey: "",
+        secretKey: "",
+        config: JSON.stringify({
+          mode: "test",
+          webhookUrl: ""
+        })
+      });
+      console.log("   ✓ Mercado Pago configurado");
+    } else {
+      console.log("💳 Métodos de pagamento já existem, pulando criação...");
+    }
+
     // Verificar status final
     const [finalUserCount] = await db.select({ count: count() }).from(users);
     const [finalProjectCount] = await db.select({ count: count() }).from(projects);
