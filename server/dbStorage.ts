@@ -1,7 +1,7 @@
-import { User, InsertUser, Project, InsertProject, Service, InsertService, Testimonial, InsertTestimonial, Message, InsertMessage, Contact, InsertContact, SiteSettings, InsertSiteSettings, Order, InsertOrder } from "@shared/schema";
+import { User, InsertUser, Project, InsertProject, Service, InsertService, Testimonial, InsertTestimonial, Message, InsertMessage, Contact, InsertContact, SiteSettings, InsertSiteSettings, Order, InsertOrder, PaymentMethod, InsertPaymentMethod } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
-import { users, projects, services, testimonials, messages, contacts, siteSettings, orders } from "@shared/schema";
+import { users, projects, services, testimonials, messages, contacts, siteSettings, orders, paymentMethods } from "@shared/schema";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";

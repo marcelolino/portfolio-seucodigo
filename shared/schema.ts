@@ -106,6 +106,21 @@ export const orders = pgTable("orders", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const paymentMethods = pgTable("payment_methods", {
+  id: serial("id").primaryKey(),
+  provider: text("provider").notNull(), // stripe, mercadopago
+  name: text("name").notNull(),
+  enabled: boolean("enabled").default(false),
+  currency: text("currency").default("BRL"),
+  publicKey: text("public_key"),
+  secretKey: text("secret_key"),
+  webhookSecret: text("webhook_secret"),
+  logo: text("logo"),
+  config: text("config"), // JSON string for additional configuration
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -148,6 +163,12 @@ export const insertOrderSchema = createInsertSchema(orders).omit({
   updatedAt: true,
 });
 
+export const insertPaymentMethodSchema = createInsertSchema(paymentMethods).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -172,6 +193,9 @@ export type SiteSettings = typeof siteSettings.$inferSelect;
 
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Order = typeof orders.$inferSelect;
+
+export type InsertPaymentMethod = z.infer<typeof insertPaymentMethodSchema>;
+export type PaymentMethod = typeof paymentMethods.$inferSelect;
 
 // Extended schemas for validation
 export const loginSchema = z.object({

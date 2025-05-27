@@ -1,5 +1,5 @@
-import { users, projects, services, testimonials, messages, contacts, siteSettings, orders } from "@shared/schema";
-import type { User, InsertUser, Project, InsertProject, Service, InsertService, Testimonial, InsertTestimonial, Message, InsertMessage, Contact, InsertContact, SiteSettings, InsertSiteSettings, Order, InsertOrder } from "@shared/schema";
+import { users, projects, services, testimonials, messages, contacts, siteSettings, orders, paymentMethods } from "@shared/schema";
+import type { User, InsertUser, Project, InsertProject, Service, InsertService, Testimonial, InsertTestimonial, Message, InsertMessage, Contact, InsertContact, SiteSettings, InsertSiteSettings, Order, InsertOrder, PaymentMethod, InsertPaymentMethod } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 import session from "express-session";
@@ -57,6 +57,14 @@ export interface IStorage {
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrder(id: number, order: Partial<InsertOrder>): Promise<Order | undefined>;
   deleteOrder(id: number): Promise<boolean>;
+  
+  // Payment Methods
+  getPaymentMethod(id: number): Promise<PaymentMethod | undefined>;
+  getPaymentMethods(): Promise<PaymentMethod[]>;
+  getPaymentMethodByProvider(provider: string): Promise<PaymentMethod | undefined>;
+  createPaymentMethod(paymentMethod: InsertPaymentMethod): Promise<PaymentMethod>;
+  updatePaymentMethod(id: number, paymentMethod: Partial<InsertPaymentMethod>): Promise<PaymentMethod | undefined>;
+  deletePaymentMethod(id: number): Promise<boolean>;
   
   // Session store
   sessionStore: session.SessionStore;
