@@ -8,9 +8,10 @@ import { RemixIcon } from "@/components/ui/remixicon";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Loader2 } from "lucide-react";
+import { Loader2, MessageCircle, Users, Clock, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ChatMessage extends Message {
@@ -179,11 +180,76 @@ export function AdminChat() {
   };
 
   return (
-    <div>
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold">Chat com Clientes</h1>
-        <p className="text-gray-600">Gerencie as conversas com os usuários.</p>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50/30 p-6">
+      {/* Header redesenhado - Tema Roxo */}
+      <div className="mb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <MessageCircle className="w-8 h-8 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              💜 Caixa de Entrada
+            </h1>
+            <p className="text-slate-600 text-lg">Gerencie conversas e mensagens dos clientes</p>
+          </div>
+        </div>
+        
+        {/* Status cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm">Total Mensagens</p>
+                  <p className="text-2xl font-bold">{allMessages.length}</p>
+                </div>
+                <MessageCircle className="w-8 h-8 text-purple-200" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-emerald-500 to-emerald-600 text-white">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-emerald-100 text-sm">Usuários Ativos</p>
+                  <p className="text-2xl font-bold">{users?.length || 0}</p>
+                </div>
+                <Users className="w-8 h-8 text-emerald-200" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-amber-100 text-sm">Conexão</p>
+                  <p className="text-lg font-semibold">
+                    {chatConnected ? "🟢 Online" : "🔴 Offline"}
+                  </p>
+                </div>
+                <CheckCircle className="w-8 h-8 text-amber-200" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm">Visitantes</p>
+                  <p className="text-lg font-semibold">
+                    {hasVisitorMessages ? "✅ Ativo" : "⚠️ Nenhum"}
+                  </p>
+                </div>
+                <Clock className="w-8 h-8 text-blue-200" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
       <div className="flex h-[calc(100vh-10rem)] bg-white rounded-lg shadow-sm overflow-hidden">
         {/* User list sidebar */}
         <div className="w-80 border-r flex flex-col">

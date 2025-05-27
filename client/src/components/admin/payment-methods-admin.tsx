@@ -468,8 +468,7 @@ export function PaymentMethodsAdmin() {
           </Card>
         )}
       </div>
-
-            <div className="space-y-4">
+    </div>
               <div>
                 <Select
                   value={mercadoPagoMethod.config ? JSON.parse(mercadoPagoMethod.config).mode || "test" : "test"}

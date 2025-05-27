@@ -1,5 +1,15 @@
 import { db } from "../db";
-import { users, projects, services, testimonials, siteSettings } from "@shared/schema";
+import { 
+  users, 
+  projects, 
+  services, 
+  testimonials, 
+  siteSettings, 
+  messages, 
+  contacts, 
+  orders, 
+  paymentMethods 
+} from "@shared/schema";
 import { 
   seedUsers, 
   seedProjects, 
@@ -20,6 +30,7 @@ export async function runCompleteMigration() {
     const [serviceCount] = await db.select({ count: count() }).from(services);
     const [testimonialCount] = await db.select({ count: count() }).from(testimonials);
     const [settingsCount] = await db.select({ count: count() }).from(siteSettings);
+    const [paymentMethodsCount] = await db.select({ count: count() }).from(paymentMethods);
 
     console.log("📊 Status atual das tabelas:");
     console.log(`- Usuários: ${userCount.count}`);
@@ -27,6 +38,7 @@ export async function runCompleteMigration() {
     console.log(`- Serviços: ${serviceCount.count}`);
     console.log(`- Depoimentos: ${testimonialCount.count}`);
     console.log(`- Configurações: ${settingsCount.count}`);
+    console.log(`- Métodos de Pagamento: ${paymentMethodsCount.count}`);
 
     // 1. Criar usuários (se não existirem)
     if (userCount.count === 0) {

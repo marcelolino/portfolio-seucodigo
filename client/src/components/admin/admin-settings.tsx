@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { RemixIcon } from "@/components/ui/remixicon";
-import { Loader2 } from "lucide-react";
+import { Loader2, Settings, Globe, Phone, Mail, MapPin, Github, Linkedin, Twitter, Instagram, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface SiteSettingsForm {
@@ -137,11 +137,66 @@ export function AdminSettings() {
   }
   
   return (
-    <div>
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold">Configurações Gerais</h1>
-        <p className="text-gray-600">Configure as informações gerais do site, contato e redes sociais.</p>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50/30 p-6">
+      {/* Header redesenhado - Tema Laranja */}
+      <div className="mb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <Settings className="w-8 h-8 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+              🧡 Configurações
+            </h1>
+            <p className="text-slate-600 text-lg">Configure informações do site, contato e redes sociais</p>
+          </div>
+        </div>
+        
+        {/* Status cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-orange-100 text-sm">Site Configurado</p>
+                  <p className="text-lg font-semibold">
+                    {formData.siteName ? "✅ Ativo" : "⚠️ Pendente"}
+                  </p>
+                </div>
+                <Globe className="w-8 h-8 text-orange-200" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-emerald-500 to-green-500 text-white">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-emerald-100 text-sm">Contato</p>
+                  <p className="text-lg font-semibold">
+                    {formData.contactEmail ? "📧 Ativo" : "⚠️ Pendente"}
+                  </p>
+                </div>
+                <Mail className="w-8 h-8 text-emerald-200" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm">Redes Sociais</p>
+                  <p className="text-lg font-semibold">
+                    {(formData.github || formData.linkedin) ? "🌐 Ativo" : "⚠️ Pendente"}
+                  </p>
+                </div>
+                <MessageCircle className="w-8 h-8 text-purple-200" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
       
       <form onSubmit={handleSubmit}>
         <Card className="mb-6">
