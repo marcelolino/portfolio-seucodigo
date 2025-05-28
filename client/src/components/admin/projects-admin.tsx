@@ -49,6 +49,8 @@ export function ProjectsAdmin() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { data: projects = [], isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
@@ -150,6 +152,25 @@ export function ProjectsAdmin() {
       status: "active",
       image: "",
     });
+    setImagePreview(null);
+    setUploadedImage(null);
+  };
+
+  // Handle image file upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Criar preview da imagem
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setImagePreview(result);
+        // Armazenar a imagem como base64
+        setFormData(prev => ({ ...prev, image: result }));
+      };
+      reader.readAsDataURL(file);
+      setUploadedImage(file);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -183,6 +204,13 @@ export function ProjectsAdmin() {
       status: project.status as "active",
       image: project.image || "",
     });
+    // Carregar preview da imagem se existir
+    if (project.image) {
+      setImagePreview(project.image);
+    } else {
+      setImagePreview(null);
+    }
+    setUploadedImage(null);
     setIsCreateDialogOpen(true);
   };
 
@@ -438,31 +466,63 @@ export function ProjectsAdmin() {
                 </div>
 
                 <div>
-                  <Label htmlFor="image" className="text-sm font-semibold text-gray-700 mb-2 block">
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 block">
                     <Image className="w-4 h-4 inline mr-1" />
-                    Upload de Imagem
+                    Imagem do Projeto
                   </Label>
-                  <div className="space-y-3">
-                    <Input
-                      id="image"
-                      value={formData.image}
-                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                      placeholder="URL da imagem ou deixe vazio para upload"
-                      className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
-                    />
-                    <div className="flex items-center gap-3">
-                      <Button 
-                        type="button"
-                        variant="outline" 
-                        className="border-gray-300 hover:border-purple-500 hover:text-purple-600"
-                      >
-                        <Upload className="w-4 h-4 mr-2" />
-                        Escolher Arquivo
-                      </Button>
-                      <span className="text-sm text-gray-500">
-                        Formatos aceitos: JPG, PNG, GIF (máx. 5MB)
-                      </span>
-                    </div>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-purple-400 transition-colors">
+                    {imagePreview ? (
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <img 
+                            src={imagePreview} 
+                            alt="Preview" 
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setImagePreview(null);
+                              setUploadedImage(null);
+                              setFormData(prev => ({ ...prev, image: "" }));
+                            }}
+                          >
+                            Remover Imagem
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex flex-col items-center justify-center py-4">
+                          <div className="text-4xl text-gray-400 mb-2">
+                            <Image className="w-8 h-8" />
+                          </div>
+                          <p className="text-gray-500 mb-2">Clique para fazer upload da imagem</p>
+                          <p className="text-xs text-gray-400">PNG, JPG ou GIF (máximo 5MB)</p>
+                        </div>
+                        <input
+                          type="file"
+                          id="projectImage"
+                          name="projectImage"
+                          onChange={handleImageUpload}
+                          accept="image/png, image/jpeg, image/gif"
+                          className="hidden"
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={() => document.getElementById("projectImage")?.click()}
+                          type="button"
+                          className="w-full"
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          Escolher Arquivo
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
 
