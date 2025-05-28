@@ -44,17 +44,27 @@ export function ServicesAdmin() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { data: services = [], isLoading } = useQuery<Service[]>({
     queryKey: ["/api/services"],
   });
 
   const createServiceMutation = useMutation({
-    mutationFn: (serviceData: InsertService) =>
-      apiRequest("/api/services", {
+    mutationFn: async (serviceData: InsertService) => {
+      const response = await fetch("/api/services", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(serviceData),
-      }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to create service");
+      }
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/services"] });
       setIsCreateDialogOpen(false);
@@ -74,11 +84,19 @@ export function ServicesAdmin() {
   });
 
   const updateServiceMutation = useMutation({
-    mutationFn: ({ id, ...serviceData }: Partial<Service> & { id: number }) =>
-      apiRequest(`/api/services/${id}`, {
+    mutationFn: async ({ id, ...serviceData }: Partial<Service> & { id: number }) => {
+      const response = await fetch(`/api/services/${id}`, {
         method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(serviceData),
-      }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update service");
+      }
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/services"] });
       setEditingService(null);
@@ -91,10 +109,15 @@ export function ServicesAdmin() {
   });
 
   const deleteServiceMutation = useMutation({
-    mutationFn: (id: number) =>
-      apiRequest(`/api/services/${id}`, {
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/services/${id}`, {
         method: "DELETE",
-      }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete service");
+      }
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/services"] });
       toast({
@@ -120,6 +143,25 @@ export function ServicesAdmin() {
       price: "",
       order: "",
     });
+    setImagePreview(null);
+    setUploadedImage(null);
+  };
+
+  // Handle image file upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Criar preview da imagem
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setImagePreview(result);
+        // Armazenar a imagem como base64
+        setFormData(prev => ({ ...prev, icon: result }));
+      };
+      reader.readAsDataURL(file);
+      setUploadedImage(file);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -149,6 +191,13 @@ export function ServicesAdmin() {
       price: service.price?.toString() || "",
       order: service.order?.toString() || "",
     });
+    // Carregar preview da imagem se existir
+    if (service.icon && service.icon.startsWith('data:')) {
+      setImagePreview(service.icon);
+    } else {
+      setImagePreview(null);
+    }
+    setUploadedImage(null);
     setIsCreateDialogOpen(true);
   };
 
@@ -338,6 +387,67 @@ export function ServicesAdmin() {
                     rows={4}
                     className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                   />
+                </div>
+
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 block">
+                    <Upload className="w-4 h-4 inline mr-1" />
+                    Imagem do Serviço
+                  </Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-purple-400 transition-colors">
+                    {imagePreview ? (
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <img 
+                            src={imagePreview} 
+                            alt="Preview" 
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setImagePreview(null);
+                              setUploadedImage(null);
+                              setFormData(prev => ({ ...prev, icon: "" }));
+                            }}
+                          >
+                            Remover Imagem
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex flex-col items-center justify-center py-4">
+                          <div className="text-4xl text-gray-400 mb-2">
+                            <Upload className="w-8 h-8" />
+                          </div>
+                          <p className="text-gray-500 mb-2">Clique para fazer upload da imagem</p>
+                          <p className="text-xs text-gray-400">PNG, JPG ou GIF (máximo 5MB)</p>
+                        </div>
+                        <input
+                          type="file"
+                          id="serviceImage"
+                          name="serviceImage"
+                          onChange={handleImageUpload}
+                          accept="image/png, image/jpeg, image/gif"
+                          className="hidden"
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={() => document.getElementById("serviceImage")?.click()}
+                          type="button"
+                          className="w-full"
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          Escolher Arquivo
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex justify-end gap-3 pt-6 border-t">
