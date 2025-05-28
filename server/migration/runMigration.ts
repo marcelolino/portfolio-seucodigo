@@ -95,6 +95,33 @@ export async function runCompleteMigration() {
       console.log("💬 Depoimentos já existem, pulando criação...");
     }
 
+    // 5.1. Corrigir possíveis inconsistências de schema
+    try {
+      // Verificar se a coluna 'read' existe na tabela messages (em vez de 'is_read')
+      await db.execute(sql`
+        DO $$
+        BEGIN
+          IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'messages' AND column_name = 'is_read') THEN
+            ALTER TABLE messages RENAME COLUMN is_read TO read;
+          END IF;
+        END $$;
+      `);
+      
+      // Verificar se a coluna 'is_read' existe na tabela contacts
+      await db.execute(sql`
+        DO $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'contacts' AND column_name = 'is_read') THEN
+            ALTER TABLE contacts ADD COLUMN is_read BOOLEAN DEFAULT FALSE;
+          END IF;
+        END $$;
+      `);
+      
+      console.log("✅ Correções de schema aplicadas");
+    } catch (error) {
+      console.log("⚠️ Algumas correções de schema podem não ter sido aplicadas:", error);
+    }
+
     // 6. Criar métodos de pagamento (se não existirem)
     if (paymentMethodsCount.count === 0) {
       console.log("💳 Criando métodos de pagamento...");
