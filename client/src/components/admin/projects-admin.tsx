@@ -87,11 +87,19 @@ export function ProjectsAdmin() {
   });
 
   const updateProjectMutation = useMutation({
-    mutationFn: ({ id, ...projectData }: Partial<Project> & { id: number }) =>
-      apiRequest(`/api/projects/${id}`, {
+    mutationFn: async ({ id, ...projectData }: Partial<Project> & { id: number }) => {
+      const response = await fetch(`/api/projects/${id}`, {
         method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(projectData),
-      }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update project");
+      }
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       setEditingProject(null);
@@ -104,10 +112,15 @@ export function ProjectsAdmin() {
   });
 
   const deleteProjectMutation = useMutation({
-    mutationFn: (id: number) =>
-      apiRequest(`/api/projects/${id}`, {
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/projects/${id}`, {
         method: "DELETE",
-      }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete project");
+      }
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       toast({
@@ -123,7 +136,7 @@ export function ProjectsAdmin() {
     category: "",
     price: "",
     technologies: "",
-    status: "active" as const,
+    status: "active",
     image: "",
   });
 
@@ -146,10 +159,10 @@ export function ProjectsAdmin() {
       title: formData.title,
       description: formData.description,
       category: formData.category,
-      price: formData.price ? parseFloat(formData.price) : undefined,
+      price: formData.price ? formData.price : undefined,
       technologies: formData.technologies.split(",").map(t => t.trim()),
       status: formData.status,
-      image: formData.image || undefined,
+      image: formData.image || "",
     };
 
     if (editingProject) {
@@ -167,8 +180,8 @@ export function ProjectsAdmin() {
       category: project.category || "",
       price: project.price?.toString() || "",
       technologies: project.technologies?.join(", ") || "",
-      status: project.status,
-      imageUrl: project.imageUrl || "",
+      status: project.status as "active",
+      image: project.image || "",
     });
     setIsCreateDialogOpen(true);
   };
@@ -425,15 +438,15 @@ export function ProjectsAdmin() {
                 </div>
 
                 <div>
-                  <Label htmlFor="imageUrl" className="text-sm font-semibold text-gray-700 mb-2 block">
+                  <Label htmlFor="image" className="text-sm font-semibold text-gray-700 mb-2 block">
                     <Image className="w-4 h-4 inline mr-1" />
                     Upload de Imagem
                   </Label>
                   <div className="space-y-3">
                     <Input
-                      id="imageUrl"
-                      value={formData.imageUrl}
-                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                      id="image"
+                      value={formData.image}
+                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                       placeholder="URL da imagem ou deixe vazio para upload"
                       className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                     />
@@ -503,9 +516,9 @@ export function ProjectsAdmin() {
                   <TableRow key={project.id} className="hover:bg-slate-50/50 transition-colors">
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        {project.imageUrl ? (
+                        {project.image ? (
                           <img 
-                            src={project.imageUrl} 
+                            src={project.image} 
                             alt={project.title}
                             className="w-10 h-10 rounded-lg object-cover"
                           />
@@ -530,7 +543,7 @@ export function ProjectsAdmin() {
                     <TableCell>
                       {project.price ? (
                         <span className="font-semibold text-emerald-600">
-                          R$ {project.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          R$ {Number(project.price).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       ) : (
                         <span className="text-gray-400">Não informado</span>
