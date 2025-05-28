@@ -55,11 +55,19 @@ export function ProjectsAdmin() {
   });
 
   const createProjectMutation = useMutation({
-    mutationFn: (projectData: InsertProject) =>
-      apiRequest("/api/projects", {
+    mutationFn: async (projectData: InsertProject) => {
+      const response = await fetch("/api/projects", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(projectData),
-      }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to create project");
+      }
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       setIsCreateDialogOpen(false);
@@ -116,7 +124,7 @@ export function ProjectsAdmin() {
     price: "",
     technologies: "",
     status: "active" as const,
-    imageUrl: "",
+    image: "",
   });
 
   const resetForm = () => {
@@ -127,7 +135,7 @@ export function ProjectsAdmin() {
       price: "",
       technologies: "",
       status: "active",
-      imageUrl: "",
+      image: "",
     });
   };
 
@@ -141,7 +149,7 @@ export function ProjectsAdmin() {
       price: formData.price ? parseFloat(formData.price) : undefined,
       technologies: formData.technologies.split(",").map(t => t.trim()),
       status: formData.status,
-      imageUrl: formData.imageUrl || undefined,
+      image: formData.image || undefined,
     };
 
     if (editingProject) {
