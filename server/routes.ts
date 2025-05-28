@@ -99,6 +99,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Erro ao atualizar projeto" });
     }
   });
+
+  app.patch("/api/projects/:id", checkAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const projectData = insertProjectSchema.partial().parse(req.body);
+      
+      const project = await storage.updateProject(id, projectData);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Projeto não encontrado" });
+      }
+      
+      res.json(project);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      }
+      res.status(500).json({ message: "Erro ao atualizar projeto" });
+    }
+  });
   
   app.delete("/api/projects/:id", checkAdmin, async (req, res) => {
     try {
