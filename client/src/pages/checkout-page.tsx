@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, Circle, Edit, Plus, Minus } from "lucide-react";
+import { CheckCircle, Circle, Edit, Plus, Minus, CreditCard, Smartphone } from "lucide-react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -165,13 +165,70 @@ export function CheckoutPage() {
                 <CardTitle className="text-white">Método de pagamento</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="border border-green-600 rounded-lg p-4 bg-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                      <span className="text-green-400">Adicionar Método de Pagamento</span>
+                <div className="space-y-4">
+                  <Label className="text-white">Selecione o método de pagamento</Label>
+                  
+                  {/* PIX Option */}
+                  <div 
+                    className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                      paymentMethod === 'pix' 
+                        ? 'border-green-600 bg-green-600/10' 
+                        : 'border-gray-600 bg-gray-700 hover:border-green-600'
+                    }`}
+                    onClick={() => setPaymentMethod('pix')}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <Smartphone className="w-6 h-6 text-green-400" />
+                      <div>
+                        <h3 className="text-white font-medium">PIX</h3>
+                        <p className="text-gray-400 text-sm">Pagamento instantâneo via PIX</p>
+                      </div>
+                      {paymentMethod === 'pix' && (
+                        <CheckCircle className="w-5 h-5 text-green-400 ml-auto" />
+                      )}
                     </div>
-                    <Edit className="w-4 h-4 text-green-400" />
+                  </div>
+
+                  {/* Credit Card Option */}
+                  <div 
+                    className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                      paymentMethod === 'credit' 
+                        ? 'border-green-600 bg-green-600/10' 
+                        : 'border-gray-600 bg-gray-700 hover:border-green-600'
+                    }`}
+                    onClick={() => setPaymentMethod('credit')}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <CreditCard className="w-6 h-6 text-blue-400" />
+                      <div>
+                        <h3 className="text-white font-medium">Cartão de Crédito</h3>
+                        <p className="text-gray-400 text-sm">Pagamento com cartão de crédito</p>
+                      </div>
+                      {paymentMethod === 'credit' && (
+                        <CheckCircle className="w-5 h-5 text-green-400 ml-auto" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Debit Card Option */}
+                  <div 
+                    className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                      paymentMethod === 'debit' 
+                        ? 'border-green-600 bg-green-600/10' 
+                        : 'border-gray-600 bg-gray-700 hover:border-green-600'
+                    }`}
+                    onClick={() => setPaymentMethod('debit')}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <CreditCard className="w-6 h-6 text-purple-400" />
+                      <div>
+                        <h3 className="text-white font-medium">Cartão de Débito</h3>
+                        <p className="text-gray-400 text-sm">Pagamento com cartão de débito</p>
+                      </div>
+                      {paymentMethod === 'debit' && (
+                        <CheckCircle className="w-5 h-5 text-green-400 ml-auto" />
+                      )}
+                    </div>
                   </div>
                 </div>
 
