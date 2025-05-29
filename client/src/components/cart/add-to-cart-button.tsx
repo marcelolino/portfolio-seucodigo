@@ -1,6 +1,6 @@
 import { ShoppingCart, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/hooks/use-cart';
 import { Project, Service } from '@shared/schema';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -14,12 +14,12 @@ interface AddToCartButtonProps {
 }
 
 export function AddToCartButton({ item, type, variant = 'default', size = 'default', className }: AddToCartButtonProps) {
-  const { addToCart } = useCart();
+  const { addItem } = useCart();
   const { toast } = useToast();
   const [isAdded, setIsAdded] = useState(false);
 
   const handleAddToCart = () => {
-    addToCart(item, type);
+    addItem(item, type);
     setIsAdded(true);
     
     toast({

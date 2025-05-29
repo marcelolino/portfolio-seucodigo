@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,7 +25,7 @@ interface CheckoutFormData {
 }
 
 export function CheckoutPage() {
-  const { items, removeFromCart, updateQuantity, getTotal, clearCart } = useCart();
+  const { items, removeItem, updateQuantity, getTotalPrice, clearCart } = useCart();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(items.length > 0 ? 1 : 0);
@@ -89,7 +89,7 @@ export function CheckoutPage() {
       clientEmail: formData.clientEmail,
       clientPhone: formData.clientPhone,
       description: `Pedido de ${items.length} item(s): ${items.map(item => item.item.title).join(", ")}. ${formData.description}`,
-      totalValue: (getTotal() - discount).toFixed(2),
+      totalValue: (getTotalPrice() - discount).toFixed(2),
       paymentMethod: paymentMethod,
       notes: formData.notes,
       deadline: formData.deadline ? new Date(formData.deadline) : undefined,
@@ -301,7 +301,7 @@ export function CheckoutPage() {
               <div className="space-y-2">
                 <div className="flex justify-between text-white">
                   <span>Preço do item</span>
-                  <span>R$ {getTotal().toFixed(2)}</span>
+                  <span>R$ {getTotalPrice().toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-green-400">
                   <span>Desconto</span>
@@ -313,7 +313,7 @@ export function CheckoutPage() {
 
               <div className="flex justify-between text-xl font-bold text-white">
                 <span>Total</span>
-                <span className="text-green-400">R$ {(getTotal() - discount).toFixed(2)}</span>
+                <span className="text-green-400">R$ {(getTotalPrice() - discount).toFixed(2)}</span>
               </div>
 
               {/* Terms and Conditions */}
