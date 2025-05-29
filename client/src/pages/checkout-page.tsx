@@ -84,6 +84,21 @@ export function CheckoutPage() {
       return;
     }
 
+    if (!paymentMethod) {
+      toast({
+        title: "Selecione um método de pagamento",
+        description: "Você deve selecionar um método de pagamento para continuar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Se PIX foi selecionado, redireciona para a tela de pagamento PIX
+    if (paymentMethod === 'pix') {
+      navigate('/pix-payment');
+      return;
+    }
+
     const orderData = {
       clientName: formData.clientName,
       clientEmail: formData.clientEmail,

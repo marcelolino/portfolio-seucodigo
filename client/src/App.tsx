@@ -8,6 +8,7 @@ import AuthPage from "@/pages/auth-page";
 import AdminPage from "@/pages/admin-page";
 import ProfilePage from "@/pages/profile-page";
 import { CheckoutPage } from "@/pages/checkout-page";
+import { PixPaymentPage } from "@/pages/pix-payment-page";
 import { AuthProvider } from "./hooks/use-auth";
 import { CartProvider } from "./hooks/use-cart";
 
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/checkout" component={CheckoutPage} />
+      <Route path="/pix-payment" component={PixPaymentPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/admin" component={AdminPage} adminOnly={true} />
       <Route component={NotFound} />
