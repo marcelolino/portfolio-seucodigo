@@ -14,12 +14,12 @@ interface AddToCartButtonProps {
 }
 
 export function AddToCartButton({ item, type, variant = 'default', size = 'default', className }: AddToCartButtonProps) {
-  const { addItem } = useCart();
+  const { addToCart } = useCart();
   const { toast } = useToast();
   const [isAdded, setIsAdded] = useState(false);
 
   const handleAddToCart = () => {
-    addItem(item, type);
+    addToCart(item, type);
     setIsAdded(true);
     
     toast({
