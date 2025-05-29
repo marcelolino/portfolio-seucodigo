@@ -1,13 +1,13 @@
 import { ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/hooks/use-cart';
 import { useLocation } from 'wouter';
 
 export function CartButton() {
-  const { getItemCount } = useCart();
+  const { getTotalItems } = useCart();
   const [, navigate] = useLocation();
-  const itemCount = getItemCount();
+  const itemCount = getTotalItems();
 
   return (
     <Button
