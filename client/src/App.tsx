@@ -9,7 +9,7 @@ import AdminPage from "@/pages/admin-page";
 import ProfilePage from "@/pages/profile-page";
 import { CheckoutPage } from "@/pages/checkout-page";
 import { AuthProvider } from "./hooks/use-auth";
-import { CartProvider } from "./contexts/CartContext";
+import { CartProvider } from "./hooks/use-cart";
 
 function Router() {
   return (
