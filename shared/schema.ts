@@ -1,4 +1,13 @@
-import { pgTable, text, serial, integer, boolean, timestamp, numeric, doublePrecision } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+  numeric,
+  doublePrecision,
+} from "drizzle-orm/pg-core";
 // There are no immediately obvious errors in this schema definition.
 // The schema appears to be well-structured and uses the Drizzle ORM and Zod libraries correctly.
 // However, a thorough review would involve checking:
@@ -44,9 +53,14 @@ export const services = pgTable("services", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description").notNull(),
-  icon: text("icon").notNull(),
-  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  category: text("category").notNull(),
+  technologies: text("technologies").array().notNull(),
+  image: text("image").notNull(),
+  imageUrl: text("image_url"),
+  featured: boolean("featured").default(false),
   order: integer("order").default(0),
+  price: numeric("price", { precision: 10, scale: 2 }),
+  status: text("status").notNull().default("active"), // active, inactive, in_progress, completed
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -177,7 +191,9 @@ export const insertOrderSchema = createInsertSchema(orders).omit({
   updatedAt: true,
 });
 
-export const insertPaymentMethodSchema = createInsertSchema(paymentMethods).omit({
+export const insertPaymentMethodSchema = createInsertSchema(
+  paymentMethods,
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -217,25 +233,33 @@ export const loginSchema = z.object({
   password: z.string().min(1, "A senha é obrigatória"),
 });
 
-export const registerSchema = insertUserSchema.extend({
-  confirmPassword: z.string(),
-}).refine(data => data.password === data.confirmPassword, {
-  message: "As senhas não coincidem",
-  path: ["confirmPassword"],
-});
+export const registerSchema = insertUserSchema
+  .extend({
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
 
 export const contactFormSchema = insertContactSchema;
 
-export const orderFormSchema = insertOrderSchema.extend({
-  clientEmail: z.string().email("Email inválido"),
-  budget: z.string().optional(),
-  totalValue: z.string().optional(),
-}).refine(data => {
-  if (!data.projectId && !data.serviceId && !data.projectTitle) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Selecione um projeto, serviço ou defina um título personalizado",
-  path: ["projectId"],
-});
+export const orderFormSchema = insertOrderSchema
+  .extend({
+    clientEmail: z.string().email("Email inválido"),
+    budget: z.string().optional(),
+    totalValue: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (!data.projectId && !data.serviceId && !data.projectTitle) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message:
+        "Selecione um projeto, serviço ou defina um título personalizado",
+      path: ["projectId"],
+    },
+  );
