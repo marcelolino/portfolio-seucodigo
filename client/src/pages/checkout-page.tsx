@@ -1,471 +1,380 @@
-import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useState } from "react";
+import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { RemixIcon } from "@/components/ui/remixicon";
+import { CheckCircle, Circle, Edit, Plus, Minus } from "lucide-react";
+import { useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Project, Service, insertOrderSchema } from "@shared/schema";
-import { PaymentMethods } from "@/components/checkout/payment-methods";
-import StripeCheckout from "@/components/checkout/stripe-checkout";
-import MercadoPagoCheckout from "@/components/checkout/mercadopago-checkout";
 
-// Schema para validação do formulário de checkout
-const checkoutSchema = z.object({
-  customerName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  customerEmail: z.string().email("Email inválido"),
-  customerPhone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos"),
-  customerCompany: z.string().optional(),
-  projectDescription: z.string().min(10, "Descrição deve ter pelo menos 10 caracteres"),
-  budget: z.string().min(1, "Orçamento é obrigatório"),
-  deadline: z.string().min(1, "Prazo é obrigatório"),
-  priority: z.enum(["Baixa", "Média", "Alta", "Urgente"]),
-  observations: z.string().optional(),
-});
+interface CheckoutFormData {
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string;
+  description: string;
+  deadline: string;
+  notes: string;
+  paymentMethod: string;
+  acceptTerms: boolean;
+}
 
-type CheckoutFormData = z.infer<typeof checkoutSchema>;
-
-export default function CheckoutPage() {
-  const [, setLocation] = useLocation();
+export function CheckoutPage() {
+  const { items, removeFromCart, updateQuantity, getTotal, clearCart } = useCart();
+  const [, navigate] = useLocation();
   const { toast } = useToast();
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [step, setStep] = useState<"form" | "payment" | "processing">("form");
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"stripe" | "mercadopago" | "">("");
-  const [createdOrderId, setCreatedOrderId] = useState<number | null>(null);
-  const [orderAmount, setOrderAmount] = useState<number>(0);
+  const [currentStep, setCurrentStep] = useState(items.length > 0 ? 1 : 0);
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [discount, setDiscount] = useState(50.00); // Desconto fixo como na imagem
 
-  // Obter parâmetros da URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const projectId = urlParams.get('project');
-  const serviceId = urlParams.get('service');
-
-  // Buscar projetos e serviços
-  const { data: projects } = useQuery<Project[]>({
-    queryKey: ["/api/projects"],
+  const [formData, setFormData] = useState<CheckoutFormData>({
+    clientName: "",
+    clientEmail: "",
+    clientPhone: "",
+    description: "",
+    deadline: "",
+    notes: "",
+    paymentMethod: "",
+    acceptTerms: false
   });
 
-  const { data: services } = useQuery<Service[]>({
-    queryKey: ["/api/services"],
-  });
-
-  // Configurar o formulário
-  const form = useForm<CheckoutFormData>({
-    resolver: zodResolver(checkoutSchema),
-    defaultValues: {
-      customerName: "",
-      customerEmail: "",
-      customerPhone: "",
-      customerCompany: "",
-      projectDescription: "",
-      budget: "",
-      deadline: "",
-      priority: "Média",
-      observations: "",
-    }
-  });
-
-  // Mutation para criar pedido
   const createOrderMutation = useMutation({
-    mutationFn: async (data: CheckoutFormData) => {
-      // Calcular valor total
-      let totalValue = 0;
-      if (selectedProject?.price) {
-        totalValue = parseFloat(selectedProject.price);
-      } else if (selectedService?.price) {
-        totalValue = parseFloat(selectedService.price.toString());
-      } else if (data.budget) {
-        totalValue = parseFloat(data.budget);
+    mutationFn: async (orderData: any) => {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to create order");
       }
-
-      const orderData = {
-        clientName: data.customerName,
-        clientEmail: data.customerEmail,
-        clientPhone: data.customerPhone,
-        projectId: selectedProject?.id || null,
-        serviceId: selectedService?.id || null,
-        projectTitle: selectedProject?.title || (data.projectDescription || "Projeto Personalizado"),
-        description: data.projectDescription,
-        budget: data.budget,
-        totalValue: totalValue.toString(),
-        deadline: data.deadline,
-        priority: data.priority.toLowerCase(),
-        notes: data.observations || null,
-      };
-
-      const response = await apiRequest("POST", "/api/orders", orderData);
       return response.json();
     },
-    onSuccess: (order) => {
-      setCreatedOrderId(order.id);
-      setOrderAmount(parseFloat(order.totalValue));
-      setStep("payment");
+    onSuccess: () => {
+      clearCart();
+      setCurrentStep(2);
       toast({
-        title: "Pedido criado com sucesso!",
-        description: "Agora escolha o método de pagamento para finalizar.",
+        title: "Pedido realizado com sucesso!",
+        description: "Entraremos em contato em breve para confirmar os detalhes.",
       });
     },
     onError: () => {
       toast({
-        title: "Erro ao criar pedido",
-        description: "Tente novamente ou entre em contato conosco.",
+        title: "Erro ao realizar pedido",
+        description: "Tente novamente mais tarde.",
         variant: "destructive",
       });
     },
   });
 
-  // Efeito para carregar projeto/serviço selecionado
-  useEffect(() => {
-    if (projectId && projects) {
-      const project = projects.find(p => p.id === parseInt(projectId));
-      if (project) {
-        setSelectedProject(project);
-        form.setValue("projectDescription", project.description);
-      }
+  const handleSubmit = async () => {
+    if (!formData.acceptTerms) {
+      toast({
+        title: "Aceite os termos",
+        description: "Você deve aceitar os termos e condições para continuar.",
+        variant: "destructive",
+      });
+      return;
     }
-    if (serviceId && services) {
-      const service = services.find(s => s.id === parseInt(serviceId));
-      if (service) {
-        setSelectedService(service);
-        form.setValue("budget", service.price);
-      }
-    }
-  }, [projectId, serviceId, projects, services, form]);
 
-  const handleSubmit = (data: CheckoutFormData) => {
-    createOrderMutation.mutate(data);
+    const orderData = {
+      clientName: formData.clientName,
+      clientEmail: formData.clientEmail,
+      clientPhone: formData.clientPhone,
+      description: `Pedido de ${items.length} item(s): ${items.map(item => item.item.title).join(", ")}. ${formData.description}`,
+      totalValue: (getTotal() - discount).toFixed(2),
+      paymentMethod: paymentMethod,
+      notes: formData.notes,
+      deadline: formData.deadline ? new Date(formData.deadline) : undefined,
+    };
+
+    createOrderMutation.mutate(orderData);
   };
 
-  const handlePaymentMethodSelect = (method: "stripe" | "mercadopago") => {
-    setSelectedPaymentMethod(method);
-  };
+  const steps = [
+    { id: 0, title: "Adicionar ao carrinho", completed: items.length > 0 },
+    { id: 1, title: "Preencha os detalhes", completed: currentStep > 1 },
+    { id: 2, title: "Confirmação", completed: currentStep >= 2 }
+  ];
 
-  const handleProceedToPayment = () => {
-    if (!selectedPaymentMethod) return;
-    setStep("processing");
-  };
-
-  const handlePaymentSuccess = () => {
-    toast({
-      title: "Pagamento realizado com sucesso!",
-      description: "Obrigado pela confiança. Entraremos em contato em breve.",
-    });
-    setLocation("/");
-  };
+  if (items.length === 0 && currentStep === 0) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Carrinho vazio</h1>
+          <p className="text-gray-400 mb-6">Adicione alguns itens ao seu carrinho para continuar</p>
+          <Button onClick={() => navigate("/")} className="bg-green-600 hover:bg-green-700">
+            Voltar à página inicial
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background py-12">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-4">
-            {step === "form" ? "Finalizar Pedido" : step === "payment" ? "Escolha o Método de Pagamento" : "Processando Pagamento"}
-          </h1>
-          <p className="text-foreground/70">
-            {step === "form" ? "Preencha os dados abaixo para solicitar seu orçamento personalizado" : 
-             step === "payment" ? "Selecione como deseja pagar seu pedido" : 
-             "Finalize seu pagamento com segurança"}
-          </p>
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Header */}
+      <header className="border-b border-gray-800 p-4">
+        <div className="flex justify-between items-center max-w-6xl mx-auto">
+          <h1 className="text-xl font-bold">Checkout</h1>
+          <Button 
+            onClick={() => navigate("/")}
+            className="bg-green-600 hover:bg-green-700"
+            size="sm"
+          >
+            Entrar
+          </Button>
         </div>
+      </header>
 
-        {step === "form" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Formulário de checkout */}
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Dados para Orçamento</CardTitle>
-                  <CardDescription>
-                    Preencha suas informações para recebermos um orçamento personalizado
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="customerName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Nome Completo *</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Seu nome completo" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name="customerEmail"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email *</FormLabel>
-                              <FormControl>
-                                <Input type="email" placeholder="seu@email.com" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+      <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column - Checkout Steps */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Progress Steps */}
+          <div className="flex items-center justify-between">
+            {steps.map((step, index) => (
+              <div key={step.id} className="flex items-center">
+                <div className="flex items-center">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    step.completed ? 'bg-green-600' : currentStep === step.id ? 'bg-green-600' : 'bg-gray-600'
+                  }`}>
+                    {step.completed ? <CheckCircle className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
+                  </div>
+                  <span className="ml-2 text-sm">{step.title}</span>
+                </div>
+                {index < steps.length - 1 && (
+                  <div className={`w-24 h-0.5 mx-4 ${
+                    step.completed ? 'bg-green-600' : 'bg-gray-600'
+                  }`} />
+                )}
+              </div>
+            ))}
+          </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="customerPhone"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Telefone *</FormLabel>
-                              <FormControl>
-                                <Input placeholder="(11) 99999-9999" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+          {/* Payment Method Section */}
+          {currentStep >= 1 && (
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-white">Método de pagamento</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="border border-green-600 rounded-lg p-4 bg-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <span className="text-green-400">Adicionar Método de Pagamento</span>
+                    </div>
+                    <Edit className="w-4 h-4 text-green-400" />
+                  </div>
+                </div>
 
-                        <FormField
-                          control={form.control}
-                          name="customerCompany"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Empresa (opcional)</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Nome da empresa" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <FormField
-                        control={form.control}
-                        name="projectDescription"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Descrição do Projeto *</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Descreva detalhadamente o que você precisa..."
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="budget"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Orçamento Estimado *</FormLabel>
-                              <FormControl>
-                                <Input placeholder="R$ 5.000,00" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="deadline"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Prazo Desejado *</FormLabel>
-                              <FormControl>
-                                <Input type="date" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <FormField
-                        control={form.control}
-                        name="priority"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Prioridade</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione a prioridade" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="Baixa">Baixa</SelectItem>
-                                <SelectItem value="Média">Média</SelectItem>
-                                <SelectItem value="Alta">Alta</SelectItem>
-                                <SelectItem value="Urgente">Urgente</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="observations"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Observações Adicionais</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                placeholder="Informações extras, referências, requisitos específicos..."
-                                {...field} 
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="flex gap-4 pt-4">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="flex-1"
-                          onClick={() => setLocation("/")}
-                        >
-                          <RemixIcon name="ri-arrow-left-line" className="w-4 h-4 mr-2" />
-                          Voltar
-                        </Button>
-                        
-                        <Button
-                          type="submit"
-                          className="flex-1 bg-accent hover:bg-accent/80"
-                          disabled={createOrderMutation.isPending}
-                        >
-                          {createOrderMutation.isPending ? (
-                            <>
-                              <RemixIcon name="ri-loader-4-line" className="w-4 h-4 mr-2 animate-spin" />
-                              Enviando...
-                            </>
-                          ) : (
-                            <>
-                              <RemixIcon name="ri-send-plane-line" className="w-4 h-4 mr-2" />
-                              Solicitar Orçamento
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Resumo do Pedido */}
-            <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <RemixIcon name="ri-shopping-bag-line" />
-                    Resumo do Pedido
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {selectedProject && (
+                {/* Client Details Form */}
+                <div className="mt-6 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <h4 className="font-semibold text-foreground mb-2">Projeto Selecionado</h4>
-                      <div className="p-3 bg-secondary/10 rounded-lg">
-                        <h5 className="font-medium">{selectedProject.title}</h5>
-                        <p className="text-sm text-foreground/70 mt-1">{selectedProject.category}</p>
-                        {selectedProject.price && (
-                          <p className="text-sm font-medium text-green-600 mt-1">
-                            R$ {parseFloat(selectedProject.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </p>
-                        )}
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {selectedProject.technologies.slice(0, 3).map((tech, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {tech}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
+                      <Label htmlFor="clientName">Nome completo</Label>
+                      <Input
+                        id="clientName"
+                        value={formData.clientName}
+                        onChange={(e) => setFormData({...formData, clientName: e.target.value})}
+                        className="bg-gray-700 border-gray-600 text-white"
+                        required
+                      />
                     </div>
-                  )}
-
-                  {selectedService && (
                     <div>
-                      <h4 className="font-semibold text-foreground mb-2">Serviço Selecionado</h4>
-                      <div className="p-3 bg-secondary/10 rounded-lg">
-                        <h5 className="font-medium">{selectedService.title}</h5>
-                        <p className="text-sm text-foreground/70 mt-1">
-                          R$ {parseFloat(selectedService.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  <Separator />
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-foreground/70">Tipo:</span>
-                      <span>{selectedProject ? 'Projeto' : selectedService ? 'Serviço' : 'Personalizado'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-foreground/70">Status:</span>
-                      <Badge variant="outline">Orçamento</Badge>
+                      <Label htmlFor="clientEmail">Email</Label>
+                      <Input
+                        id="clientEmail"
+                        type="email"
+                        value={formData.clientEmail}
+                        onChange={(e) => setFormData({...formData, clientEmail: e.target.value})}
+                        className="bg-gray-700 border-gray-600 text-white"
+                        required
+                      />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  
+                  <div>
+                    <Label htmlFor="clientPhone">Telefone</Label>
+                    <Input
+                      id="clientPhone"
+                      value={formData.clientPhone}
+                      onChange={(e) => setFormData({...formData, clientPhone: e.target.value})}
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="description">Descrição do projeto</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      className="bg-gray-700 border-gray-600 text-white"
+                      rows={4}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="deadline">Prazo desejado</Label>
+                    <Input
+                      id="deadline"
+                      type="date"
+                      value={formData.deadline}
+                      onChange={(e) => setFormData({...formData, deadline: e.target.value})}
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="notes">Observações adicionais</Label>
+                    <Textarea
+                      id="notes"
+                      value={formData.notes}
+                      onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                      className="bg-gray-700 border-gray-600 text-white"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Right Column - Order Summary */}
+        <div className="space-y-6">
+          <Card className="bg-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-white">Resumo do pedido</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Cart Items */}
+              {items.map((cartItem) => (
+                <div key={cartItem.id} className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center text-white font-bold">
+                    {cartItem.quantity}x
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-white font-medium">{cartItem.item.title}</p>
+                    <p className="text-gray-400 text-sm">
+                      {cartItem.type === 'project' ? 'Projeto' : 'Serviço'}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-white font-bold">
+                      R$ {parseFloat(cartItem.item.price || "0").toFixed(2)}
+                    </span>
+                    <div className="flex items-center space-x-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => updateQuantity(cartItem.id, cartItem.quantity - 1)}
+                        className="w-6 h-6 p-0"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => updateQuantity(cartItem.id, cartItem.quantity + 1)}
+                        className="w-6 h-6 p-0"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <Separator className="bg-gray-600" />
+
+              {/* Pricing Summary */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-white">
+                  <span>Preço do item</span>
+                  <span>R$ {getTotal().toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-green-400">
+                  <span>Desconto</span>
+                  <span>(-) R$ {discount.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <Separator className="bg-gray-600" />
+
+              <div className="flex justify-between text-xl font-bold text-white">
+                <span>Total</span>
+                <span className="text-green-400">R$ {(getTotal() - discount).toFixed(2)}</span>
+              </div>
+
+              {/* Terms and Conditions */}
+              <div className="flex items-start space-x-2 pt-4">
+                <Checkbox
+                  id="acceptTerms"
+                  checked={formData.acceptTerms}
+                  onCheckedChange={(checked) => 
+                    setFormData({...formData, acceptTerms: !!checked})
+                  }
+                  className="border-gray-600"
+                />
+                <label htmlFor="acceptTerms" className="text-sm text-gray-300 leading-tight">
+                  Eu concordo que fazer o pedido me coloca sob{" "}
+                  <a href="#" className="text-green-400 underline">os Termos e Condições</a> e{" "}
+                  <a href="#" className="text-green-400 underline">Política de Privacidade</a>
+                </label>
+              </div>
+
+              {/* Action Button */}
+              <Button
+                onClick={handleSubmit}
+                disabled={!formData.acceptTerms || createOrderMutation.isPending}
+                className="w-full bg-gray-600 hover:bg-gray-500 text-white mt-6"
+              >
+                {createOrderMutation.isPending ? "Processando..." : "Realizar pedido"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Additional Options */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-green-400 cursor-pointer">
+              <span>Se Algum Produto Não Estiver Disponível</span>
+              <span>›</span>
+            </div>
+            <div className="flex items-center justify-between text-green-400 cursor-pointer">
+              <span>Adicionar Mais Instruções De Entrega</span>
+              <span>›</span>
             </div>
           </div>
-        )}
-
-        {step === "payment" && createdOrderId && (
-          <div className="max-w-2xl mx-auto">
-            <PaymentMethods
-              onMethodSelect={handlePaymentMethodSelect}
-              onProceedToPayment={handleProceedToPayment}
-              selectedMethod={selectedPaymentMethod}
-              amount={orderAmount}
-            />
-          </div>
-        )}
-
-        {step === "processing" && createdOrderId && selectedPaymentMethod && (
-          <div className="max-w-2xl mx-auto">
-            {selectedPaymentMethod === "stripe" && (
-              <StripeCheckout
-                orderId={createdOrderId}
-                amount={orderAmount}
-                onSuccess={handlePaymentSuccess}
-              />
-            )}
-            {selectedPaymentMethod === "mercadopago" && (
-              <MercadoPagoCheckout
-                orderId={createdOrderId}
-                amount={orderAmount}
-                onSuccess={handlePaymentSuccess}
-              />
-            )}
-          </div>
-        )}
+        </div>
       </div>
+
+      {/* Success Message */}
+      {currentStep === 2 && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <Card className="bg-gray-800 border-gray-700 max-w-md mx-4">
+            <CardContent className="p-6 text-center">
+              <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-white mb-2">Pedido Confirmado!</h2>
+              <p className="text-gray-400 mb-6">
+                Seu pedido foi recebido com sucesso. Entraremos em contato em breve para confirmar os detalhes.
+              </p>
+              <Button onClick={() => navigate("/")} className="bg-green-600 hover:bg-green-700">
+                Voltar à página inicial
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

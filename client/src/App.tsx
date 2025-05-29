@@ -7,9 +7,9 @@ import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import AdminPage from "@/pages/admin-page";
 import ProfilePage from "@/pages/profile-page";
-import CheckoutPage from "@/pages/checkout-page";
+import { CheckoutPage } from "@/pages/checkout-page";
 import { AuthProvider } from "./hooks/use-auth";
-import { CartProvider } from "./hooks/use-cart";
+import { CartProvider } from "./contexts/CartContext";
 
 function Router() {
   return (

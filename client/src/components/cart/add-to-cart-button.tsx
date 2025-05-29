@@ -1,6 +1,6 @@
 import { ShoppingCart, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/hooks/use-cart';
+import { useCart } from '@/contexts/CartContext';
 import { Project, Service } from '@shared/schema';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
