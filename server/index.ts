@@ -38,8 +38,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Sistema funcionando com dados em memória - banco PostgreSQL disponível via scripts de migração
-  log("Sistema inicializado com sucesso usando storage em memória");
+  // Sistema configurado para usar PostgreSQL quando disponível
+  const storageType = process.env.DATABASE_URL ? "PostgreSQL" : "memória";
+  log(`Sistema inicializado com sucesso usando storage em ${storageType}`);
 
   const server = await registerRoutes(app);
 

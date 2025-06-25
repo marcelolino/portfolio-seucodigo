@@ -109,7 +109,7 @@ export class MemStorage implements IStorage {
     // Seed admin user
     this.createUser({
       username: "admin",
-      password: "$2b$10$EYqgMBTGj5QJ/QnWAWQhZ.cG9G0L7Nb4/t0BVuQlFqB9vDGECM6G6", // hashed "admin123"
+      password: "836a1c15ef1d7f91ca00d01eda029bca68bc44827880eddfce8b862d1891a66e082f717271b761881b7b3fdad7052da41c0d83340f9253e50d08b926566d5796.e45b687a544687772e3df978a162733c", // hashed "admin123" using scrypt
       name: "Admin",
       email: "admin@seucodigo.com",
       role: "admin"
@@ -428,4 +428,6 @@ export class MemStorage implements IStorage {
 
 // Usar o DatabaseStorage para banco de dados PostgreSQL
 import { DatabaseStorage } from "./dbStorage";
-export const storage = new MemStorage();
+
+// Use PostgreSQL database if available, otherwise fallback to memory storage
+export const storage = process.env.DATABASE_URL ? new DatabaseStorage() : new MemStorage();
