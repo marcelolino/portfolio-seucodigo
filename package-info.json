@@ -1,0 +1,55 @@
+{
+  "name": "seucodigo-portfolio",
+  "version": "1.0.0",
+  "description": "Portfolio e E-commerce Platform completo com React, Node.js e PostgreSQL",
+  "main": "server/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "NODE_ENV=development tsx server/index.ts",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && vite build",
+    "build:server": "tsc --project tsconfig.json",
+    "start": "NODE_ENV=production node dist/server/index.js",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "keywords": [
+    "portfolio",
+    "ecommerce", 
+    "react",
+    "nodejs",
+    "typescript",
+    "postgresql",
+    "tailwindcss"
+  ],
+  "author": "SeuCodigo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seucodigo/portfolio-platform.git"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "system_requirements": {
+    "database": "PostgreSQL 14+",
+    "memory": "512MB minimum",
+    "storage": "1GB minimum"
+  },
+  "features": [
+    "Sistema completo de autenticação",
+    "Carrinho de compras funcional", 
+    "Checkout com PIX e cartão",
+    "Dashboard administrativo",
+    "Chat em tempo real",
+    "Design responsivo",
+    "Tema neon/dark customizado"
+  ],
+  "deployment": {
+    "platform": "Replit",
+    "database": "PostgreSQL",
+    "build_command": "npm run build",
+    "start_command": "npm start"
+  }
+}

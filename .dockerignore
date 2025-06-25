@@ -1,0 +1,15 @@
+node_modules
+.git
+.cache
+.config
+.local
+.upm
+attached_assets
+generated-icon.png
+dist
+build
+.env
+.env.local
+*.log
+.DS_Store
+Thumbs.db
