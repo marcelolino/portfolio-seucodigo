@@ -38,8 +38,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Temporariamente usando storage em memória devido a problemas de endpoint do banco
-  log("Usando storage em memória temporariamente");
+  // Temporariamente usando storage em memória - banco PostgreSQL fornecido tem endpoint desabilitado
+  log("Sistema funcionando com storage em memória temporariamente");
 
   const server = await registerRoutes(app);
 
