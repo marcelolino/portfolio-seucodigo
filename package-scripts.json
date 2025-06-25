@@ -1,0 +1,24 @@
+{
+  "scripts": {
+    "migrate:local": "node run-local-migration.js",
+    "setup:local": "npm run migrate:local && npm run dev",
+    "db:create": "createdb portfolio",
+    "db:drop": "dropdb portfolio",
+    "db:reset": "npm run db:drop && npm run db:create && npm run migrate:local"
+  },
+  "instructions": {
+    "setup": [
+      "1. Certifique-se que PostgreSQL está rodando",
+      "2. Crie o banco: npm run db:create (ou CREATE DATABASE portfolio;)",
+      "3. Configure .env com DATABASE_URL=postgresql://postgres:123@localhost:5432/portfolio",
+      "4. Execute: npm run migrate:local",
+      "5. Inicie o projeto: npm run dev"
+    ],
+    "troubleshooting": {
+      "connection_refused": "Verifique se PostgreSQL está rodando (brew services start postgresql ou sudo service postgresql start)",
+      "database_not_exist": "Execute: createdb portfolio ou CREATE DATABASE portfolio;",
+      "permission_denied": "Verifique usuário e senha no DATABASE_URL",
+      "port_5432": "Confirme se PostgreSQL está na porta 5432"
+    }
+  }
+}

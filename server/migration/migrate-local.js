@@ -1,4 +1,4 @@
-import { db } from '../db.js';
+import { db, testConnection } from '../db-local.js';
 import { hashPassword } from '../auth.js';
 import * as schema from "../../shared/schema.js";
 
@@ -144,18 +144,30 @@ const seedData = {
 async function runMigration() {
   console.log("🚀 Iniciando migração para banco PostgreSQL local...");
   
+  // Testar conexão primeiro
+  console.log("🔌 Testando conexão com o banco...");
+  const connectionOk = await testConnection();
+  if (!connectionOk) {
+    throw new Error("Falha na conexão com o banco de dados");
+  }
+  
   try {
-    // Limpar tabelas existentes
+    // Limpar tabelas existentes (ordem importante devido às foreign keys)
     console.log("🧹 Limpando dados existentes...");
-    await db.delete(schema.messages);
-    await db.delete(schema.contacts);
-    await db.delete(schema.orders);
-    await db.delete(schema.testimonials);
-    await db.delete(schema.services);
-    await db.delete(schema.projects);
-    await db.delete(schema.paymentMethods);
-    await db.delete(schema.siteSettings);
-    await db.delete(schema.users);
+    try {
+      await db.delete(schema.messages);
+      await db.delete(schema.contacts);
+      await db.delete(schema.orders);
+      await db.delete(schema.testimonials);
+      await db.delete(schema.services);
+      await db.delete(schema.projects);
+      await db.delete(schema.paymentMethods);
+      await db.delete(schema.siteSettings);
+      await db.delete(schema.users);
+      console.log("  ✅ Dados existentes removidos");
+    } catch (cleanError) {
+      console.log("  ℹ️ Algumas tabelas podem não existir ainda (normal na primeira execução)");
+    }
 
     // Inserir usuários com senhas hasheadas
     console.log("👥 Inserindo usuários...");
@@ -212,7 +224,16 @@ async function runMigration() {
     // Inserir configurações do site
     console.log("⚙️ Inserindo configurações do site...");
     await db.insert(schema.siteSettings).values({
-      ...seedData.siteSettings,
+      siteName: seedData.siteSettings.siteName,
+      siteTitle: seedData.siteSettings.siteTitle,
+      siteDescription: seedData.siteSettings.siteDescription,
+      contactEmail: seedData.siteSettings.contactEmail,
+      contactPhone: seedData.siteSettings.contactPhone,
+      address: seedData.siteSettings.address,
+      socialMedia: JSON.stringify(seedData.siteSettings.socialMedia),
+      theme: seedData.siteSettings.theme,
+      primaryColor: seedData.siteSettings.primaryColor,
+      secondaryColor: seedData.siteSettings.secondaryColor,
       createdAt: new Date()
     });
     console.log("  ✅ Configurações inseridas");
@@ -221,7 +242,10 @@ async function runMigration() {
     console.log("💳 Inserindo métodos de pagamento...");
     for (const payment of seedData.paymentMethods) {
       await db.insert(schema.paymentMethods).values({
-        ...payment,
+        provider: payment.provider,
+        name: payment.name,
+        isActive: payment.isActive,
+        config: JSON.stringify(payment.config),
         createdAt: new Date()
       });
       console.log(`  ✅ Método ${payment.name} inserido`);
