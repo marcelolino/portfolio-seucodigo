@@ -24,9 +24,11 @@ SeuCodigo is a modern full-stack web application that serves as both a portfolio
 - **Real-time Communication**: WebSocket integration for chat functionality
 
 ### Database Design
-- **Primary Database**: PostgreSQL (Neon serverless in production)
-- **Schema Management**: Drizzle Kit for migrations and schema management
+- **Primary Database**: PostgreSQL configurado e funcionando
+- **Schema Management**: Drizzle Kit para migrações e gerenciamento de schema
+- **Storage**: Sistema automaticamente usa PostgreSQL quando DATABASE_URL está disponível
 - **Tables**: Users, Projects, Services, Testimonials, Messages, Contacts, Site Settings, Orders, Payment Methods
+- **Authentication**: Sistema de hash scrypt para senhas seguras
 
 ## Key Components
 
@@ -105,14 +107,17 @@ SeuCodigo is a modern full-stack web application that serves as both a portfolio
 ✓ Métodos de pagamento PIX e cartão configurados
 ✓ Tela PIX personalizada conforme design fornecido
 ✓ Interface responsiva com tema neon/dark
-✓ Dados de demonstração completos carregados em memória
-✓ Scripts de migração PostgreSQL criados para uso futuro
-✓ Sistema otimizado para performance sem dependência de banco externo
+✓ Banco PostgreSQL configurado e funcionando corretamente
+✓ Sistema de autenticação corrigido (hash scrypt)
+✓ Migração completa de dados para PostgreSQL executada
+✓ Login do usuário admin funcionando (admin/admin123)
 
 ## Changelog
 
 ```
 Changelog:
+- June 25, 2025: Problemas de login e migração resolvidos
+- June 25, 2025: PostgreSQL configurado e dados migrados com sucesso
 - June 25, 2025: Sistema e-commerce completo implementado
 - June 25, 2025: Configuração inicial e estrutura base
 ```
