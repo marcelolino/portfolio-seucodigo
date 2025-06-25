@@ -67,7 +67,7 @@ export interface IStorage {
   deletePaymentMethod(id: number): Promise<boolean>;
   
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
 }
 
 export class MemStorage implements IStorage {
@@ -85,7 +85,7 @@ export class MemStorage implements IStorage {
   private messageIdCounter: number;
   private contactIdCounter: number;
   
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
 
   constructor() {
     this.users = new Map();
@@ -137,7 +137,13 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
     const createdAt = new Date();
-    const user: User = { ...insertUser, id, createdAt };
+    const user: User = { 
+      ...insertUser, 
+      id, 
+      createdAt,
+      avatar: insertUser.avatar || null,
+      role: insertUser.role || "user"
+    };
     this.users.set(id, user);
     return user;
   }
@@ -158,7 +164,16 @@ export class MemStorage implements IStorage {
   async createProject(insertProject: InsertProject): Promise<Project> {
     const id = this.projectIdCounter++;
     const createdAt = new Date();
-    const project: Project = { ...insertProject, id, createdAt };
+    const project: Project = { 
+      ...insertProject, 
+      id, 
+      createdAt,
+      imageUrl: insertProject.imageUrl || null,
+      featured: insertProject.featured || null,
+      order: insertProject.order || null,
+      price: insertProject.price || null,
+      status: insertProject.status || "active"
+    };
     this.projects.set(id, project);
     return project;
   }
@@ -188,7 +203,16 @@ export class MemStorage implements IStorage {
   async createService(insertService: InsertService): Promise<Service> {
     const id = this.serviceIdCounter++;
     const createdAt = new Date();
-    const service: Service = { ...insertService, id, createdAt };
+    const service: Service = { 
+      ...insertService, 
+      id, 
+      createdAt,
+      imageUrl: insertService.imageUrl || null,
+      featured: insertService.featured || null,
+      order: insertService.order || null,
+      price: insertService.price || null,
+      status: insertService.status || "active"
+    };
     this.services.set(id, service);
     return service;
   }
@@ -218,7 +242,13 @@ export class MemStorage implements IStorage {
   async createTestimonial(insertTestimonial: InsertTestimonial): Promise<Testimonial> {
     const id = this.testimonialIdCounter++;
     const createdAt = new Date();
-    const testimonial: Testimonial = { ...insertTestimonial, id, createdAt };
+    const testimonial: Testimonial = { 
+      ...insertTestimonial, 
+      id, 
+      createdAt,
+      order: insertTestimonial.order || null,
+      position: insertTestimonial.position || null
+    };
     this.testimonials.set(id, testimonial);
     return testimonial;
   }
@@ -254,7 +284,15 @@ export class MemStorage implements IStorage {
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
     const id = this.messageIdCounter++;
     const createdAt = new Date();
-    const message: Message = { ...insertMessage, id, createdAt };
+    const message: Message = { 
+      ...insertMessage, 
+      id, 
+      createdAt,
+      userId: insertMessage.userId || null,
+      receiverId: insertMessage.receiverId || null,
+      isAdmin: insertMessage.isAdmin || false,
+      isRead: insertMessage.isRead || null
+    };
     this.messages.set(id, message);
     return message;
   }
@@ -271,7 +309,12 @@ export class MemStorage implements IStorage {
   async createContact(insertContact: InsertContact): Promise<Contact> {
     const id = this.contactIdCounter++;
     const createdAt = new Date();
-    const contact: Contact = { ...insertContact, id, createdAt };
+    const contact: Contact = { 
+      ...insertContact, 
+      id, 
+      createdAt,
+      isRead: insertContact.isRead || null
+    };
     this.contacts.set(id, contact);
     return contact;
   }
