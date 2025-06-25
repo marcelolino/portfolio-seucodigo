@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Direto - SeuCodigo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .download-card {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #00ff88;
+        }
+        .download-btn {
+            display: inline-block;
+            background: #00ff88;
+            color: #000;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .download-btn:hover {
+            background: #00cc66;
+        }
+        .file-info {
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #ff6b35;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔽 Download Direto - Projeto SeuCodigo</h1>
+    
+    <div class="warning">
+        <strong>⚠️ Atenção:</strong> Se o download pelo painel do Replit não funcionar, use os links diretos abaixo.
+    </div>
+
+    <div class="download-card">
+        <h2>📦 Projeto Completo (Recomendado)</h2>
+        <div class="file-info">
+            <strong>Arquivo:</strong> seucodigo-minimal.tar.gz<br>
+            <strong>Tamanho:</strong> ~136KB<br>
+            <strong>Conteúdo:</strong> Frontend + Backend + Banco + Docs
+        </div>
+        <a href="./seucodigo-minimal.tar.gz" class="download-btn" download>
+            ⬇️ Download Completo
+        </a>
+    </div>
+
+    <div class="download-card">
+        <h2>🚀 Projeto Essencial (Menor)</h2>
+        <div class="file-info">
+            <strong>Arquivo:</strong> projeto-core.tar.gz<br>
+            <strong>Tamanho:</strong> ~80KB<br>
+            <strong>Conteúdo:</strong> Apenas código fonte essencial
+        </div>
+        <a href="./projeto-core.tar.gz" class="download-btn" download>
+            ⬇️ Download Essencial
+        </a>
+    </div>
+
+    <div class="download-card">
+        <h2>📋 Instruções Pós-Download</h2>
+        <pre style="background: #111; padding: 15px; border-radius: 5px; overflow-x: auto;">
+# 1. Extrair arquivo
+tar -xzf arquivo.tar.gz
+cd seucodigo-clean/
+
+# 2. Instalar dependências
+npm install
+
+# 3. Configurar banco (.env)
+DATABASE_URL=postgresql://postgres:123@localhost:5432/portfolio
+SESSION_SECRET=sua_chave_secreta
+
+# 4. Executar migração
+node run-local-migration.js
+
+# 5. Iniciar projeto
+npm run dev
+        </pre>
+    </div>
+
+    <div class="download-card">
+        <h2>🔑 Credenciais</h2>
+        <div class="file-info">
+            <strong>Admin:</strong> admin / admin123<br>
+            <strong>Cliente:</strong> cliente1 / cliente123
+        </div>
+    </div>
+
+    <script>
+        // Verificar se arquivos existem e mostrar status
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('.download-btn');
+            links.forEach(link => {
+                fetch(link.href, {method: 'HEAD'})
+                    .then(response => {
+                        if (!response.ok) {
+                            link.style.background = '#666';
+                            link.style.cursor = 'not-allowed';
+                            link.innerHTML = '❌ Arquivo não encontrado';
+                        }
+                    })
+                    .catch(() => {
+                        // Ignorar erros CORS
+                    });
+            });
+        });
+    </script>
+</body>
+</html>
