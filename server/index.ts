@@ -38,14 +38,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Inicializar banco de dados primeiro
-  try {
-    await initializeDatabase();
-    log("Banco de dados inicializado com sucesso!");
-  } catch (error) {
-    log("Erro ao inicializar banco de dados:", error);
-    process.exit(1);
-  }
+  // Temporariamente usando storage em memória devido a problemas de endpoint do banco
+  log("Usando storage em memória temporariamente");
 
   const server = await registerRoutes(app);
 
