@@ -677,7 +677,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         switch (data.type) {
           case 'authenticate':
-            if (data.userId) {
+            if (data.userId && data.userId !== null) {
               userId = data.userId;
               const user = await storage.getUser(userId);
               
@@ -691,6 +691,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   console.log("User authenticated:", userId);
                 }
               }
+            } else if (data.isAdmin) {
+              // Admin authentication without userId
+              isAdmin = true;
+              adminClients.push(ws);
+              console.log("Admin authenticated without specific userId");
             } else {
               // This is a visitor without authentication
               isVisitor = true;
@@ -709,7 +714,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Save message to database
               const newMessage = await storage.createMessage({
-                userId: isAdmin ? data.userId : userId, // userId para mensagens admin->user, null para visitantes
+                userId: isAdmin ? data.userId : (userId || null), // Use actual userId for logged-in users, null for visitors
                 content: data.content,
                 isAdmin: isAdmin
               });

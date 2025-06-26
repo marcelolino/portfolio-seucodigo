@@ -302,9 +302,26 @@ export function AdminChat() {
                 )}
 
                 {/* Usuários registrados */}
-                {users?.filter(user => user.role !== "admin").map((user) => {
-                  const lastMsg = getUserLastMessage(user.id);
-                  const unreadCount = getUnreadCount(user.id);
+                {users?.filter(user => {
+                  // Only show users who have messages and are not admin
+                  return user.role !== "admin" && allMessages.some(msg => msg.userId === user.id);
+                }).map((user) => {
+                  const userMsgs = allMessages.filter(msg => msg.userId === user.id);
+                  const lastMsg = userMsgs[userMsgs.length - 1];
+                  const unreadCount = userMsgs.filter(msg => !msg.isAdmin && !msg.isRead).length;
+                  
+                  // Generate consistent color for each user based on their ID
+                  const colors = [
+                    { bg: 'bg-blue-500', color: '3b82f6' },
+                    { bg: 'bg-green-500', color: '22c55e' },
+                    { bg: 'bg-purple-500', color: 'a855f7' },
+                    { bg: 'bg-red-500', color: 'ef4444' },
+                    { bg: 'bg-yellow-500', color: 'eab308' },
+                    { bg: 'bg-indigo-500', color: '6366f1' },
+                    { bg: 'bg-pink-500', color: 'ec4899' },
+                    { bg: 'bg-teal-500', color: '14b8a6' }
+                  ];
+                  const userColorScheme = colors[user.id % colors.length];
                   
                   return (
                     <button
@@ -317,8 +334,8 @@ export function AdminChat() {
                       onClick={() => setActiveUser(user)}
                     >
                       <Avatar className="h-10 w-10 mr-3">
-                        <AvatarImage src={`https://ui-avatars.com/api/?name=${user.name}&background=2563eb&color=fff`} />
-                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                        <AvatarImage src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=${userColorScheme.color}&color=fff`} />
+                        <AvatarFallback className={`${userColorScheme.bg} text-white`}>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 text-left">
                         <div className="flex justify-between">
@@ -377,27 +394,48 @@ export function AdminChat() {
               <ScrollArea className="flex-1 p-4">
                 <div className="space-y-4">
                   {getDisplayMessages().length > 0 ? (
-                    getDisplayMessages().map((msg, index) => (
-                      <div
-                        key={index}
-                        className={`flex ${msg.isAdmin ? 'justify-end' : 'justify-start'} ${
-                          msg.animateIn ? 'animate-fadeIn' : ''
-                        }`}
-                      >
+                    getDisplayMessages().map((msg, index) => {
+                      // Generate consistent color for each user
+                      const colors = [
+                        { bg: 'bg-blue-500', border: 'border-blue-600' },
+                        { bg: 'bg-green-500', border: 'border-green-600' },
+                        { bg: 'bg-purple-500', border: 'border-purple-600' },
+                        { bg: 'bg-red-500', border: 'border-red-600' },
+                        { bg: 'bg-yellow-500', border: 'border-yellow-600' },
+                        { bg: 'bg-indigo-500', border: 'border-indigo-600' },
+                        { bg: 'bg-pink-500', border: 'border-pink-600' },
+                        { bg: 'bg-teal-500', border: 'border-teal-600' }
+                      ];
+                      
+                      let userColorScheme = { bg: 'bg-gray-200', border: 'border-gray-300' };
+                      if (msg.userId && !msg.isAdmin) {
+                        userColorScheme = colors[msg.userId % colors.length];
+                      }
+                      
+                      return (
                         <div
-                          className={`max-w-[80%] px-4 py-2 rounded-lg ${
-                            msg.isAdmin
-                              ? 'bg-blue-600 text-white shadow-md'
-                              : 'bg-gray-200 text-gray-800 border border-gray-300'
+                          key={index}
+                          className={`flex ${msg.isAdmin ? 'justify-end' : 'justify-start'} ${
+                            msg.animateIn ? 'animate-fadeIn' : ''
                           }`}
                         >
-                          <p className="mb-1">{msg.content}</p>
-                          <p className="text-xs opacity-70">
-                            {formatDate(new Date(msg.createdAt))}
-                          </p>
+                          <div
+                            className={`max-w-[80%] px-4 py-2 rounded-lg ${
+                              msg.isAdmin
+                                ? 'bg-blue-600 text-white shadow-md'
+                                : msg.userId 
+                                  ? `${userColorScheme.bg} text-white shadow-md border ${userColorScheme.border}`
+                                  : 'bg-gray-200 text-gray-800 border border-gray-300'
+                            }`}
+                          >
+                            <p className="mb-1">{msg.content}</p>
+                            <p className={`text-xs ${msg.isAdmin || msg.userId ? 'text-white/70' : 'text-gray-500'}`}>
+                              {formatDate(new Date(msg.createdAt))}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="text-center py-10">
                       <p className="text-gray-500">
