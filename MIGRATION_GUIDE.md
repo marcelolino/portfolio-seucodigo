@@ -1,223 +1,210 @@
-# Guia de Migração para PostgreSQL Neon
+# 🔄 Guia de Migração Local - SeuCodigo
 
-Este documento contém as instruções completas para migrar o sistema SeuCodigo para o banco PostgreSQL Neon fornecido.
+## Pré-requisitos
 
-## ✅ Status Atual do Banco
-
-O banco PostgreSQL está **configurado e funcionando corretamente**. O sistema foi migrado com sucesso e todos os dados estão persistidos no banco.
-
-## ✅ Sistema Atual Funcionando
-
-O sistema está operacional com:
-- Dados de demonstração completos (usuários, projetos, serviços, depoimentos)
-- Sistema de carrinho de compras funcional
-- Checkout com PIX e cartão implementado
-- Interface de pagamento PIX conforme especificado
-
-## 📋 Pré-requisitos
-
-- Node.js 18+ instalado
-- Acesso ao banco PostgreSQL Neon
-- Variáveis de ambiente configuradas
-
-## 🔧 Configuração do Banco de Dados
-
-### URL de Conexão
-```
-postgresql://neondb_owner:npg_8SC0GMqKxEUy@ep-shiny-mode-a55x91xd.us-east-2.aws.neon.tech/neondb?sslmode=require
-```
-
-### Variáveis de Ambiente
-Adicione as seguintes variáveis ao seu ambiente:
-
+### 1. PostgreSQL Instalado
 ```bash
-DATABASE_URL="postgresql://neondb_owner:npg_8SC0GMqKxEUy@ep-shiny-mode-a55x91xd.us-east-2.aws.neon.tech/neondb?sslmode=require"
-PGHOST="ep-shiny-mode-a55x91xd.us-east-2.aws.neon.tech"
-PGDATABASE="neondb"
-PGUSER="neondb_owner"
-PGPASSWORD="npg_8SC0GMqKxEUy"
-PGPORT="5432"
+# Windows (usando chocolatey)
+choco install postgresql
+
+# Ou baixar do site oficial
+# https://www.postgresql.org/download/windows/
+
+# Verificar se está rodando
+pg_ctl status
 ```
 
-## 🚀 Processo de Migração
-
-### Passo 1: Atualizar Configuração
-Primeiro, atualize o arquivo `server/storage.ts` para usar o DatabaseStorage:
-
-```javascript
-// Comentar esta linha:
-// export const storage = new MemStorage();
-
-// Descomentar esta linha:
-export const storage = new DatabaseStorage();
-```
-
-### Passo 2: Executar Migração do Schema
-Execute o comando para criar as tabelas no banco:
-
+### 2. Node.js 18+ com tsx
 ```bash
-npm run db:push
+# Instalar dependências
+npm install
+
+# Verificar tsx
+npx tsx --version
 ```
 
-### Passo 3: Executar Seed de Dados
+## Configuração
 
-#### Opção A: Script Node.js (quando banco estiver ativo)
+### 1. Configurar PostgreSQL
+```sql
+-- Conectar ao PostgreSQL
+psql -U postgres
+
+-- Criar banco
+CREATE DATABASE portfolio;
+
+-- Verificar
+\l
+\q
+```
+
+### 2. Arquivo .env
+Crie `.env` na raiz do projeto:
+```env
+DATABASE_URL=postgresql://postgres:SUA_SENHA@localhost:5432/portfolio
+SESSION_SECRET=chave_secreta_muito_forte_aqui
+NODE_ENV=development
+```
+
+## Executar Migração
+
+### Opção 1: Via npm (Recomendado)
 ```bash
-tsx server/migration/migrate-to-neon.js
+npm run db:migrate:local
 ```
 
-#### Opção B: Script SQL direto (recomendado)
-Execute o arquivo SQL diretamente no banco PostgreSQL:
-
+### Opção 2: Via tsx diretamente
 ```bash
-psql "postgresql://neondb_owner:npg_8SC0GMqKxEUy@ep-shiny-mode-a55x91xd.us-east-2.aws.neon.tech/neondb?sslmode=require" -f server/migration/migrate-with-psql.sql
+npx tsx run-local-migration.ts
 ```
 
-Ou acesse o console Neon e execute o conteúdo de `server/migration/migrate-with-psql.sql`
+### Opção 3: Via Node.js (se configurado)
+```bash
+node --loader tsx/esm run-local-migration.ts
+```
 
-### Passo 4: Reativar Inicialização do Banco
-No arquivo `server/index.ts`, reative a inicialização do banco:
+## Scripts Disponíveis
 
-```javascript
-// Descomentar estas linhas:
-try {
-  await initializeDatabase();
-  log("Banco de dados inicializado com sucesso!");
-} catch (error) {
-  log("Erro ao inicializar banco de dados:", error);
-  process.exit(1);
+```json
+{
+  "scripts": {
+    "db:migrate:local": "tsx run-local-migration.ts",
+    "db:test": "tsx test-local-connection.ts",
+    "db:setup": "npm run db:migrate:local && npm run dev"
+  }
 }
-
-// Comentar esta linha:
-// log("Usando storage em memória temporariamente");
 ```
 
-### Passo 5: Reiniciar Aplicação
-Reinicie o servidor para aplicar as mudanças:
+## Dados Criados
 
+Após a migração, você terá:
+
+### Usuários
+- **admin** / admin123 (Administrador)
+- **cliente1** / cliente123 (Cliente)
+
+### Projetos (3)
+- E-commerce Platform
+- Portfolio Responsivo  
+- Sistema de Gestão
+
+### Serviços (3)
+- Desenvolvimento Web Full-Stack
+- Design UX/UI
+- Consultoria Técnica
+
+### Outros
+- 3 depoimentos de clientes
+- Configurações do site
+- 2 métodos de pagamento (PIX, Stripe)
+
+## Solução de Problemas
+
+### Erro: Module not found
+```bash
+# Instalar tsx globalmente
+npm install -g tsx
+
+# Ou usar npx
+npx tsx run-local-migration.ts
+```
+
+### Erro: Cannot find module 'pg'
+```bash
+npm install pg @types/pg
+```
+
+### Erro: ECONNREFUSED
+```bash
+# Iniciar PostgreSQL
+# Windows
+net start postgresql-x64-14
+
+# Verificar porta
+netstat -an | findstr :5432
+```
+
+### Erro: database "portfolio" does not exist
+```bash
+# Conectar e criar banco
+psql -U postgres
+CREATE DATABASE portfolio;
+\q
+```
+
+### Erro: password authentication failed
+```bash
+# Resetar senha do postgres
+psql -U postgres
+ALTER USER postgres PASSWORD 'nova_senha';
+\q
+
+# Atualizar .env
+DATABASE_URL=postgresql://postgres:nova_senha@localhost:5432/portfolio
+```
+
+## Estrutura Final
+
+```
+portfolio/
+├── users (2 registros)
+├── projects (3 registros)
+├── services (3 registros)
+├── testimonials (3 registros)
+├── messages (0 registros)
+├── contacts (0 registros)
+├── orders (0 registros)
+├── payment_methods (2 registros)
+└── site_settings (1 registro)
+```
+
+## Verificação
+
+### 1. Testar Conexão
+```bash
+npx tsx test-local-connection.ts
+```
+
+### 2. Verificar Dados
+```sql
+psql -U postgres -d portfolio
+SELECT COUNT(*) FROM users;
+SELECT COUNT(*) FROM projects;
+\q
+```
+
+### 3. Iniciar Aplicação
 ```bash
 npm run dev
+# Acesse: http://localhost:5000
+# Login: admin/admin123
 ```
 
-## 📊 Dados Incluídos na Migração
+## Troubleshooting Avançado
 
-### Usuários (3)
-- **admin** (admin@seucodigo.com) - Administrador
-- **cliente1** (joao@email.com) - Cliente teste
-- **cliente2** (maria@email.com) - Cliente teste
-
-**Senha padrão:** `admin123` para admin, `cliente123` para clientes
-
-### Projetos (6)
-1. E-commerce Responsivo
-2. Aplicativo de Gestão Financeira
-3. Portal Institucional
-4. Sistema de Reservas Online
-5. App de Delivery
-6. Dashboard Analytics
-
-### Serviços (6)
-1. Desenvolvimento Web Full-Stack
-2. Aplicativos Mobile Nativos
-3. E-commerce Personalizado
-4. Consultoria em Tecnologia
-5. Manutenção e Suporte
-6. Integração de APIs
-
-### Depoimentos (6)
-Depoimentos reais de clientes com imagens e avaliações 5 estrelas.
-
-### Configurações do Site
-- Nome: SeuCodigo
-- Tema: Dark com cores neon
-- Informações de contato
-- Links de redes sociais
-
-### Métodos de Pagamento (2)
-- Stripe (configuração para teste)
-- PIX (chave: contato@seucodigo.com)
-
-## 🔍 Verificação da Migração
-
-Após a migração, verifique se:
-
-1. ✅ O servidor inicia sem erros
-2. ✅ A página inicial carrega com projetos e serviços
-3. ✅ É possível fazer login com admin/admin123
-4. ✅ O carrinho de compras funciona
-5. ✅ A página de checkout exibe métodos de pagamento
-6. ✅ A tela PIX é acessível
-
-## 🐛 Solução de Problemas
-
-### Erro "Control plane request failed"
-- Verifique se a URL de conexão está correta
-- Confirme que o banco Neon está ativo
-- Teste a conexão manualmente
-
-### Erro de Schema
+### Windows Specific
 ```bash
-# Forçar recriação das tabelas
-npm run db:push -- --force
+# Verificar serviços PostgreSQL
+services.msc
+# Procurar por "postgresql"
+
+# Path do PostgreSQL
+# C:\Program Files\PostgreSQL\14\bin\
 ```
 
-### Erro de Autenticação
-- Verifique as credenciais do banco
-- Confirme que o usuário tem permissões adequadas
+### Port Issues
+```bash
+# Verificar porta ocupada
+netstat -ano | findstr :5432
+netstat -ano | findstr :5000
 
-### Timeout de Conexão
-- Verifique conectividade de rede
-- Confirme que SSL está habilitado
-
-## 📝 Logs de Migração
-
-O script de migração produz logs detalhados:
-
-```
-🚀 Iniciando migração para banco Neon PostgreSQL...
-🧹 Limpando tabelas...
-👥 Inserindo usuários...
-  ✅ Usuário Administrador inserido
-  ✅ Usuário João Silva inserido
-  ✅ Usuário Maria Santos inserido
-📁 Inserindo projetos...
-  ✅ Projeto E-commerce Responsivo inserido
-  [...]
-🎉 Migração concluída com sucesso!
-
-📊 Estatísticas da migração:
-  users: 3
-  projects: 6
-  services: 6
-  testimonials: 6
-  paymentMethods: 2
+# Matar processo se necessário
+taskkill /PID <PID> /F
 ```
 
-## 🔐 Segurança
-
-- Todas as senhas são hasheadas usando scrypt
-- Conexão SSL obrigatória
-- Credenciais armazenadas em variáveis de ambiente
-- Validação de entrada em todas as APIs
-
-## 📞 Suporte
-
-Em caso de problemas:
-
-1. Verifique os logs do servidor
-2. Confirme conectividade com o banco
-3. Valide as variáveis de ambiente
-4. Execute o script de migração novamente se necessário
-
-## 🔄 Rollback
-
-Para reverter para storage em memória:
-
-1. Altere `server/storage.ts` para usar `MemStorage`
-2. Comente a inicialização do banco em `server/index.ts`
-3. Reinicie o servidor
-
----
-
-**Desenvolvido para o sistema SeuCodigo**  
-*Última atualização: Janeiro 2025*
+### Logs do PostgreSQL
+```bash
+# Localizar logs
+# Windows: C:\Program Files\PostgreSQL\14\data\log\
+tail -f postgresql-*.log
+```

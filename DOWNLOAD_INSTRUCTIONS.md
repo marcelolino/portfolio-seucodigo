@@ -1,88 +1,93 @@
-# 📥 Como Fazer Download do Projeto SeuCodigo
+# 📥 Instruções de Download e Configuração
 
-## Problema: Rate Limit Exceeded
+## Download Realizado com Sucesso!
 
-Se você está enfrentando erro de "Rate limit exceeded" no download do Replit, aqui estão as soluções:
+Você baixou: `seucodigo-clean.tar.gz`
 
-## ✅ Soluções Alternativas
+## Próximos Passos
 
-### 1. Arquivo Compactado Otimizado
-- **Arquivo**: `seucodigo-minimal.tar.gz` (muito menor)
-- **Localização**: Na raiz do projeto
-- **Tamanho**: ~200KB
-- **Conteúdo**: Apenas código fonte essencial
-
-### 2. Download por Partes
-Se o download completo não funcionar, baixe as pastas individualmente:
-
-```
-📁 client/          (Interface React)
-📁 server/          (Backend Node.js)  
-📁 shared/          (Código compartilhado)
-📄 package.json     (Dependências)
-📄 README.md        (Documentação)
-```
-
-### 3. Via Terminal (se disponível)
+### 1. Extrair o Arquivo
 ```bash
-# No terminal do Replit
-tar -czf meu-projeto.tar.gz client/ server/ shared/ package.json *.config.ts *.md
+tar -xzf seucodigo-clean.tar.gz
+cd seucodigo-clean/
 ```
 
-### 4. Git Clone (se conectado)
+### 2. Instalar Dependências
 ```bash
-git clone [URL_DO_REPOSITORIO]
+npm install
 ```
 
-## 🚀 Configuração Após Download
+### 3. Configurar Banco de Dados
+Crie um arquivo `.env`:
+```env
+DATABASE_URL=postgresql://postgres:SUA_SENHA@localhost:5432/portfolio
+SESSION_SECRET=chave_secreta_muito_forte
+NODE_ENV=development
+```
 
-1. **Extrair arquivo**:
-   ```bash
-   tar -xzf seucodigo-minimal.tar.gz
-   cd seucodigo-clean
-   ```
+### 4. Configurar PostgreSQL
+```sql
+-- Conectar ao PostgreSQL
+psql -U postgres
 
-2. **Instalar dependências**:
-   ```bash
-   npm install
-   ```
+-- Criar banco
+CREATE DATABASE portfolio;
 
-3. **Configurar banco de dados**:
-   ```bash
-   # Criar arquivo .env
-   DATABASE_URL="postgresql://usuario:senha@host:porta/database"
-   SESSION_SECRET="sua_chave_secreta_aqui"
-   ```
+-- Sair
+\q
+```
 
-4. **Executar migrações**:
-   ```bash
-   npm run db:push
-   ```
+### 5. Executar Migração
+```bash
+# Opção 1: Via tsx (recomendado)
+npx tsx run-local-migration.ts
 
-5. **Iniciar projeto**:
-   ```bash
-   npm run dev
-   ```
+# Opção 2: Via Node.js
+node run-local-migration.js
+```
 
-## 🔑 Credenciais de Acesso
+### 6. Iniciar Aplicação
+```bash
+npm run dev
+```
 
-- **Admin**: username: `admin` / password: `admin123`
-- **Cliente**: username: `cliente1` / password: `cliente123`
+## Credenciais de Acesso
+- **Admin**: admin / admin123
+- **Cliente**: cliente1 / cliente123
 
-## 📞 Suporte
+## Estrutura de Dados
+Após a migração você terá:
+- 2 usuários
+- 3 projetos
+- 3 serviços  
+- 3 depoimentos
+- Configurações do site
+- 2 métodos de pagamento
 
-Se ainda tiver problemas, tente:
-- Aguardar alguns minutos e tentar novamente
-- Baixar arquivos individuais
-- Usar o arquivo `.tar.gz` menor que criamos
+## Solução de Problemas
 
-## 📊 Conteúdo Incluído
+### Erro: Module not found
+```bash
+npm install -g tsx
+```
 
-✅ Frontend React completo
-✅ Backend Node.js/Express  
-✅ Schema PostgreSQL
-✅ Configurações de build
-✅ Documentação completa
-✅ Sistema de autenticação
-✅ E-commerce funcional
-✅ Design responsivo
+### Erro: PostgreSQL connection
+```bash
+# Verificar se PostgreSQL está rodando
+pg_ctl status
+
+# Iniciar se necessário
+pg_ctl start
+```
+
+### Erro: Database não existe
+```bash
+createdb portfolio
+```
+
+## Suporte
+Se tiver problemas, verifique:
+1. PostgreSQL rodando na porta 5432
+2. Banco 'portfolio' criado
+3. Credenciais corretas no .env
+4. Todas as dependências instaladas

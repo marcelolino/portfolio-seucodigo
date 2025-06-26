@@ -1,6 +1,6 @@
-import { db, testConnection } from '../db-local.js';
-import { hashPassword } from '../auth.js';
-import * as schema from "../../shared/schema.js";
+import { db, testConnection } from '../db-local';
+import { hashPassword } from '../auth';
+import * as schema from "../../shared/schema";
 
 // Dados para seed
 const seedData = {
@@ -224,16 +224,8 @@ async function runMigration() {
     // Inserir configurações do site
     console.log("⚙️ Inserindo configurações do site...");
     await db.insert(schema.siteSettings).values({
-      siteName: seedData.siteSettings.siteName,
-      siteTitle: seedData.siteSettings.siteTitle,
-      siteDescription: seedData.siteSettings.siteDescription,
-      contactEmail: seedData.siteSettings.contactEmail,
-      contactPhone: seedData.siteSettings.contactPhone,
-      address: seedData.siteSettings.address,
+      ...seedData.siteSettings,
       socialMedia: JSON.stringify(seedData.siteSettings.socialMedia),
-      theme: seedData.siteSettings.theme,
-      primaryColor: seedData.siteSettings.primaryColor,
-      secondaryColor: seedData.siteSettings.secondaryColor,
       createdAt: new Date()
     });
     console.log("  ✅ Configurações inseridas");
@@ -242,9 +234,7 @@ async function runMigration() {
     console.log("💳 Inserindo métodos de pagamento...");
     for (const payment of seedData.paymentMethods) {
       await db.insert(schema.paymentMethods).values({
-        provider: payment.provider,
-        name: payment.name,
-        isActive: payment.isActive,
+        ...payment,
         config: JSON.stringify(payment.config),
         createdAt: new Date()
       });

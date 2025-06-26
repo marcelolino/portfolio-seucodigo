@@ -1,64 +1,127 @@
 #!/bin/bash
 
-# Script para criar um arquivo ZIP limpo do projeto SeuCodigo
-echo "📦 Criando arquivo de download do projeto SeuCodigo..."
+# Script para criar arquivos de download otimizados
+echo "🚀 Criando arquivos de download..."
 
-# Criar diretório temporário
-mkdir -p /tmp/seucodigo-download
+# Limpar arquivos antigos
+rm -f *.tar.gz 2>/dev/null
 
-# Copiar arquivos essenciais
-echo "📁 Copiando arquivos essenciais..."
+# Criar arquivo com código essencial (sem node_modules)
+echo "📦 Criando arquivo essencial..."
+tar -czf seucodigo-clean.tar.gz \
+  --exclude=node_modules \
+  --exclude=.git \
+  --exclude=dist \
+  --exclude=.cache \
+  --exclude=*.log \
+  --exclude=.env \
+  client/ server/ shared/ \
+  *.json *.ts *.md *.js \
+  postcss.config.js tailwind.config.ts vite.config.ts
 
-# Estrutura principal
-cp -r client /tmp/seucodigo-download/
-cp -r server /tmp/seucodigo-download/
-cp -r shared /tmp/seucodigo-download/
+# Verificar tamanho
+SIZE=$(du -h seucodigo-clean.tar.gz | cut -f1)
+echo "✅ Arquivo criado: seucodigo-clean.tar.gz ($SIZE)"
 
-# Arquivos de configuração
-cp package.json /tmp/seucodigo-download/
-cp package-lock.json /tmp/seucodigo-download/
-cp tsconfig.json /tmp/seucodigo-download/
-cp vite.config.ts /tmp/seucodigo-download/
-cp tailwind.config.ts /tmp/seucodigo-download/
-cp postcss.config.js /tmp/seucodigo-download/
-cp drizzle.config.ts /tmp/seucodigo-download/
-cp components.json /tmp/seucodigo-download/
+# Criar arquivo README para download
+cat > DOWNLOAD_INSTRUCTIONS.md << 'EOF'
+# 📥 Instruções de Download e Configuração
 
-# Documentação
-cp README.md /tmp/seucodigo-download/
-cp replit.md /tmp/seucodigo-download/
-cp MIGRATION_GUIDE.md /tmp/seucodigo-download/
-cp .gitignore /tmp/seucodigo-download/
-cp .dockerignore /tmp/seucodigo-download/
-cp package-info.json /tmp/seucodigo-download/
+## Download Realizado com Sucesso!
 
-# Criar arquivo TAR.GZ
-cd /tmp
-echo "🗜️ Compactando arquivos..."
-tar -czf seucodigo-portfolio.tar.gz --exclude="*.log" --exclude="*.tmp" --exclude=".DS_Store" seucodigo-download/
+Você baixou: `seucodigo-clean.tar.gz`
 
-# Mover para diretório do projeto
-mv seucodigo-portfolio.tar.gz /home/runner/workspace/
+## Próximos Passos
 
-# Limpar temporários
-rm -rf /tmp/seucodigo-download
+### 1. Extrair o Arquivo
+```bash
+tar -xzf seucodigo-clean.tar.gz
+cd seucodigo-clean/
+```
 
-echo "✅ Arquivo criado: seucodigo-portfolio.tar.gz"
-echo "📊 Tamanho do arquivo:"
-ls -lh /home/runner/workspace/seucodigo-portfolio.tar.gz
+### 2. Instalar Dependências
+```bash
+npm install
+```
+
+### 3. Configurar Banco de Dados
+Crie um arquivo `.env`:
+```env
+DATABASE_URL=postgresql://postgres:SUA_SENHA@localhost:5432/portfolio
+SESSION_SECRET=chave_secreta_muito_forte
+NODE_ENV=development
+```
+
+### 4. Configurar PostgreSQL
+```sql
+-- Conectar ao PostgreSQL
+psql -U postgres
+
+-- Criar banco
+CREATE DATABASE portfolio;
+
+-- Sair
+\q
+```
+
+### 5. Executar Migração
+```bash
+# Opção 1: Via tsx (recomendado)
+npx tsx run-local-migration.ts
+
+# Opção 2: Via Node.js
+node run-local-migration.js
+```
+
+### 6. Iniciar Aplicação
+```bash
+npm run dev
+```
+
+## Credenciais de Acesso
+- **Admin**: admin / admin123
+- **Cliente**: cliente1 / cliente123
+
+## Estrutura de Dados
+Após a migração você terá:
+- 2 usuários
+- 3 projetos
+- 3 serviços  
+- 3 depoimentos
+- Configurações do site
+- 2 métodos de pagamento
+
+## Solução de Problemas
+
+### Erro: Module not found
+```bash
+npm install -g tsx
+```
+
+### Erro: PostgreSQL connection
+```bash
+# Verificar se PostgreSQL está rodando
+pg_ctl status
+
+# Iniciar se necessário
+pg_ctl start
+```
+
+### Erro: Database não existe
+```bash
+createdb portfolio
+```
+
+## Suporte
+Se tiver problemas, verifique:
+1. PostgreSQL rodando na porta 5432
+2. Banco 'portfolio' criado
+3. Credenciais corretas no .env
+4. Todas as dependências instaladas
+EOF
+
+echo "📄 Instruções criadas: DOWNLOAD_INSTRUCTIONS.md"
 echo ""
-echo "🎉 Projeto pronto para download!"
-echo ""
-echo "📋 Conteúdo do arquivo:"
-echo "- Código fonte completo (frontend + backend)"
-echo "- Configurações de build e deploy"
-echo "- Documentação completa"
-echo "- Schema do banco de dados"
-echo "- Scripts de migração"
-echo ""
-echo "🚀 Para usar o projeto:"
-echo "1. Extrair o arquivo: tar -xzf seucodigo-portfolio.tar.gz"
-echo "2. npm install"
-echo "3. Configurar DATABASE_URL"
-echo "4. npm run db:push"
-echo "5. npm run dev"
+echo "🎉 Download pronto!"
+echo "📁 Arquivo: seucodigo-clean.tar.gz ($SIZE)"
+echo "📖 Leia: DOWNLOAD_INSTRUCTIONS.md"

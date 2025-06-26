@@ -1,10 +1,12 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 
 /**
  * Script para executar migração no PostgreSQL local
  * 
  * Uso:
- * node run-local-migration.js
+ * npm run migrate:local
+ * ou
+ * npx tsx run-local-migration.ts
  * 
  * Certifique-se de ter:
  * 1. PostgreSQL rodando localmente
@@ -17,9 +19,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 // Carregar variáveis de ambiente
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-dotenv.config({ path: join(__dirname, '.env') });
+dotenv.config();
 
 console.log('🔧 Configuração do ambiente:');
 console.log(`   DATABASE_URL: ${process.env.DATABASE_URL ? 'Configurado' : 'NÃO CONFIGURADO'}`);
@@ -30,12 +30,13 @@ if (!process.env.DATABASE_URL) {
   console.log('');
   console.log('📝 Crie um arquivo .env na raiz do projeto com:');
   console.log('DATABASE_URL=postgresql://postgres:123@localhost:5432/portfolio');
+  console.log('SESSION_SECRET=sua_chave_secreta_aqui');
   console.log('');
   process.exit(1);
 }
 
 // Importar e executar migração
-import('./server/migration/migrate-local.ts')
+import('./server/migration/migrate-local.js')
   .then(({ runMigration }) => {
     return runMigration();
   })
@@ -58,7 +59,7 @@ import('./server/migration/migrate-local.ts')
     console.log('1. PostgreSQL está rodando (psql -U postgres)');
     console.log('2. Banco "portfolio" existe (CREATE DATABASE portfolio;)');
     console.log('3. Credenciais no .env estão corretas');
-    console.log('4. Não há conflitos de porta');
+    console.log('4. Dependências instaladas (npm install)');
     console.error('');
     process.exit(1);
   });
