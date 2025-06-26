@@ -77,9 +77,14 @@ export function setupAuth(app: Express) {
   passport.deserializeUser(async (id: number, done) => {
     try {
       const user = await storage.getUser(id);
+      if (!user) {
+        // User doesn't exist anymore (probably from old session after DB reset)
+        return done(null, false);
+      }
       done(null, user);
     } catch (error) {
-      done(error);
+      // Handle database errors gracefully
+      done(null, false);
     }
   });
 
