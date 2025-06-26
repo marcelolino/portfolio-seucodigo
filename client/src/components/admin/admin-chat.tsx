@@ -164,13 +164,12 @@ export function AdminChat() {
 
   const getDisplayMessages = () => {
     if (activeUser) {
-      // Mensagens de usuário registrado
-      return userMessages[activeUser.id] || [];
-    } else if (hasVisitorMessages) {
-      // Mensagens de visitantes (userId = 0)
-      return userMessages[0] || [];
+      // Mensagens de usuário registrado específico
+      return allMessages.filter(msg => msg.userId === activeUser.id);
+    } else {
+      // Mensagens de visitantes (userId = null)
+      return allMessages.filter(msg => !msg.userId);
     }
-    return [];
   };
 
   const getUnreadCount = (userId: number) => {
@@ -270,8 +269,8 @@ export function AdminChat() {
               </div>
             ) : users && users.length > 0 ? (
               <div className="space-y-1 p-2">
-                {/* Visitantes (não autenticados) */}
-                {hasVisitorMessages && (
+                {/* Show visitor messages only if there are messages from users without userId or userId=null */}
+                {allMessages.some(msg => !msg.userId) && (
                   <button
                     className={`w-full flex items-center p-3 rounded-md transition-colors ${
                       activeUser === null && !isLoadingMessages
@@ -286,16 +285,16 @@ export function AdminChat() {
                     </Avatar>
                     <div className="flex-1 text-left">
                       <div className="flex justify-between">
-                        <p className="font-medium truncate">Visitante</p>
-                        {userMessages[0]?.filter(msg => !msg.isAdmin).length > 0 && (
+                        <p className="font-medium truncate">Visitantes</p>
+                        {allMessages.filter(msg => !msg.userId && !msg.isAdmin).length > 0 && (
                           <Badge variant="destructive" className="ml-2">
-                            {userMessages[0]?.filter(msg => !msg.isAdmin).length}
+                            {allMessages.filter(msg => !msg.userId && !msg.isAdmin).length}
                           </Badge>
                         )}
                       </div>
                       <p className="text-sm text-gray-500 truncate">
-                        {userMessages[0]?.length > 0 
-                          ? userMessages[0][userMessages[0].length - 1].content 
+                        {allMessages.filter(msg => !msg.userId).length > 0 
+                          ? allMessages.filter(msg => !msg.userId).slice(-1)[0]?.content 
                           : "Nenhuma mensagem"}
                       </p>
                     </div>
@@ -388,8 +387,8 @@ export function AdminChat() {
                         <div
                           className={`max-w-[80%] px-4 py-2 rounded-lg ${
                             msg.isAdmin
-                              ? 'bg-primary text-white'
-                              : 'bg-gray-100'
+                              ? 'bg-blue-600 text-white shadow-md'
+                              : 'bg-gray-200 text-gray-800 border border-gray-300'
                           }`}
                         >
                           <p className="mb-1">{msg.content}</p>

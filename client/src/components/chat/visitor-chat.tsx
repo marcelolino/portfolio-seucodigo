@@ -213,14 +213,14 @@ export function VisitorChat({ onClose = () => {} }: VisitorChatProps) {
                       )}
                       
                       <div 
-                        className={`px-3 py-2 rounded-lg ${
+                        className={`px-3 py-2 rounded-lg shadow-md ${
                           msg.isAdmin 
-                            ? 'bg-gray-100 text-gray-800' 
+                            ? 'bg-blue-600 text-white border border-blue-700' 
                             : 'bg-primary text-white'
                         }`}
                       >
-                        <div className="text-sm break-words">{msg.content}</div>
-                        <div className={`text-xs mt-1 ${msg.isAdmin ? 'text-gray-500' : 'text-primary-50'}`}>
+                        <div className={`text-sm break-words ${msg.isAdmin ? 'font-medium' : ''}`}>{msg.content}</div>
+                        <div className={`text-xs mt-1 ${msg.isAdmin ? 'text-blue-100' : 'text-primary-50'}`}>
                           {formatTime(msg.createdAt)}
                         </div>
                       </div>

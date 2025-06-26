@@ -120,9 +120,9 @@ export function ChatWidget({ user, onClose }: ChatWidgetProps) {
                       <AvatarImage src="https://images.unsplash.com/photo-1531891437562-4301cf35b7e4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=30&h=30" alt="Admin" />
                       <AvatarFallback>SC</AvatarFallback>
                     </Avatar>
-                    <div className="bg-gray-200 rounded-lg py-2 px-4 max-w-xs">
-                      <p className="text-sm">{msg.content}</p>
-                      <span className="text-xs text-gray-500 mt-1 block">
+                    <div className="bg-blue-600 text-white rounded-lg py-3 px-4 max-w-xs shadow-lg">
+                      <p className="text-sm font-medium">{msg.content}</p>
+                      <span className="text-xs text-blue-100 mt-1 block">
                         {msg.createdAt ? formatTime(msg.createdAt) : ""}
                       </span>
                     </div>
