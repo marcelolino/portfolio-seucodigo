@@ -8,9 +8,10 @@
  */
 
 import dotenv from 'dotenv';
-import { db, testConnection } from './server/db-local';
+import { db } from './server/db';
 import { hashPassword } from './server/auth';
 import * as schema from "./shared/schema";
+import { sql } from 'drizzle-orm';
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -28,8 +29,11 @@ if (!process.env.DATABASE_URL) {
 async function runRealDataSeed() {
   // Testar conexão primeiro
   console.log("🔌 Testando conexão com o banco...");
-  const connectionOk = await testConnection();
-  if (!connectionOk) {
+  try {
+    const result = await db.execute(sql`SELECT NOW()`);
+    console.log("✅ Conexão com PostgreSQL estabelecida:", result.rows[0]);
+  } catch (error) {
+    console.error("❌ Erro na conexão:", error);
     throw new Error("Falha na conexão com o banco de dados");
   }
   
@@ -126,6 +130,36 @@ async function runRealDataSeed() {
         featured: false,
         price: "4200.00",
         status: "completed"
+      },
+      {
+        title: "E-commerce Responsivo",
+        description: "Loja virtual completa com carrinho de compras, sistema de pagamento e painel administrativo. Desenvolvida com React e Node.js.",
+        image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop",
+        technologies: ["React", "Node.js", "PostgreSQL", "Stripe"],
+        price: "2500.00",
+        category: "E-commerce",
+        status: "completed",
+        featured: true
+      },
+      {
+        title: "Aplicativo de Gestão Financeira",
+        description: "App mobile para controle de finanças pessoais com gráficos, relatórios e sincronização em nuvem.",
+        image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=400&fit=crop",
+        technologies: ["React Native", "Firebase", "Chart.js"],
+        price: "3000.00",
+        category: "Mobile",
+        status: "completed",
+        featured: false
+      },
+      {
+        title: "Portal Institucional",
+        description: "Website corporativo moderno com CMS integrado, blog e sistema de contato.",
+        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop",
+        technologies: ["Next.js", "Tailwind CSS", "Strapi"],
+        price: "1800.00",
+        category: "Website",
+        status: "completed",
+        featured: false
       }
     ];
 
@@ -178,6 +212,33 @@ async function runRealDataSeed() {
         price: "250.00",
         duration: "Por hora",
         features: ["Análise de processos", "Automação", "Integração sistemas", "Treinamento equipe"]
+      },
+      {
+        title: "Desenvolvimento Web Full-Stack",
+        description: "Criação de aplicações web completas, desde o frontend até o backend, com tecnologias modernas e escaláveis.",
+        price: "150.00",
+        category: "Web Development",
+        technologies: ["React", "Node.js", "PostgreSQL"],
+        duration: "40 horas",
+        features: ["Frontend React", "Backend Node.js", "Banco PostgreSQL", "API REST"]
+      },
+      {
+        title: "Aplicativos Mobile Nativos",
+        description: "Desenvolvimento de apps para iOS e Android com performance nativa e experiência de usuário excepcional.",
+        price: "200.00",
+        category: "Mobile Development",
+        technologies: ["React Native", "Flutter"],
+        duration: "55 horas",
+        features: ["App nativo", "Multiplataforma", "Performance otimizada", "UX excepcional"]
+      },
+      {
+        title: "E-commerce Personalizado",
+        description: "Lojas virtuais sob medida com carrinho, pagamentos, estoque e painel administrativo completo.",
+        price: "250.00",
+        category: "E-commerce",
+        technologies: ["React", "Stripe", "PostgreSQL"],
+        duration: "65 horas",
+        features: ["Carrinho de compras", "Pagamentos Stripe", "Gestão de estoque", "Painel admin"]
       }
     ];
 
@@ -187,9 +248,9 @@ async function runRealDataSeed() {
         description: service.description,
         category: service.category,
         price: service.price,
-        duration: service.duration,
-        features: service.features,
-        createdAt: new Date()
+        technologies: (service as any).technologies || null,
+        status: "active",
+        featured: false
       });
       console.log(`  ✅ Serviço ${service.title} inserido`);
     }
