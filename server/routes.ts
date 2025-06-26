@@ -712,9 +712,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (data.content && data.content.trim() !== '') {
               console.log("Message processing - isAdmin:", isAdmin, "userId:", userId, "isVisitor:", isVisitor);
               
-              // Save message to database
+              // Save message to database  
+              let messageUserId = null;
+              if (isAdmin && data.userId) {
+                messageUserId = data.userId;
+              } else if (userId) {
+                messageUserId = userId;
+              }
+              
               const newMessage = await storage.createMessage({
-                userId: isAdmin ? data.userId : (userId || null), // Use actual userId for logged-in users, null for visitors
+                userId: messageUserId,
                 content: data.content,
                 isAdmin: isAdmin
               });
