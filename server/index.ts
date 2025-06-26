@@ -1,6 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
 import { initializeDatabase } from "./initDb";
 
 const app = express();
@@ -31,7 +30,7 @@ app.use((req, res, next) => {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      log(logLine);
+      console.log(`[express] ${logLine}`);
     }
   });
 
@@ -41,7 +40,7 @@ app.use((req, res, next) => {
 (async () => {
   // Sistema configurado para usar PostgreSQL quando disponível
   const storageType = process.env.DATABASE_URL ? "PostgreSQL" : "memória";
-  log(`Sistema inicializado com sucesso usando storage em ${storageType}`);
+  console.log(`Sistema inicializado com sucesso usando storage em ${storageType}`);
 
   const server = await registerRoutes(app);
 
@@ -56,10 +55,25 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  if (process.env.NODE_ENV === "development") {
+    const { setupVite } = await import("./vite");
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    // Production: Serve static files directly
+    const path = await import("path");
+    const { fileURLToPath } = await import("url");
+    
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const distPath = path.resolve(__dirname, "../dist/public");
+    
+    // Serve static files from dist/public
+    app.use(express.static(distPath));
+    
+    // Fall through to index.html for SPA routing
+    app.use("*", (_req, res) => {
+      res.sendFile(path.resolve(distPath, "index.html"));
+    });
   }
 
   // ALWAYS serve the app on port 5000
@@ -71,6 +85,6 @@ app.use((req, res, next) => {
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    console.log(`[express] serving on port ${port}`);
   });
 })();
