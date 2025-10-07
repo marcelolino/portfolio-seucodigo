@@ -14,25 +14,53 @@ export function ProductCard({ item, type }: ProductCardProps) {
   const price = parseFloat(String(item.price)) || 0;
   const isProject = type === 'project';
 
+  const hasPreviewImages = isProject && 'previewImage1' in item && 
+    item.previewImage1 && item.previewImage2 && item.previewImage3 && item.previewImage4;
+
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
       {/* Product Image/Header */}
       <div className="relative">
-        <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-          {isProject ? (
-            <div className="text-center text-white">
-              <div className="text-3xl font-bold mb-2">PROJETO</div>
-              <div className="text-sm opacity-80">
-                {'category' in item ? item.category : 'Desenvolvimento'}
+        {hasPreviewImages ? (
+          <div className="h-48 grid grid-cols-2 gap-0.5 bg-gray-200">
+            <img 
+              src={item.previewImage1 || ""} 
+              alt={`${item.title} - Preview 1`}
+              className="w-full h-24 object-cover"
+            />
+            <img 
+              src={item.previewImage2 || ""} 
+              alt={`${item.title} - Preview 2`}
+              className="w-full h-24 object-cover"
+            />
+            <img 
+              src={item.previewImage3 || ""} 
+              alt={`${item.title} - Preview 3`}
+              className="w-full h-24 object-cover"
+            />
+            <img 
+              src={item.previewImage4 || ""} 
+              alt={`${item.title} - Preview 4`}
+              className="w-full h-24 object-cover"
+            />
+          </div>
+        ) : (
+          <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+            {isProject ? (
+              <div className="text-center text-white">
+                <div className="text-3xl font-bold mb-2">PROJETO</div>
+                <div className="text-sm opacity-80">
+                  {'category' in item ? item.category : 'Desenvolvimento'}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="text-center text-white">
-              <div className="text-3xl font-bold mb-2">SERVIÇO</div>
-              <div className="text-sm opacity-80">Profissional</div>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="text-center text-white">
+                <div className="text-3xl font-bold mb-2">SERVIÇO</div>
+                <div className="text-sm opacity-80">Profissional</div>
+              </div>
+            )}
+          </div>
+        )}
         
         {/* Featured Badge */}
         {'featured' in item && item.featured && (
@@ -62,7 +90,7 @@ export function ProductCard({ item, type }: ProductCardProps) {
 
       <CardContent className="pt-0">
         {/* Technologies/Features for projects */}
-        {isProject && 'technologies' in item && (
+        {isProject && 'technologies' in item && item.technologies && (
           <div className="mb-4">
             <div className="flex flex-wrap gap-1">
               {item.technologies.slice(0, 3).map((tech, index) => (
