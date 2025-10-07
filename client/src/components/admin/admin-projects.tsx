@@ -38,6 +38,19 @@ export function AdminProjects() {
   });
   
   const [technologyInput, setTechnologyInput] = useState("");
+  const [imagePreviews, setImagePreviews] = useState<{
+    main: string | null;
+    preview1: string | null;
+    preview2: string | null;
+    preview3: string | null;
+    preview4: string | null;
+  }>({
+    main: null,
+    preview1: null,
+    preview2: null,
+    preview3: null,
+    preview4: null,
+  });
 
   const { data: projects, isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
@@ -144,6 +157,46 @@ export function AdminProjects() {
     }));
   };
 
+  const handleImageUpload = (imageType: 'main' | 'preview1' | 'preview2' | 'preview3' | 'preview4') => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setImagePreviews(prev => ({ ...prev, [imageType]: result }));
+        
+        if (imageType === 'main') {
+          setFormData(prev => ({ ...prev, image: result }));
+        } else if (imageType === 'preview1') {
+          setFormData(prev => ({ ...prev, previewImage1: result }));
+        } else if (imageType === 'preview2') {
+          setFormData(prev => ({ ...prev, previewImage2: result }));
+        } else if (imageType === 'preview3') {
+          setFormData(prev => ({ ...prev, previewImage3: result }));
+        } else if (imageType === 'preview4') {
+          setFormData(prev => ({ ...prev, previewImage4: result }));
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = (imageType: 'main' | 'preview1' | 'preview2' | 'preview3' | 'preview4') => () => {
+    setImagePreviews(prev => ({ ...prev, [imageType]: null }));
+    
+    if (imageType === 'main') {
+      setFormData(prev => ({ ...prev, image: "" }));
+    } else if (imageType === 'preview1') {
+      setFormData(prev => ({ ...prev, previewImage1: "" }));
+    } else if (imageType === 'preview2') {
+      setFormData(prev => ({ ...prev, previewImage2: "" }));
+    } else if (imageType === 'preview3') {
+      setFormData(prev => ({ ...prev, previewImage3: "" }));
+    } else if (imageType === 'preview4') {
+      setFormData(prev => ({ ...prev, previewImage4: "" }));
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       title: "",
@@ -160,6 +213,13 @@ export function AdminProjects() {
     });
     setTechnologyInput("");
     setFormErrors({});
+    setImagePreviews({
+      main: null,
+      preview1: null,
+      preview2: null,
+      preview3: null,
+      preview4: null,
+    });
   };
 
   const openAddDialog = () => {
@@ -181,6 +241,13 @@ export function AdminProjects() {
       previewImage4: project.previewImage4 || "",
       featured: project.featured ?? false,
       order: project.order ?? 0
+    });
+    setImagePreviews({
+      main: project.image || null,
+      preview1: project.previewImage1 || null,
+      preview2: project.previewImage2 || null,
+      preview3: project.previewImage3 || null,
+      preview4: project.previewImage4 || null,
     });
     setIsEditDialogOpen(true);
   };
@@ -325,15 +392,48 @@ export function AdminProjects() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="image">URL da Imagem Principal</Label>
-              <Input
-                id="image"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                placeholder="https://exemplo.com/imagem.jpg"
-                className={formErrors.image ? "border-red-500" : ""}
-              />
+              <Label htmlFor="image">Imagem Principal do Projeto</Label>
+              <div className="border-2 border-dashed rounded-lg p-4">
+                {imagePreviews.main ? (
+                  <div className="space-y-2">
+                    <img 
+                      src={imagePreviews.main} 
+                      alt="Preview" 
+                      className="w-full h-40 object-cover rounded"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={removeImage('main')}
+                      className="w-full"
+                      data-testid="button-remove-main-image"
+                    >
+                      Remover Imagem
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Input
+                      id="image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload('main')}
+                      className="hidden"
+                      data-testid="input-main-image"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById('image')?.click()}
+                      className="w-full"
+                      data-testid="button-upload-main-image"
+                    >
+                      Escolher Arquivo
+                    </Button>
+                  </>
+                )}
+              </div>
               {formErrors.image && (
                 <p className="text-red-500 text-sm">{formErrors.image}</p>
               )}
@@ -341,45 +441,173 @@ export function AdminProjects() {
             <div className="space-y-2">
               <Label className="text-sm font-medium">Imagens de Preview (4 imagens para exibir na home)</Label>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Input
-                    id="previewImage1"
-                    name="previewImage1"
-                    value={formData.previewImage1 || ""}
-                    onChange={handleChange}
-                    placeholder="Preview 1"
-                    className="text-sm"
-                  />
+                <div className="border-2 border-dashed rounded-lg p-2">
+                  {imagePreviews.preview1 ? (
+                    <div className="space-y-2">
+                      <img 
+                        src={imagePreviews.preview1} 
+                        alt="Preview 1" 
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={removeImage('preview1')}
+                        className="w-full text-xs"
+                        data-testid="button-remove-preview1"
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Input
+                        id="previewImage1"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload('preview1')}
+                        className="hidden"
+                        data-testid="input-preview1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('previewImage1')?.click()}
+                        className="w-full text-xs"
+                        data-testid="button-upload-preview1"
+                      >
+                        Preview 1
+                      </Button>
+                    </>
+                  )}
                 </div>
-                <div>
-                  <Input
-                    id="previewImage2"
-                    name="previewImage2"
-                    value={formData.previewImage2 || ""}
-                    onChange={handleChange}
-                    placeholder="Preview 2"
-                    className="text-sm"
-                  />
+                <div className="border-2 border-dashed rounded-lg p-2">
+                  {imagePreviews.preview2 ? (
+                    <div className="space-y-2">
+                      <img 
+                        src={imagePreviews.preview2} 
+                        alt="Preview 2" 
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={removeImage('preview2')}
+                        className="w-full text-xs"
+                        data-testid="button-remove-preview2"
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Input
+                        id="previewImage2"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload('preview2')}
+                        className="hidden"
+                        data-testid="input-preview2"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('previewImage2')?.click()}
+                        className="w-full text-xs"
+                        data-testid="button-upload-preview2"
+                      >
+                        Preview 2
+                      </Button>
+                    </>
+                  )}
                 </div>
-                <div>
-                  <Input
-                    id="previewImage3"
-                    name="previewImage3"
-                    value={formData.previewImage3 || ""}
-                    onChange={handleChange}
-                    placeholder="Preview 3"
-                    className="text-sm"
-                  />
+                <div className="border-2 border-dashed rounded-lg p-2">
+                  {imagePreviews.preview3 ? (
+                    <div className="space-y-2">
+                      <img 
+                        src={imagePreviews.preview3} 
+                        alt="Preview 3" 
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={removeImage('preview3')}
+                        className="w-full text-xs"
+                        data-testid="button-remove-preview3"
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Input
+                        id="previewImage3"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload('preview3')}
+                        className="hidden"
+                        data-testid="input-preview3"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('previewImage3')?.click()}
+                        className="w-full text-xs"
+                        data-testid="button-upload-preview3"
+                      >
+                        Preview 3
+                      </Button>
+                    </>
+                  )}
                 </div>
-                <div>
-                  <Input
-                    id="previewImage4"
-                    name="previewImage4"
-                    value={formData.previewImage4 || ""}
-                    onChange={handleChange}
-                    placeholder="Preview 4"
-                    className="text-sm"
-                  />
+                <div className="border-2 border-dashed rounded-lg p-2">
+                  {imagePreviews.preview4 ? (
+                    <div className="space-y-2">
+                      <img 
+                        src={imagePreviews.preview4} 
+                        alt="Preview 4" 
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={removeImage('preview4')}
+                        className="w-full text-xs"
+                        data-testid="button-remove-preview4"
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Input
+                        id="previewImage4"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload('preview4')}
+                        className="hidden"
+                        data-testid="input-preview4"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('previewImage4')?.click()}
+                        className="w-full text-xs"
+                        data-testid="button-upload-preview4"
+                      >
+                        Preview 4
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -496,73 +724,222 @@ export function AdminProjects() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-image">URL da Imagem Principal</Label>
-              <Input
-                id="edit-image"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                placeholder="https://exemplo.com/imagem.jpg"
-                className={formErrors.image ? "border-red-500" : ""}
-              />
+              <Label htmlFor="edit-image">Imagem Principal do Projeto</Label>
+              <div className="border-2 border-dashed rounded-lg p-4">
+                {imagePreviews.main ? (
+                  <div className="space-y-2">
+                    <img 
+                      src={imagePreviews.main} 
+                      alt="Preview" 
+                      className="w-full h-40 object-cover rounded"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={removeImage('main')}
+                      className="w-full"
+                      data-testid="button-remove-edit-main-image"
+                    >
+                      Remover Imagem
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Input
+                      id="edit-image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload('main')}
+                      className="hidden"
+                      data-testid="input-edit-main-image"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById('edit-image')?.click()}
+                      className="w-full"
+                      data-testid="button-upload-edit-main-image"
+                    >
+                      Escolher Arquivo
+                    </Button>
+                  </>
+                )}
+              </div>
               {formErrors.image && (
                 <p className="text-red-500 text-sm">{formErrors.image}</p>
-              )}
-              {formData.image && (
-                <div className="mt-2 border rounded-md p-2">
-                  <img 
-                    src={formData.image} 
-                    alt="Preview" 
-                    className="h-24 object-cover rounded" 
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://via.placeholder.com/150?text=Imagem+Inválida";
-                    }}
-                  />
-                </div>
               )}
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium">Imagens de Preview (4 imagens para exibir na home)</Label>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Input
-                    id="edit-previewImage1"
-                    name="previewImage1"
-                    value={formData.previewImage1 || ""}
-                    onChange={handleChange}
-                    placeholder="Preview 1"
-                    className="text-sm"
-                  />
+                <div className="border-2 border-dashed rounded-lg p-2">
+                  {imagePreviews.preview1 ? (
+                    <div className="space-y-2">
+                      <img 
+                        src={imagePreviews.preview1} 
+                        alt="Preview 1" 
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={removeImage('preview1')}
+                        className="w-full text-xs"
+                        data-testid="button-remove-edit-preview1"
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Input
+                        id="edit-previewImage1"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload('preview1')}
+                        className="hidden"
+                        data-testid="input-edit-preview1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('edit-previewImage1')?.click()}
+                        className="w-full text-xs"
+                        data-testid="button-upload-edit-preview1"
+                      >
+                        Preview 1
+                      </Button>
+                    </>
+                  )}
                 </div>
-                <div>
-                  <Input
-                    id="edit-previewImage2"
-                    name="previewImage2"
-                    value={formData.previewImage2 || ""}
-                    onChange={handleChange}
-                    placeholder="Preview 2"
-                    className="text-sm"
-                  />
+                <div className="border-2 border-dashed rounded-lg p-2">
+                  {imagePreviews.preview2 ? (
+                    <div className="space-y-2">
+                      <img 
+                        src={imagePreviews.preview2} 
+                        alt="Preview 2" 
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={removeImage('preview2')}
+                        className="w-full text-xs"
+                        data-testid="button-remove-edit-preview2"
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Input
+                        id="edit-previewImage2"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload('preview2')}
+                        className="hidden"
+                        data-testid="input-edit-preview2"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('edit-previewImage2')?.click()}
+                        className="w-full text-xs"
+                        data-testid="button-upload-edit-preview2"
+                      >
+                        Preview 2
+                      </Button>
+                    </>
+                  )}
                 </div>
-                <div>
-                  <Input
-                    id="edit-previewImage3"
-                    name="previewImage3"
-                    value={formData.previewImage3 || ""}
-                    onChange={handleChange}
-                    placeholder="Preview 3"
-                    className="text-sm"
-                  />
+                <div className="border-2 border-dashed rounded-lg p-2">
+                  {imagePreviews.preview3 ? (
+                    <div className="space-y-2">
+                      <img 
+                        src={imagePreviews.preview3} 
+                        alt="Preview 3" 
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={removeImage('preview3')}
+                        className="w-full text-xs"
+                        data-testid="button-remove-edit-preview3"
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Input
+                        id="edit-previewImage3"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload('preview3')}
+                        className="hidden"
+                        data-testid="input-edit-preview3"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('edit-previewImage3')?.click()}
+                        className="w-full text-xs"
+                        data-testid="button-upload-edit-preview3"
+                      >
+                        Preview 3
+                      </Button>
+                    </>
+                  )}
                 </div>
-                <div>
-                  <Input
-                    id="edit-previewImage4"
-                    name="previewImage4"
-                    value={formData.previewImage4 || ""}
-                    onChange={handleChange}
-                    placeholder="Preview 4"
-                    className="text-sm"
-                  />
+                <div className="border-2 border-dashed rounded-lg p-2">
+                  {imagePreviews.preview4 ? (
+                    <div className="space-y-2">
+                      <img 
+                        src={imagePreviews.preview4} 
+                        alt="Preview 4" 
+                        className="w-full h-24 object-cover rounded"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={removeImage('preview4')}
+                        className="w-full text-xs"
+                        data-testid="button-remove-edit-preview4"
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Input
+                        id="edit-previewImage4"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload('preview4')}
+                        className="hidden"
+                        data-testid="input-edit-preview4"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('edit-previewImage4')?.click()}
+                        className="w-full text-xs"
+                        data-testid="button-upload-edit-preview4"
+                      >
+                        Preview 4
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
