@@ -348,35 +348,35 @@ export function AdminProjects() {
               )}
             </div>
             <div className="space-y-2">
-              <Label>Tags</Label>
+              <Label>Tecnologias</Label>
               <div className="flex items-center gap-2">
                 <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  placeholder="Adicionar tag"
+                  value={technologyInput}
+                  onChange={(e) => setTechnologyInput(e.target.value)}
+                  placeholder="Adicionar tecnologia"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      handleTagAdd();
+                      handleTechnologyAdd();
                     }
                   }}
                 />
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={handleTagAdd}
+                  onClick={handleTechnologyAdd}
                   size="icon"
                 >
                   <RemixIcon name="ri-add-line" />
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
-                {formData.tags.map((tag, index) => (
+                {formData.technologies.map((tech, index) => (
                   <Badge key={index} variant="secondary" className="flex items-center gap-1 bg-blue-100 text-blue-800">
-                    {tag}
+                    {tech}
                     <button 
                       type="button" 
-                      onClick={() => handleTagRemove(tag)}
+                      onClick={() => handleTechnologyRemove(tech)}
                       className="text-blue-800 hover:text-blue-900 focus:outline-none"
                     >
                       <RemixIcon name="ri-close-line" />
@@ -384,8 +384,8 @@ export function AdminProjects() {
                   </Badge>
                 ))}
               </div>
-              {formErrors.tags && (
-                <p className="text-red-500 text-sm">{formErrors.tags}</p>
+              {formErrors.technologies && (
+                <p className="text-red-500 text-sm">{formErrors.technologies}</p>
               )}
             </div>
           </div>
@@ -469,35 +469,35 @@ export function AdminProjects() {
               )}
             </div>
             <div className="space-y-2">
-              <Label>Tags</Label>
+              <Label>Tecnologias</Label>
               <div className="flex items-center gap-2">
                 <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  placeholder="Adicionar tag"
+                  value={technologyInput}
+                  onChange={(e) => setTechnologyInput(e.target.value)}
+                  placeholder="Adicionar tecnologia"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      handleTagAdd();
+                      handleTechnologyAdd();
                     }
                   }}
                 />
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={handleTagAdd}
+                  onClick={handleTechnologyAdd}
                   size="icon"
                 >
                   <RemixIcon name="ri-add-line" />
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
-                {formData.tags.map((tag, index) => (
+                {formData.technologies.map((tech, index) => (
                   <Badge key={index} variant="secondary" className="flex items-center gap-1 bg-blue-100 text-blue-800">
-                    {tag}
+                    {tech}
                     <button 
                       type="button" 
-                      onClick={() => handleTagRemove(tag)}
+                      onClick={() => handleTechnologyRemove(tech)}
                       className="text-blue-800 hover:text-blue-900 focus:outline-none"
                     >
                       <RemixIcon name="ri-close-line" />
@@ -505,8 +505,8 @@ export function AdminProjects() {
                   </Badge>
                 ))}
               </div>
-              {formErrors.tags && (
-                <p className="text-red-500 text-sm">{formErrors.tags}</p>
+              {formErrors.technologies && (
+                <p className="text-red-500 text-sm">{formErrors.technologies}</p>
               )}
             </div>
           </div>
