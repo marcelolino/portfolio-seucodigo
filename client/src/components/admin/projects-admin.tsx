@@ -51,6 +51,19 @@ export function ProjectsAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreviews, setImagePreviews] = useState<{
+    main: string | null;
+    preview1: string | null;
+    preview2: string | null;
+    preview3: string | null;
+    preview4: string | null;
+  }>({
+    main: null,
+    preview1: null,
+    preview2: null,
+    preview3: null,
+    preview4: null,
+  });
 
   const { data: projects = [], isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
@@ -154,22 +167,53 @@ export function ProjectsAdmin() {
     });
     setImagePreview(null);
     setUploadedImage(null);
+    setImagePreviews({
+      main: null,
+      preview1: null,
+      preview2: null,
+      preview3: null,
+      preview4: null,
+    });
   };
 
   // Handle image file upload
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (imageType: 'main' | 'preview1' | 'preview2' | 'preview3' | 'preview4') => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Criar preview da imagem
       const reader = new FileReader();
       reader.onloadend = () => {
         const result = reader.result as string;
-        setImagePreview(result);
-        // Armazenar a imagem como base64
-        setFormData(prev => ({ ...prev, image: result }));
+        setImagePreviews(prev => ({ ...prev, [imageType]: result }));
+        
+        if (imageType === 'main') {
+          setFormData(prev => ({ ...prev, image: result }));
+        } else if (imageType === 'preview1') {
+          setFormData(prev => ({ ...prev, previewImage1: result }));
+        } else if (imageType === 'preview2') {
+          setFormData(prev => ({ ...prev, previewImage2: result }));
+        } else if (imageType === 'preview3') {
+          setFormData(prev => ({ ...prev, previewImage3: result }));
+        } else if (imageType === 'preview4') {
+          setFormData(prev => ({ ...prev, previewImage4: result }));
+        }
       };
       reader.readAsDataURL(file);
-      setUploadedImage(file);
+    }
+  };
+
+  const removeImage = (imageType: 'main' | 'preview1' | 'preview2' | 'preview3' | 'preview4') => () => {
+    setImagePreviews(prev => ({ ...prev, [imageType]: null }));
+    
+    if (imageType === 'main') {
+      setFormData(prev => ({ ...prev, image: "" }));
+    } else if (imageType === 'preview1') {
+      setFormData(prev => ({ ...prev, previewImage1: "" }));
+    } else if (imageType === 'preview2') {
+      setFormData(prev => ({ ...prev, previewImage2: "" }));
+    } else if (imageType === 'preview3') {
+      setFormData(prev => ({ ...prev, previewImage3: "" }));
+    } else if (imageType === 'preview4') {
+      setFormData(prev => ({ ...prev, previewImage4: "" }));
     }
   };
 
@@ -184,6 +228,10 @@ export function ProjectsAdmin() {
       technologies: formData.technologies.split(",").map(t => t.trim()),
       status: formData.status,
       image: formData.image || "",
+      previewImage1: imagePreviews.preview1 || undefined,
+      previewImage2: imagePreviews.preview2 || undefined,
+      previewImage3: imagePreviews.preview3 || undefined,
+      previewImage4: imagePreviews.preview4 || undefined,
     };
 
     if (editingProject) {
@@ -210,6 +258,13 @@ export function ProjectsAdmin() {
     } else {
       setImagePreview(null);
     }
+    setImagePreviews({
+      main: project.image || null,
+      preview1: project.previewImage1 || null,
+      preview2: project.previewImage2 || null,
+      preview3: project.previewImage3 || null,
+      preview4: project.previewImage4 || null,
+    });
     setUploadedImage(null);
     setIsCreateDialogOpen(true);
   };
@@ -468,14 +523,14 @@ export function ProjectsAdmin() {
                 <div>
                   <Label className="text-sm font-semibold text-gray-700 mb-2 block">
                     <Image className="w-4 h-4 inline mr-1" />
-                    Imagem do Projeto
+                    Imagem Principal do Projeto
                   </Label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-purple-400 transition-colors">
-                    {imagePreview ? (
+                    {imagePreviews.main ? (
                       <div className="space-y-3">
                         <div className="relative">
                           <img 
-                            src={imagePreview} 
+                            src={imagePreviews.main} 
                             alt="Preview" 
                             className="w-full h-32 object-cover rounded-lg"
                           />
@@ -485,11 +540,7 @@ export function ProjectsAdmin() {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                              setImagePreview(null);
-                              setUploadedImage(null);
-                              setFormData(prev => ({ ...prev, image: "" }));
-                            }}
+                            onClick={removeImage('main')}
                           >
                             Remover Imagem
                           </Button>
@@ -508,7 +559,7 @@ export function ProjectsAdmin() {
                           type="file"
                           id="projectImage"
                           name="projectImage"
-                          onChange={handleImageUpload}
+                          onChange={handleImageUpload('main')}
                           accept="image/png, image/jpeg, image/gif"
                           className="hidden"
                         />
@@ -523,6 +574,177 @@ export function ProjectsAdmin() {
                         </Button>
                       </>
                     )}
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 block">
+                    Imagens de Preview (4 imagens para exibir na home)
+                  </Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 hover:border-purple-400 transition-colors">
+                      {imagePreviews.preview1 ? (
+                        <div className="space-y-2">
+                          <img 
+                            src={imagePreviews.preview1} 
+                            alt="Preview 1" 
+                            className="w-full h-24 object-cover rounded"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={removeImage('preview1')}
+                            className="w-full text-xs"
+                          >
+                            Remover
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <input
+                            type="file"
+                            id="previewImage1"
+                            onChange={handleImageUpload('preview1')}
+                            accept="image/*"
+                            className="hidden"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => document.getElementById('previewImage1')?.click()}
+                            className="w-full text-xs"
+                          >
+                            <Upload className="w-3 h-3 mr-1" />
+                            Preview 1
+                          </Button>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 hover:border-purple-400 transition-colors">
+                      {imagePreviews.preview2 ? (
+                        <div className="space-y-2">
+                          <img 
+                            src={imagePreviews.preview2} 
+                            alt="Preview 2" 
+                            className="w-full h-24 object-cover rounded"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={removeImage('preview2')}
+                            className="w-full text-xs"
+                          >
+                            Remover
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <input
+                            type="file"
+                            id="previewImage2"
+                            onChange={handleImageUpload('preview2')}
+                            accept="image/*"
+                            className="hidden"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => document.getElementById('previewImage2')?.click()}
+                            className="w-full text-xs"
+                          >
+                            <Upload className="w-3 h-3 mr-1" />
+                            Preview 2
+                          </Button>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 hover:border-purple-400 transition-colors">
+                      {imagePreviews.preview3 ? (
+                        <div className="space-y-2">
+                          <img 
+                            src={imagePreviews.preview3} 
+                            alt="Preview 3" 
+                            className="w-full h-24 object-cover rounded"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={removeImage('preview3')}
+                            className="w-full text-xs"
+                          >
+                            Remover
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <input
+                            type="file"
+                            id="previewImage3"
+                            onChange={handleImageUpload('preview3')}
+                            accept="image/*"
+                            className="hidden"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => document.getElementById('previewImage3')?.click()}
+                            className="w-full text-xs"
+                          >
+                            <Upload className="w-3 h-3 mr-1" />
+                            Preview 3
+                          </Button>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 hover:border-purple-400 transition-colors">
+                      {imagePreviews.preview4 ? (
+                        <div className="space-y-2">
+                          <img 
+                            src={imagePreviews.preview4} 
+                            alt="Preview 4" 
+                            className="w-full h-24 object-cover rounded"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={removeImage('preview4')}
+                            className="w-full text-xs"
+                          >
+                            Remover
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <input
+                            type="file"
+                            id="previewImage4"
+                            onChange={handleImageUpload('preview4')}
+                            accept="image/*"
+                            className="hidden"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => document.getElementById('previewImage4')?.click()}
+                            className="w-full text-xs"
+                          >
+                            <Upload className="w-3 h-3 mr-1" />
+                            Preview 4
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
 
