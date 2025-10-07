@@ -151,6 +151,10 @@ export function AdminProjects() {
       category: "Web",
       technologies: [],
       image: "",
+      previewImage1: "",
+      previewImage2: "",
+      previewImage3: "",
+      previewImage4: "",
       featured: false,
       order: 0
     });
@@ -171,6 +175,10 @@ export function AdminProjects() {
       category: project.category,
       technologies: [...project.technologies],
       image: project.image,
+      previewImage1: project.previewImage1 || "",
+      previewImage2: project.previewImage2 || "",
+      previewImage3: project.previewImage3 || "",
+      previewImage4: project.previewImage4 || "",
       featured: project.featured ?? false,
       order: project.order ?? 0
     });
@@ -317,7 +325,7 @@ export function AdminProjects() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="image">URL da Imagem</Label>
+              <Label htmlFor="image">URL da Imagem Principal</Label>
               <Input
                 id="image"
                 name="image"
@@ -329,6 +337,51 @@ export function AdminProjects() {
               {formErrors.image && (
                 <p className="text-red-500 text-sm">{formErrors.image}</p>
               )}
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Imagens de Preview (4 imagens para exibir na home)</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Input
+                    id="previewImage1"
+                    name="previewImage1"
+                    value={formData.previewImage1 || ""}
+                    onChange={handleChange}
+                    placeholder="Preview 1"
+                    className="text-sm"
+                  />
+                </div>
+                <div>
+                  <Input
+                    id="previewImage2"
+                    name="previewImage2"
+                    value={formData.previewImage2 || ""}
+                    onChange={handleChange}
+                    placeholder="Preview 2"
+                    className="text-sm"
+                  />
+                </div>
+                <div>
+                  <Input
+                    id="previewImage3"
+                    name="previewImage3"
+                    value={formData.previewImage3 || ""}
+                    onChange={handleChange}
+                    placeholder="Preview 3"
+                    className="text-sm"
+                  />
+                </div>
+                <div>
+                  <Input
+                    id="previewImage4"
+                    name="previewImage4"
+                    value={formData.previewImage4 || ""}
+                    onChange={handleChange}
+                    placeholder="Preview 4"
+                    className="text-sm"
+                  />
+                </div>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="price">Valor do Projeto (R$)</Label>
@@ -443,7 +496,7 @@ export function AdminProjects() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-image">URL da Imagem</Label>
+              <Label htmlFor="edit-image">URL da Imagem Principal</Label>
               <Input
                 id="edit-image"
                 name="image"
@@ -467,6 +520,51 @@ export function AdminProjects() {
                   />
                 </div>
               )}
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Imagens de Preview (4 imagens para exibir na home)</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Input
+                    id="edit-previewImage1"
+                    name="previewImage1"
+                    value={formData.previewImage1 || ""}
+                    onChange={handleChange}
+                    placeholder="Preview 1"
+                    className="text-sm"
+                  />
+                </div>
+                <div>
+                  <Input
+                    id="edit-previewImage2"
+                    name="previewImage2"
+                    value={formData.previewImage2 || ""}
+                    onChange={handleChange}
+                    placeholder="Preview 2"
+                    className="text-sm"
+                  />
+                </div>
+                <div>
+                  <Input
+                    id="edit-previewImage3"
+                    name="previewImage3"
+                    value={formData.previewImage3 || ""}
+                    onChange={handleChange}
+                    placeholder="Preview 3"
+                    className="text-sm"
+                  />
+                </div>
+                <div>
+                  <Input
+                    id="edit-previewImage4"
+                    name="previewImage4"
+                    value={formData.previewImage4 || ""}
+                    onChange={handleChange}
+                    placeholder="Preview 4"
+                    className="text-sm"
+                  />
+                </div>
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Tecnologias</Label>
