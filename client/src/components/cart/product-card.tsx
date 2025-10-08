@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Eye, Star } from 'lucide-react';
 import { Project, Service } from '@shared/schema';
 import { AddToCartButton } from './add-to-cart-button';
+import { Link } from 'wouter';
 
 interface ProductCardProps {
   item: Project | Service;
@@ -14,53 +15,37 @@ export function ProductCard({ item, type }: ProductCardProps) {
   const price = parseFloat(String(item.price)) || 0;
   const isProject = type === 'project';
 
-  const hasPreviewImages = isProject && 'previewImage1' in item && 
-    item.previewImage1 && item.previewImage2 && item.previewImage3 && item.previewImage4;
+  const mainImage = isProject && 'previewImage1' in item ? item.previewImage1 : null;
+  const detailsUrl = isProject ? `/project/${item.id}` : `/service/${item.id}`;
 
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+    <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden" data-testid={`card-${type}-${item.id}`}>
       {/* Product Image/Header */}
-      <div className="relative">
-        {hasPreviewImages ? (
-          <div className="h-48 grid grid-cols-2 gap-0.5 bg-gray-200">
+      <Link href={detailsUrl} className="block" data-testid={`link-${type}-details-${item.id}`}>
+        <div className="relative cursor-pointer">
+          {mainImage ? (
             <img 
-              src={item.previewImage1 || ""} 
-              alt={`${item.title} - Preview 1`}
-              className="w-full h-24 object-cover"
+              src={mainImage} 
+              alt={item.title}
+              className="w-full h-48 object-cover"
             />
-            <img 
-              src={item.previewImage2 || ""} 
-              alt={`${item.title} - Preview 2`}
-              className="w-full h-24 object-cover"
-            />
-            <img 
-              src={item.previewImage3 || ""} 
-              alt={`${item.title} - Preview 3`}
-              className="w-full h-24 object-cover"
-            />
-            <img 
-              src={item.previewImage4 || ""} 
-              alt={`${item.title} - Preview 4`}
-              className="w-full h-24 object-cover"
-            />
-          </div>
-        ) : (
-          <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            {isProject ? (
-              <div className="text-center text-white">
-                <div className="text-3xl font-bold mb-2">PROJETO</div>
-                <div className="text-sm opacity-80">
-                  {'category' in item ? item.category : 'Desenvolvimento'}
+          ) : (
+            <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              {isProject ? (
+                <div className="text-center text-white">
+                  <div className="text-3xl font-bold mb-2">PROJETO</div>
+                  <div className="text-sm opacity-80">
+                    {'category' in item ? item.category : 'Desenvolvimento'}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-center text-white">
-                <div className="text-3xl font-bold mb-2">SERVIÇO</div>
-                <div className="text-sm opacity-80">Profissional</div>
-              </div>
-            )}
-          </div>
-        )}
+              ) : (
+                <div className="text-center text-white">
+                  <div className="text-3xl font-bold mb-2">SERVIÇO</div>
+                  <div className="text-sm opacity-80">Profissional</div>
+                </div>
+              )}
+            </div>
+          )}
         
         {/* Featured Badge */}
         {'featured' in item && item.featured && (
@@ -79,7 +64,8 @@ export function ProductCard({ item, type }: ProductCardProps) {
           <Eye className="w-4 h-4 mr-1" />
           Preview
         </Button>
-      </div>
+        </div>
+      </Link>
 
       <CardHeader className="pb-2">
         <CardTitle className="text-lg leading-tight">{item.title}</CardTitle>
