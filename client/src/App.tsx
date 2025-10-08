@@ -9,6 +9,7 @@ import AdminPage from "@/pages/admin-page";
 import ProfilePage from "@/pages/profile-page";
 import { CheckoutPage } from "@/pages/checkout-page";
 import { PixPaymentPage } from "@/pages/pix-payment-page";
+import ProjectDetails from "@/pages/project-details";
 import { AuthProvider } from "./hooks/use-auth";
 import { CartProvider } from "./hooks/use-cart";
 
@@ -17,6 +18,7 @@ function Router() {
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/project/:id" component={ProjectDetails} />
       <Route path="/checkout" component={CheckoutPage} />
       <Route path="/pix-payment" component={PixPaymentPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
