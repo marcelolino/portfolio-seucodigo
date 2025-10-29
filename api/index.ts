@@ -1,9 +1,10 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { storage } from "../server/storage";
+import { DatabaseStorageVercel } from "../server/dbStorage-vercel";
 import { setupAuth } from "../server/auth";
+
 import { z } from "zod";
-import { db } from "../server/db";
-import { sql } from "drizzle-orm";
+import { db, sql } from "../server/db-vercel";
+import { sql as drizzleSql } from "drizzle-orm";
 import { 
   insertContactSchema, 
   insertProjectSchema, 
@@ -13,6 +14,8 @@ import {
   insertOrderSchema,
   insertPaymentMethodSchema
 } from "../shared/schema";
+
+const storage = new DatabaseStorageVercel();
 
 const app = express();
 
@@ -41,7 +44,7 @@ function checkAdmin(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-setupAuth(app);
+setupAuth(app, storage);
 
 app.get("/api/projects", async (req, res) => {
   try {
@@ -387,8 +390,8 @@ app.delete("/api/payment-methods/:id", checkAdmin, async (req, res) => {
 
 app.get("/api/settings", async (req, res) => {
   try {
-    const result = await db.execute(sql`SELECT * FROM site_settings LIMIT 1`);
-    const settings = result.rows[0];
+    const result = await sql`SELECT * FROM site_settings LIMIT 1`;
+    const settings = result[0];
     res.json(settings || {});
   } catch (error) {
     res.status(500).json({ message: "Erro ao buscar configurações" });
@@ -399,22 +402,18 @@ app.put("/api/settings", checkAdmin, async (req, res) => {
   try {
     const settingsData = insertSiteSettingsSchema.parse(req.body);
     
-    const existingSettings = await db.execute(sql`SELECT id FROM site_settings LIMIT 1`);
+    const existingSettings = await sql`SELECT id FROM site_settings LIMIT 1`;
     
-    if (existingSettings.rows.length > 0) {
-      const id = existingSettings.rows[0].id;
-      await db.execute(sql`
-        UPDATE site_settings 
-        SET ${sql.raw(Object.entries(settingsData)
-          .map(([key, value]) => `${key} = ${typeof value === 'string' ? `'${value}'` : value}`)
-          .join(', '))}
-        WHERE id = ${id}
-      `);
+    if (existingSettings.length > 0) {
+      const id = existingSettings[0].id;
+      const updates = Object.entries(settingsData)
+        .map(([key, value]) => `${key} = ${typeof value === 'string' ? `'${value.replace(/'/g, "''")}'` : value}`)
+        .join(', ');
+      await sql`UPDATE site_settings SET ${drizzleSql.raw(updates)} WHERE id = ${id}`;
     } else {
-      await db.execute(sql`
-        INSERT INTO site_settings ${sql.raw(`(${Object.keys(settingsData).join(', ')})`)}
-        VALUES ${sql.raw(`(${Object.values(settingsData).map(v => typeof v === 'string' ? `'${v}'` : v).join(', ')})`)}
-      `);
+      const keys = Object.keys(settingsData).join(', ');
+      const values = Object.values(settingsData).map(v => typeof v === 'string' ? `'${v.replace(/'/g, "''")}'` : v).join(', ');
+      await sql`INSERT INTO site_settings (${drizzleSql.raw(keys)}) VALUES (${drizzleSql.raw(values)})`;
     }
     
     res.json({ message: "Configurações atualizadas com sucesso" });
