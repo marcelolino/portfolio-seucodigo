@@ -1,0 +1,162 @@
+/* Tema Moderno Minimalista para Painel Admin */
+.admin-theme {
+  --admin-primary: #1A1A1A;
+  --admin-secondary: #F5F5F5;
+  --admin-accent: #00A8E8;
+  --admin-text-secondary: #4D4D4D;
+  --admin-background: #FFFFFF;
+  --admin-border: #E5E5E5;
+  --admin-hover: #F8F9FA;
+  --admin-shadow: rgba(0, 0, 0, 0.08);
+}
+
+/* Aplicar tema ao container admin */
+.admin-container {
+  background-color: var(--admin-background);
+  color: var(--admin-primary);
+  min-height: 100vh;
+}
+
+/* Sidebar do admin */
+.admin-sidebar {
+  background-color: var(--admin-background);
+  border-right: 1px solid var(--admin-border);
+  box-shadow: 2px 0 8px var(--admin-shadow);
+}
+
+.admin-sidebar-item {
+  color: var(--admin-text-secondary);
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  margin: 2px 0;
+}
+
+.admin-sidebar-item:hover {
+  background-color: var(--admin-hover);
+  color: var(--admin-primary);
+}
+
+.admin-sidebar-item.active {
+  background-color: var(--admin-accent);
+  color: white;
+}
+
+/* Botões do admin */
+.admin-btn-primary {
+  background-color: var(--admin-accent);
+  border-color: var(--admin-accent);
+  color: white;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.admin-btn-primary:hover {
+  background-color: #0090C4;
+  border-color: #0090C4;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 168, 232, 0.3);
+}
+
+.admin-btn-secondary {
+  background-color: var(--admin-secondary);
+  border-color: var(--admin-border);
+  color: var(--admin-primary);
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+.admin-btn-secondary:hover {
+  background-color: var(--admin-hover);
+  border-color: var(--admin-text-secondary);
+}
+
+/* Cards do admin */
+.admin-card {
+  background-color: var(--admin-background);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--admin-shadow);
+  transition: all 0.2s ease;
+}
+
+.admin-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Headers do admin */
+.admin-header {
+  color: var(--admin-primary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--admin-accent);
+  padding-bottom: 8px;
+}
+
+.admin-subheader {
+  color: var(--admin-text-secondary);
+  font-weight: 400;
+}
+
+/* Inputs do admin */
+.admin-input {
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background-color: var(--admin-background);
+  color: var(--admin-primary);
+  transition: all 0.2s ease;
+}
+
+.admin-input:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.1);
+  outline: none;
+}
+
+/* Tabelas do admin */
+.admin-table {
+  background-color: var(--admin-background);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px var(--admin-shadow);
+}
+
+.admin-table thead {
+  background-color: var(--admin-secondary);
+}
+
+.admin-table th {
+  color: var(--admin-primary);
+  font-weight: 600;
+  padding: 16px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-table td {
+  color: var(--admin-text-secondary);
+  padding: 16px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-table tbody tr:hover {
+  background-color: var(--admin-hover);
+}
+
+/* Badges do admin */
+.admin-badge {
+  background-color: var(--admin-accent);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.admin-badge-secondary {
+  background-color: var(--admin-secondary);
+  color: var(--admin-text-secondary);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}

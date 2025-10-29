@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Futurista Neon - Cores conforme solicitado */
+  --background: 0 0% 0%;             /* #000000 - Fundo preto */
+  --foreground: 0 0% 90%;            /* #E6E6E6 - Texto claro */
+  --muted: 240 50% 3%;
+  --muted-foreground: 0 0% 70%;
+  --popover: 0 0% 0%;
+  --popover-foreground: 0 0% 90%;
+  --card: 240 50% 6%;
+  --card-foreground: 0 0% 90%;
+  --border: 240 50% 10%;
+  --input: 240 50% 10%;
+  --primary: 240 50% 12%;            /* #0F0F2D - Azul escuro galáctico */
+  --primary-foreground: 0 0% 90%;
+  --secondary: 240 100% 55%;         /* #1A1AFF - Azul neon */
+  --secondary-foreground: 0 0% 98%;
+  --accent: 300 100% 50%;            /* #FF00FF - Magenta */
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 100% 55%;
+  --radius: 0.5rem;
+  --chart-1: 240 100% 55%;
+  --chart-2: 300 100% 50%;
+  --chart-3: 270 100% 60%;
+  --chart-4: 250 100% 65%;
+  --chart-5: 230 100% 70%;
+}
+
+/* Sempre usando o tema escuro para o estilo futurista neon */
+.dark, :root {
+  --background: 0 0% 0%;             /* #000000 - Fundo preto */
+  --foreground: 0 0% 90%;            /* #E6E6E6 - Texto claro */
+  --muted: 240 50% 3%;
+  --muted-foreground: 0 0% 70%;
+  --popover: 0 0% 0%;
+  --popover-foreground: 0 0% 90%;
+  --card: 240 50% 6%;
+  --card-foreground: 0 0% 90%;
+  --border: 240 50% 10%;
+  --input: 240 50% 10%;
+  --primary: 240 50% 12%;            /* #0F0F2D - Azul escuro galáctico */
+  --primary-foreground: 0 0% 90%;
+  --secondary: 240 100% 55%;         /* #1A1AFF - Azul neon */
+  --secondary-foreground: 0 0% 98%;
+  --accent: 300 100% 50%;            /* #FF00FF - Magenta */
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 100% 55%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  /* Efeitos neon para botões e elementos de destaque */
+  .neon-text {
+    text-shadow: 0 0 5px hsl(var(--secondary)), 0 0 10px hsl(var(--secondary));
+  }
+
+  .neon-border {
+    box-shadow: 0 0 5px hsl(var(--accent)), 0 0 10px hsl(var(--accent));
+  }
+
+  .neon-button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .neon-button:hover {
+    box-shadow: 0 0 10px hsl(var(--secondary)), 0 0 20px hsl(var(--secondary));
+  }
+
+  .neon-glow {
+    animation: neon-pulse 2s infinite;
+  }
+
+  @keyframes neon-pulse {
+    0% {
+      filter: drop-shadow(0 0 1px hsl(var(--secondary)));
+    }
+    50% {
+      filter: drop-shadow(0 0 6px hsl(var(--accent)));
+    }
+    100% {
+      filter: drop-shadow(0 0 1px hsl(var(--secondary)));
+    }
+  }
+}
+
+.chat-window {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.section-transition {
+  transition: all 0.3s ease;
+}
