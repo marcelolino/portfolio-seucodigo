@@ -38,7 +38,7 @@ interface WebSocketMessage {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configurar autenticação
-  setupAuth(app);
+  setupAuth(app, storage);
 
   // API routes
   
