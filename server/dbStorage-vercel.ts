@@ -216,7 +216,7 @@ export class DatabaseStorageVercel implements IStorage {
   }
 
   async getPaymentMethods(): Promise<PaymentMethod[]> {
-    return await db.select().from(paymentMethods).orderBy(paymentMethods.order);
+    return await db.select().from(paymentMethods).orderBy(paymentMethods.id);
   }
 
   async getPaymentMethodByProvider(provider: string): Promise<PaymentMethod | undefined> {

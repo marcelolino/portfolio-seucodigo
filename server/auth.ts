@@ -108,8 +108,7 @@ export function setupAuth(app: Express, storage: IStorage) {
       });
       
       // Remove password from response
-      const userResponse = { ...user };
-      delete userResponse.password;
+      const { password: _, ...userResponse } = user;
       
       // Log the user in
       req.login(user, (err) => {
@@ -122,7 +121,7 @@ export function setupAuth(app: Express, storage: IStorage) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: any, user: Express.User | false, info: any) => {
       if (err) return next(err);
       if (!user) {
         return res.status(401).json({ message: info?.message || "Falha na autenticação" });
@@ -132,8 +131,7 @@ export function setupAuth(app: Express, storage: IStorage) {
         if (err) return next(err);
         
         // Remove password from response
-        const userResponse = { ...user };
-        delete userResponse.password;
+        const { password: _, ...userResponse } = user;
         
         return res.json(userResponse);
       });
@@ -153,8 +151,7 @@ export function setupAuth(app: Express, storage: IStorage) {
     }
     
     // Remove password from response
-    const userResponse = { ...req.user };
-    delete userResponse.password;
+    const { password: _, ...userResponse } = req.user;
     
     res.json(userResponse);
   });
