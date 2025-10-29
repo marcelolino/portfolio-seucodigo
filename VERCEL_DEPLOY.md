@@ -2,6 +2,13 @@
 
 Este guia mostra como fazer deploy da sua aplicação fullstack (React + Express) na Vercel usando o banco de dados Neon PostgreSQL.
 
+## ⚙️ Configuração do Projeto
+
+**Frontend**: React + Vite → build para `dist/public`  
+**Backend**: Express serverless na pasta `/api`  
+**Database**: Neon PostgreSQL com driver HTTP (@neondatabase/serverless)  
+**Sessions**: PostgreSQL session store para persistência
+
 ## 📋 Índice
 
 1. [Pré-requisitos](#pré-requisitos)
