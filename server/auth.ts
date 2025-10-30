@@ -33,7 +33,7 @@ export async function comparePasswords(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
-export function setupAuth(app: Express, storage: IStorage) {
+export function setupAuth(app: Express, storage: IStorage, prefix: string = "/api") {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "seucodigo-secret-key",
     resave: false,
@@ -88,7 +88,7 @@ export function setupAuth(app: Express, storage: IStorage) {
     }
   });
 
-  app.post("/api/register", async (req, res, next) => {
+  app.post(`${prefix}/register`, async (req, res, next) => {
     try {
       const { name, email, username, password } = req.body;
       
@@ -120,7 +120,7 @@ export function setupAuth(app: Express, storage: IStorage) {
     }
   });
 
-  app.post("/api/login", (req, res, next) => {
+  app.post(`${prefix}/login`, (req, res, next) => {
     passport.authenticate("local", (err: any, user: Express.User | false, info: any) => {
       if (err) return next(err);
       if (!user) {
@@ -138,14 +138,14 @@ export function setupAuth(app: Express, storage: IStorage) {
     })(req, res, next);
   });
 
-  app.post("/api/logout", (req, res, next) => {
+  app.post(`${prefix}/logout`, (req, res, next) => {
     req.logout((err) => {
       if (err) return next(err);
       res.sendStatus(200);
     });
   });
 
-  app.get("/api/user", (req, res) => {
+  app.get(`${prefix}/user`, (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Não autenticado" });
     }

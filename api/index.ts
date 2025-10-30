@@ -44,9 +44,9 @@ function checkAdmin(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-setupAuth(app, storage);
+setupAuth(app, storage, "");
 
-app.get("/api/projects", async (req, res) => {
+app.get("/projects", async (req, res) => {
   try {
     const projects = await storage.getProjects();
     res.json(projects);
@@ -55,7 +55,7 @@ app.get("/api/projects", async (req, res) => {
   }
 });
 
-app.get("/api/projects/:id", async (req, res) => {
+app.get("/projects/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const project = await storage.getProject(id);
@@ -70,7 +70,7 @@ app.get("/api/projects/:id", async (req, res) => {
   }
 });
 
-app.post("/api/projects", checkAdmin, async (req, res) => {
+app.post("/projects", checkAdmin, async (req, res) => {
   try {
     const projectData = insertProjectSchema.parse(req.body);
     const project = await storage.createProject(projectData);
@@ -83,7 +83,7 @@ app.post("/api/projects", checkAdmin, async (req, res) => {
   }
 });
 
-app.put("/api/projects/:id", checkAdmin, async (req, res) => {
+app.put("/projects/:id", checkAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const projectData = insertProjectSchema.partial().parse(req.body);
@@ -103,7 +103,7 @@ app.put("/api/projects/:id", checkAdmin, async (req, res) => {
   }
 });
 
-app.patch("/api/projects/:id", checkAdmin, async (req, res) => {
+app.patch("/projects/:id", checkAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const projectData = insertProjectSchema.partial().parse(req.body);
@@ -123,7 +123,7 @@ app.patch("/api/projects/:id", checkAdmin, async (req, res) => {
   }
 });
 
-app.delete("/api/projects/:id", checkAdmin, async (req, res) => {
+app.delete("/projects/:id", checkAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const success = await storage.deleteProject(id);
@@ -138,7 +138,7 @@ app.delete("/api/projects/:id", checkAdmin, async (req, res) => {
   }
 });
 
-app.get("/api/services", async (req, res) => {
+app.get("/services", async (req, res) => {
   try {
     const services = await storage.getServices();
     res.json(services);
@@ -147,7 +147,7 @@ app.get("/api/services", async (req, res) => {
   }
 });
 
-app.get("/api/services/:id", async (req, res) => {
+app.get("/services/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const service = await storage.getService(id);
@@ -162,7 +162,7 @@ app.get("/api/services/:id", async (req, res) => {
   }
 });
 
-app.post("/api/services", checkAdmin, async (req, res) => {
+app.post("/services", checkAdmin, async (req, res) => {
   try {
     const serviceData = insertServiceSchema.parse(req.body);
     const service = await storage.createService(serviceData);
@@ -175,7 +175,7 @@ app.post("/api/services", checkAdmin, async (req, res) => {
   }
 });
 
-app.put("/api/services/:id", checkAdmin, async (req, res) => {
+app.put("/services/:id", checkAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const serviceData = insertServiceSchema.partial().parse(req.body);
@@ -195,7 +195,7 @@ app.put("/api/services/:id", checkAdmin, async (req, res) => {
   }
 });
 
-app.delete("/api/services/:id", checkAdmin, async (req, res) => {
+app.delete("/services/:id", checkAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const success = await storage.deleteService(id);
@@ -210,7 +210,7 @@ app.delete("/api/services/:id", checkAdmin, async (req, res) => {
   }
 });
 
-app.get("/api/testimonials", async (req, res) => {
+app.get("/testimonials", async (req, res) => {
   try {
     const testimonials = await storage.getTestimonials();
     res.json(testimonials);
@@ -219,7 +219,7 @@ app.get("/api/testimonials", async (req, res) => {
   }
 });
 
-app.post("/api/testimonials", checkAdmin, async (req, res) => {
+app.post("/testimonials", checkAdmin, async (req, res) => {
   try {
     const testimonialData = insertTestimonialSchema.parse(req.body);
     const testimonial = await storage.createTestimonial(testimonialData);
@@ -232,7 +232,7 @@ app.post("/api/testimonials", checkAdmin, async (req, res) => {
   }
 });
 
-app.put("/api/testimonials/:id", checkAdmin, async (req, res) => {
+app.put("/testimonials/:id", checkAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const testimonialData = insertTestimonialSchema.partial().parse(req.body);
@@ -252,7 +252,7 @@ app.put("/api/testimonials/:id", checkAdmin, async (req, res) => {
   }
 });
 
-app.delete("/api/testimonials/:id", checkAdmin, async (req, res) => {
+app.delete("/testimonials/:id", checkAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const success = await storage.deleteTestimonial(id);
@@ -267,7 +267,7 @@ app.delete("/api/testimonials/:id", checkAdmin, async (req, res) => {
   }
 });
 
-app.post("/api/contact", async (req, res) => {
+app.post("/contact", async (req, res) => {
   try {
     const contactData = insertContactSchema.parse(req.body);
     const contact = await storage.createContact(contactData);
@@ -280,7 +280,7 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
-app.get("/api/contacts", checkAdmin, async (req, res) => {
+app.get("/contacts", checkAdmin, async (req, res) => {
   try {
     const contacts = await storage.getContacts();
     res.json(contacts);
@@ -289,7 +289,7 @@ app.get("/api/contacts", checkAdmin, async (req, res) => {
   }
 });
 
-app.get("/api/orders", checkAdmin, async (req, res) => {
+app.get("/orders", checkAdmin, async (req, res) => {
   try {
     const orders = await storage.getOrders();
     res.json(orders);
@@ -298,7 +298,7 @@ app.get("/api/orders", checkAdmin, async (req, res) => {
   }
 });
 
-app.post("/api/orders", async (req, res) => {
+app.post("/orders", async (req, res) => {
   try {
     const orderData = insertOrderSchema.parse(req.body);
     const order = await storage.createOrder(orderData);
@@ -311,7 +311,7 @@ app.post("/api/orders", async (req, res) => {
   }
 });
 
-app.put("/api/orders/:id", checkAdmin, async (req, res) => {
+app.put("/orders/:id", checkAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const orderData = insertOrderSchema.partial().parse(req.body);
@@ -331,7 +331,7 @@ app.put("/api/orders/:id", checkAdmin, async (req, res) => {
   }
 });
 
-app.get("/api/payment-methods", async (req, res) => {
+app.get("/payment-methods", async (req, res) => {
   try {
     const paymentMethods = await storage.getPaymentMethods();
     res.json(paymentMethods);
@@ -340,7 +340,7 @@ app.get("/api/payment-methods", async (req, res) => {
   }
 });
 
-app.post("/api/payment-methods", checkAdmin, async (req, res) => {
+app.post("/payment-methods", checkAdmin, async (req, res) => {
   try {
     const paymentMethodData = insertPaymentMethodSchema.parse(req.body);
     const paymentMethod = await storage.createPaymentMethod(paymentMethodData);
@@ -353,7 +353,7 @@ app.post("/api/payment-methods", checkAdmin, async (req, res) => {
   }
 });
 
-app.put("/api/payment-methods/:id", checkAdmin, async (req, res) => {
+app.put("/payment-methods/:id", checkAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const paymentMethodData = insertPaymentMethodSchema.partial().parse(req.body);
@@ -373,7 +373,7 @@ app.put("/api/payment-methods/:id", checkAdmin, async (req, res) => {
   }
 });
 
-app.delete("/api/payment-methods/:id", checkAdmin, async (req, res) => {
+app.delete("/payment-methods/:id", checkAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const success = await storage.deletePaymentMethod(id);
@@ -388,7 +388,7 @@ app.delete("/api/payment-methods/:id", checkAdmin, async (req, res) => {
   }
 });
 
-app.get("/api/settings", async (req, res) => {
+app.get("/settings", async (req, res) => {
   try {
     const result = await sql`SELECT * FROM site_settings LIMIT 1`;
     const settings = result[0];
@@ -398,7 +398,7 @@ app.get("/api/settings", async (req, res) => {
   }
 });
 
-app.put("/api/settings", checkAdmin, async (req, res) => {
+app.put("/settings", checkAdmin, async (req, res) => {
   try {
     const settingsData = insertSiteSettingsSchema.parse(req.body);
     
@@ -425,7 +425,7 @@ app.put("/api/settings", checkAdmin, async (req, res) => {
   }
 });
 
-app.get("/api/users", checkAdmin, async (req, res) => {
+app.get("/users", checkAdmin, async (req, res) => {
   try {
     const allUsers = await storage.getUsers();
     const usersWithoutPasswords = allUsers.map(user => {
@@ -438,7 +438,7 @@ app.get("/api/users", checkAdmin, async (req, res) => {
   }
 });
 
-app.put("/api/users/:id", checkAdmin, async (req, res) => {
+app.put("/users/:id", checkAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const userData = req.body;
@@ -457,7 +457,7 @@ app.put("/api/users/:id", checkAdmin, async (req, res) => {
 });
 
 if (stripe) {
-  app.post("/api/create-payment-intent", async (req, res) => {
+  app.post("/create-payment-intent", async (req, res) => {
     try {
       const { amount } = req.body;
       
